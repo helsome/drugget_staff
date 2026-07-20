@@ -64,6 +64,7 @@ class CollectionResult(BaseModel):
     page_price_raw: str | None = None
     page_price_value: Decimal | None = None
     sale_box_count: Decimal | None = None
+    min_purchase_box_count: Decimal | None = None
     units_per_box: Decimal | None = None
     min_unit: str | None = None
     single_box_price: Decimal | None = None

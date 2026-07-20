@@ -39,7 +39,9 @@ DRUG_MAP: dict[str, str] = {
     "胆舒软胶囊": "舒贝尼",
 }
 BRAND_TO_GENERIC = {brand: generic for generic, brand in DRUG_MAP.items()}
-BRAND_ALIASES = {"新托妥": "托妥"}
+# 仅维护已由业务目录确认的品牌别名；不得以商品标题的字符串包含关系推断别名。
+BUSINESS_CONFIRMED_BRAND_ALIASES = {"新托妥": "托妥"}
+BRAND_ALIASES = BUSINESS_CONFIRMED_BRAND_ALIASES
 GENERIC_VARIANTS = {
     "厄贝沙坦氢氯噻唛片": "依伦平",
     "托妥瑞舒伐他汀钙片": "托妥",

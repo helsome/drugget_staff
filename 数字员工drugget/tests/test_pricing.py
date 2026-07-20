@@ -19,13 +19,10 @@ def test_parse_price_rejects_ranges_and_missing_values() -> None:
     assert parse_price(None) is None
 
 
-def test_control_price_requires_exact_spec_when_brand_has_multiple_prices() -> None:
+def test_control_price_requires_full_exact_spec() -> None:
     entries = [entry("20mg", "1.65"), entry("50mg", "3.30")]
-    assert resolve_control_price(entries, brand="希诺彤", spec="20mg*7粒").price == Decimal("1.65")
-    with pytest.raises(AmbiguousControlPrice):
-        resolve_control_price(entries, brand="希诺彤", spec="30mg*7粒")
-    with pytest.raises(AmbiguousControlPrice):
-        resolve_control_price(entries, brand="希诺彤", spec=None)
+    assert resolve_control_price(entries, brand="希诺彤", spec="20mg*7粒") is None
+    assert resolve_control_price(entries, brand="希诺彤", spec="20mg").price == Decimal("1.65")
 
 
 def test_price_calculation_never_defaults_missing_box_count() -> None:
@@ -57,4 +54,3 @@ def test_price_calculation_requires_box_cross_validation() -> None:
     assert evaluated.calculation_status == CalculationStatus.SUCCESS
     assert evaluated.single_unit_price == Decimal("1.4700")
     assert evaluated.price_status == PriceStatus.AT_CONTROL
-

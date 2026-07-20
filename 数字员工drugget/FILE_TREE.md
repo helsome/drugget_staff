@@ -18,7 +18,7 @@
 │   ├── services.py / search.py / catalog.py# [现用] 队列、候选、药品规格归一化
 │   ├── evidence.py / incidents.py          # [现用] 证据与人工事件状态机
 │   ├── api.py / cli.py / config.py         # [现用] 本地工作台、命令与配置
-│   ├── pricing.py                           # [待接通] 价格、包装换算与控价判断
+│   ├── pricing.py                           # [部分接通] 价格、包装换算与严格规格控价匹配
 │   ├── routing.py / alerts.py               # [待接通] 路由与通知 dry-run，无钉钉发送
 │   ├── scheduler.py                         # [待接通] 默认禁用的调度骨架
 │   ├── bootstrap.py / smoke_plan.py         # [兼容] 旧烟测资料导入
@@ -44,7 +44,8 @@
 │
 ├── scripts/                                 # [现用] 数据构建脚本
 │   ├── build_knowledge_base.py               # [现用] 原始资料 → 全量知识库
-│   └── build_test_knowledge_base.py          # [现用/阻塞] 知识库 → 小规模测试库
+│   ├── build_test_knowledge_base.py          # [现用/阻塞] 知识库 → 小规模测试库
+│   └── normalize_confirmed_prices.py         # [现用] 已确认详情价的标准化；不创建通知
 │
 ├── artifacts/                               # 可复核的运行产物
 │   ├── evidence/<run_id>/<task_id>/          # [生成/历史] 截图、原始字段、元数据与哈希

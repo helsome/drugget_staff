@@ -133,6 +133,7 @@ class PriceObservation(Base):
     page_price_raw: Mapped[str | None] = mapped_column(String(100))
     page_price_value: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
     sale_box_count: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
+    min_purchase_box_count: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
     units_per_box: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
     min_unit: Mapped[str | None] = mapped_column(String(20))
     single_box_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))

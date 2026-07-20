@@ -100,6 +100,7 @@ class TaskQueueService:
             page_price_raw=result.page_price_raw,
             page_price_value=result.page_price_value,
             sale_box_count=result.sale_box_count,
+            min_purchase_box_count=result.min_purchase_box_count,
             units_per_box=result.units_per_box,
             min_unit=result.min_unit,
             single_box_price=result.single_box_price,

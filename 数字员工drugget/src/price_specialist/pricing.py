@@ -33,20 +33,19 @@ def resolve_control_price(
 ) -> ControlPriceEntry | None:
     """Resolve a control price without converting units or guessing a specification.
 
-    A brand-level entry is valid only when it is the sole general entry. When a
-    brand has specification-specific prices, the dosage token must match exactly.
+    A control price is eligible only when its full specification exactly matches
+    the verified page specification. General (spec-less) rules are retained as
+    reference data but must not produce a break-price conclusion.
     """
     brand_entries = [entry for entry in entries if entry.brand == brand]
     if not brand_entries:
         return None
-    general = [entry for entry in brand_entries if not entry.spec_key]
     specific = [entry for entry in brand_entries if entry.spec_key]
-    normalized = normalize_spec(spec) or ""
-    dose_section = normalized.split("*", 1)[0].replace(" ", "").lower()
+    normalized = (normalize_spec(spec) or "").replace(" ", "").lower()
     matches = [
         entry
         for entry in specific
-        if (normalize_spec(entry.spec_key) or "").replace(" ", "").lower() == dose_section
+        if (normalize_spec(entry.spec_key) or "").replace(" ", "").lower() == normalized
     ]
     if len(matches) == 1:
         return matches[0]
@@ -56,17 +55,7 @@ def resolve_control_price(
             details={"source_lines": [entry.source_line for entry in matches]},
         )
     if specific:
-        raise AmbiguousControlPrice(
-            f"{brand}存在分规格控价，但{spec or '当前SKU规格缺失'}无法精确匹配",
-            details={"available_spec_keys": [entry.spec_key for entry in specific]},
-        )
-    if len(general) == 1:
-        return general[0]
-    if len(general) > 1:
-        raise AmbiguousControlPrice(
-            f"{brand}存在多个通用控价",
-            details={"source_lines": [entry.source_line for entry in general]},
-        )
+        return None
     return None
 
 
