@@ -23,6 +23,42 @@ if TYPE_CHECKING:
     from .data_quality import DataAuditReport
 
 
+def sync_control_price_rules(session: Session, *, control_path: Path) -> dict[str, int]:
+    """Synchronize the validated CSV through the application layer only."""
+    control_entries = parse_control_price_rules(control_path)
+    drugs = {drug.brand_name: drug for drug in session.scalars(select(DrugProduct))}
+    added = 0
+    updated = 0
+    for entry in control_entries:
+        drug = drugs.get(entry.brand)
+        if drug is None:
+            raise ValueError(f"控价规则药品未导入数据库：{entry.brand}")
+        existing = session.scalar(
+            select(ControlPriceVersion).where(
+                ControlPriceVersion.drug_id == drug.id,
+                ControlPriceVersion.spec_key == entry.spec_key,
+                ControlPriceVersion.source_line == entry.source_line,
+            )
+        )
+        values = {
+            "price_per_min_unit": entry.price, "min_unit": entry.min_unit,
+            "effective_from": entry.effective_from, "effective_to": entry.effective_to,
+            "source": entry.source_file or control_path.name, "source_line_number": entry.source_line_number,
+            "active": entry.active, "business_confirmed": entry.business_confirmed,
+            "confirmed_by": entry.confirmed_by, "confirmed_at": entry.confirmed_at,
+            "approval_reference": entry.approval_reference,
+        }
+        if existing is None:
+            session.add(ControlPriceVersion(drug_id=drug.id, spec_key=entry.spec_key, source_line=entry.source_line, **values))
+            added += 1
+        else:
+            for field, value in values.items():
+                setattr(existing, field, value)
+            updated += 1
+    session.flush()
+    return {"input": len(control_entries), "added": added, "updated": updated}
+
+
 def bootstrap_reference_data(
     session: Session,
     *,
@@ -149,35 +185,7 @@ def bootstrap_reference_data(
                 )
 
     control_path = source_dir.parent / "knowledge-base" / "control_price_rules.csv"
-    control_entries = parse_control_price_rules(control_path)
-    for entry in control_entries:
-        drug = drugs[entry.brand]
-        existing = session.scalar(
-            select(ControlPriceVersion).where(
-                ControlPriceVersion.drug_id == drug.id,
-                ControlPriceVersion.spec_key == entry.spec_key,
-                ControlPriceVersion.active.is_(True),
-            )
-        )
-        values = {
-            "price_per_min_unit": entry.price,
-            "min_unit": entry.min_unit,
-            "effective_from": entry.effective_from,
-            "effective_to": entry.effective_to,
-            "source": entry.source_file or control_path.name,
-            "source_line": entry.source_line,
-            "source_line_number": entry.source_line_number,
-            "active": entry.active,
-            "business_confirmed": entry.business_confirmed,
-            "confirmed_by": entry.confirmed_by,
-            "confirmed_at": entry.confirmed_at,
-            "approval_reference": entry.approval_reference,
-        }
-        if existing is None:
-            session.add(ControlPriceVersion(drug_id=drug.id, spec_key=entry.spec_key, **values))
-        else:
-            for field, value in values.items():
-                setattr(existing, field, value)
+    sync_control_price_rules(session, control_path=control_path)
 
     stores: dict[tuple[str, str], StoreResponsibility] = {}
     stores_by_internal_id: dict[str, StoreResponsibility] = {}

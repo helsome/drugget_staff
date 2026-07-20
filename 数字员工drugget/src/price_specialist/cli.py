@@ -10,7 +10,7 @@ import typer
 from sqlalchemy import select
 
 from .api import create_app
-from .bootstrap import bootstrap_reference_data
+from .bootstrap import bootstrap_reference_data, sync_control_price_rules
 from .catalog import BRAND_TO_GENERIC, import_control_price_rules
 from .collector import OpenCLIComputerUseCollector
 from .config import Settings
@@ -54,6 +54,18 @@ def control_rules_import(
 ) -> None:
     """Validate and merge approved control rules into CSV only; never writes SQLite."""
     typer.echo(json.dumps(import_control_price_rules(input_path=input_path, target_path=target_path), ensure_ascii=False))
+
+
+@app.command("control-rules-sync")
+def control_rules_sync(
+    source_path: Path = typer.Option(PROJECT_DIR / "data/knowledge-base/control_price_rules.csv", "--source", exists=True, dir_okay=False),
+) -> None:
+    """Apply validated control-rule CSV changes through the app, without manual SQLite edits."""
+    engine, factory = configured_database(settings())
+    init_database(engine)
+    with factory.begin() as session:
+        result = sync_control_price_rules(session, control_path=source_path)
+    typer.echo(json.dumps(result, ensure_ascii=False))
 
 
 @app.command("price-judge")

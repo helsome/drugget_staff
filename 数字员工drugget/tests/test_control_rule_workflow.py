@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from price_specialist.catalog import CONTROL_PRICE_RULE_FIELDNAMES, import_control_price_rules, parse_control_price_rules, parse_control_prices
 from price_specialist.decisions import BELOW_CONTROL, PriceDecisionService
 from price_specialist.models import Base, CollectionRun, CollectionTask, DrugProduct, PackageMaster, PriceObservation
+from price_specialist.bootstrap import sync_control_price_rules
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,3 +76,14 @@ def test_rebuild_import_and_judge_preserves_approved_box_rule(tmp_path: Path):
     decision = PriceDecisionService(session).evaluate_observation(observation.id)
     assert decision.verdict == BELOW_CONTROL
     assert decision.rule_snapshot["approval_reference"] == "GT-APP-001"
+
+
+def test_control_rule_sync_uses_validated_csv_not_manual_sqlite(tmp_path: Path):
+    source = tmp_path / "approved.csv"
+    write_rules(source, [approved_getai_box_rule()])
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)()
+    session.add(DrugProduct(brand_name="葛泰", generic_name="地奥司明片")); session.flush()
+    assert sync_control_price_rules(session, control_path=source) == {"input": 1, "added": 1, "updated": 0}
+    assert sync_control_price_rules(session, control_path=source) == {"input": 1, "added": 0, "updated": 1}

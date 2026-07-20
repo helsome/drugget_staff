@@ -1,0 +1,2 @@
+brand,generic_name,spec_key,control_price_value,control_price_basis,control_price_per_min_unit,min_unit,effective_from,effective_to,active,source_file,source_line,business_confirmed,confirmed_by,confirmed_at,approval_reference
+葛泰,地奥司明片,0.45g*20片,1.15,per_min_unit,,片,2026-04-01,,True,业务确认会话-2026-07-20,业务确认：地奥司明片葛泰 0.45g*20片 1.15元/片,True,业务确认（会话）,2026-07-20,用户会话确认-2026-07-20

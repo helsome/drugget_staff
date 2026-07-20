@@ -54,13 +54,17 @@ def test_unconfirmed_or_incomplete_rules_are_ineligible() -> None:
 
 def test_existing_getai_and_tuotuo_rules_are_pending_business_confirmation() -> None:
     path = Path(__file__).parents[1] / "data/knowledge-base/control_price_rules.csv"
-    entries = {entry.brand: entry for entry in parse_control_price_rules(path) if entry.brand in {"葛泰", "托妥"}}
-    assert entries["葛泰"].spec_key is None
-    assert entries["托妥"].spec_key == "10mg"
-    assert not entries["葛泰"].business_confirmed
-    assert not entries["托妥"].business_confirmed
-    assert resolve_control_price(entries.values(), brand="葛泰", spec="0.45g*20片", on_date=date(2026, 7, 20)) is None
-    assert resolve_control_price(entries.values(), brand="托妥", spec="10mg*48片", on_date=date(2026, 7, 20)) is None
+    entries = [entry for entry in parse_control_price_rules(path) if entry.brand in {"葛泰", "托妥"}]
+    old_getai = next(entry for entry in entries if entry.brand == "葛泰" and entry.spec_key is None)
+    approved_getai = next(entry for entry in entries if entry.brand == "葛泰" and entry.spec_key == "0.45g*20片")
+    tuotuo = next(entry for entry in entries if entry.brand == "托妥")
+    assert not old_getai.business_confirmed
+    assert approved_getai.business_confirmed
+    assert approved_getai.approval_reference == "用户会话确认-2026-07-20"
+    assert tuotuo.spec_key == "10mg"
+    assert not tuotuo.business_confirmed
+    assert resolve_control_price(entries, brand="葛泰", spec="0.45g*20片", on_date=date(2026, 7, 20)).price == Decimal("1.15")
+    assert resolve_control_price(entries, brand="托妥", spec="10mg*48片", on_date=date(2026, 7, 20)) is None
 
 
 def test_price_calculation_never_defaults_missing_box_count() -> None:
