@@ -19,7 +19,7 @@ from .database import configured_database, init_database
 from .enums import FixedTier, TaskType
 from .evidence import EvidenceStore
 from .logging_config import configure_logging
-from .models import CollectionRun, CollectionTask, DrugProduct, MonitorTarget, PackageMaster, StoreResponsibility
+from .models import CollectionRun, CollectionTask, DrugProduct, MonitorTarget, PackageMaster, PriceComparison, StoreResponsibility
 from .offline_search import classify_existing_search
 from .orchestrator import BatchOrchestrator
 from .replay import audit_legacy_smoke, write_replay_report
@@ -27,6 +27,8 @@ from .scheduler import scheduler_description
 from .schemas import BrowserSession, CollectionTaskSpec
 from .search import weekly_search_cohort
 from .services import TaskQueueService
+from .decisions import PriceDecisionService
+from .alerts import AlertDryRunService
 from .smoke_plan import build_smoke_plan
 
 
@@ -43,6 +45,33 @@ def db_init() -> None:
     engine, _ = configured_database(settings())
     init_database(engine)
     typer.echo("database schema ready")
+
+
+@app.command("price-judge")
+def price_judge(observation_id: str = typer.Option(..., "--observation-id")) -> None:
+    """Persist a strict price decision; this command never sends notifications."""
+    engine, factory = configured_database(settings())
+    init_database(engine)
+    with factory.begin() as session:
+        decision = PriceDecisionService(session).evaluate_observation(observation_id)
+    typer.echo(json.dumps({"id": decision.id, "observation_id": decision.observation_id, "verdict": decision.verdict, "reason_code": decision.reason_code}, ensure_ascii=False))
+
+
+@app.command("route-dry-run")
+def route_dry_run(comparison_id: str = typer.Option(..., "--comparison-id")) -> None:
+    """Create/reuse a local dry-run case and notification preview; never sends."""
+    engine, factory = configured_database(settings())
+    init_database(engine)
+    with factory.begin() as session:
+        comparison = session.get(PriceComparison, comparison_id)
+        if comparison is None:
+            raise typer.BadParameter("price comparison not found", param_hint="--comparison-id")
+        alerts = AlertDryRunService()
+        event = alerts.ensure_event(session, comparison=comparison)
+        result = {"comparison_id": comparison.id, "event": None}
+        if event is not None:
+            result["event"] = alerts.route_preview(session, event=event)
+    typer.echo(json.dumps(result, ensure_ascii=False))
 
 
 @app.command("audit-data")

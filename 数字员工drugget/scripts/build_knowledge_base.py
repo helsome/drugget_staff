@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
+import os
 import re
+import tempfile
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -105,7 +108,22 @@ def write_csv(name, fields, records):
     return p
 
 
-def main():
+def build_knowledge_base(source: Path = SOURCE, output: Path = OUT) -> dict[str, object]:
+    """Build a complete knowledge-base snapshot in ``output``.
+
+    Callers that publish a snapshot should use :func:`build_atomically`; this
+    function intentionally writes only to the supplied output directory.
+    """
+    global SOURCE, OUT, ANTUO, QUWEI, STORES, CONTROL
+    SOURCE = source.resolve()
+    OUT = output.resolve()
+    ANTUO = SOURCE / "安托监控数据2026年4-6月.xlsx"
+    QUWEI = SOURCE / "趣维1-3月总数据.xlsx"
+    STORES = SOURCE / "网络店铺档案明细表_2026.xlsx"
+    CONTROL = SOURCE / "价格标准表.md"
+    missing = [path for path in (STORES, QUWEI, ANTUO, CONTROL) if not path.is_file()]
+    if missing:
+        raise FileNotFoundError("缺少知识库原始输入: " + ", ".join(str(path) for path in missing))
     OUT.mkdir(exist_ok=True)
     issues = []
     source_stats = {}
@@ -244,7 +262,59 @@ def main():
     unmatched_rows = manifest["quality_summary"]["unmatched_store_rows"]
     report = f'''# 数据清洗与质量报告\n\n## 数据范围\n\n- 店铺档案：{len(stores):,} 行，来源为 `网络店铺档案明细表_2026.xlsx`。\n- 趣维历史：{source_stats[QUWEI.name]:,} 行识别为正式药品记录。\n- 安托历史：{source_stats[ANTUO.name]:,} 行识别为正式药品记录。\n- 控价规则：{len(control_records):,} 条；同一商品存在多个规格规则时保留为多条。\n\n## 清洗动作\n\n1. 重置 Excel 错误的工作表维度后读取实际数据，不改写原始文件。\n2. 统一平台编码、商品名、规格、包装数量和最小单位。\n3. 从 URL 或商品 ID 提取商品身份；无法提取的记录进入质量问题清单。\n4. 按平台+店铺名匹配当前店铺档案，无法匹配的记录不进入责任核心。\n5. 完全重复事实移除；同业务键但价格不同的记录保留并单独统计。\n6. 以控价标准表计算标准化单件价状态，同时保留历史来源侧标记。\n\n## 发现与风险\n\n|问题|数量|严重度|影响|\n|---|---:|---|---|\n|未识别药品|{manifest["quality_summary"]["unrecognized_rows"]:,}|中/高|无法可靠关联药品知识|\n|店铺未匹配|{unmatched_rows:,}|中|不能自动路由责任人|\n|缺少商品身份|{missing_identity:,}|高|不能生成稳定复查任务|\n|单盒价公式不一致|{formula_mismatch:,}|高|金额计算存在可信性风险|\n|完全重复移除|{raw_observation_count-len(observations):,}|中|避免重复计数|\n|同业务键重复额外行|{manifest["quality_summary"]["business_key_duplicate_extra_rows"]:,}|高|需结合采集轮次/价格判断是否为重复抓取|\n\n详细行级记录见 `data_quality_issues.csv`，生成摘要和源文件哈希见 `manifest.json`。\n\n## 建议\n\n优先补齐缺少商品 ID/链接的 {missing_identity:,} 行，并建立店铺别名映射处理 {unmatched_rows:,} 行未匹配记录；对趣维业务键重复先按采集轮次和价格确认是否应压缩；正式上线前将“详情页确认、规格匹配、责任关系匹配、控价版本有效期”设为任务放行条件。\n'''
     (OUT / "data_quality_report.md").write_text(report, encoding="utf-8")
+    return manifest
+
+
+def validate_snapshot(directory: Path) -> None:
+    required = {
+        "manifest.json", "README.md", "data_quality_report.md",
+        "store_master.csv", "drug_master.csv", "drug_package_master.csv",
+        "control_price_rules.csv", "responsibility_relations.csv",
+        "monitor_task_master.csv", "price_observations_clean.csv",
+        "data_quality_issues.csv",
+    }
+    missing = sorted(name for name in required if not (directory / name).is_file())
+    if missing:
+        raise ValueError("知识库快照不完整: " + ", ".join(missing))
+    json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+
+
+def build_atomically(source: Path, output: Path) -> dict[str, object]:
+    """Stage and validate all generated files before replacing published files."""
+    output = output.resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="knowledge-base-", dir=output.parent) as temp:
+        staged = Path(temp) / "snapshot"
+        manifest = build_knowledge_base(source, staged)
+        validate_snapshot(staged)
+        output.mkdir(parents=True, exist_ok=True)
+        for path in staged.iterdir():
+            os.replace(path, output / path.name)
+    return manifest
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="从原始业务数据构建完整价格知识库")
+    parser.add_argument("--source", type=Path, default=ROOT / "data/raw", help="原始 Excel 与控价 Markdown 所在目录")
+    parser.add_argument("--output", type=Path, default=ROOT / "data/knowledge-base", help="发布知识库目录")
+    parser.add_argument("--check", action="store_true", help="仅检查原始输入是否齐全，不生成文件")
+    args = parser.parse_args()
+    source = args.source.resolve()
+    required = [
+        source / "网络店铺档案明细表_2026.xlsx",
+        source / "趣维1-3月总数据.xlsx",
+        source / "安托监控数据2026年4-6月.xlsx",
+        source / "价格标准表.md",
+    ]
+    missing = [path for path in required if not path.is_file()]
+    if missing:
+        parser.error("缺少原始输入: " + ", ".join(str(path) for path in missing))
+    if args.check:
+        print(json.dumps({"source": str(source), "status": "ready"}, ensure_ascii=False))
+        return
+    manifest = build_atomically(source, args.output)
     print(json.dumps(manifest["outputs"], ensure_ascii=False, indent=2))
 
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

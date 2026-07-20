@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -260,6 +260,9 @@ def evaluate_fixed_result(session: Session, spec: CollectionTaskSpec, result: Co
             select(ControlPriceVersion).where(
                 ControlPriceVersion.drug_id == target.drug_id,
                 ControlPriceVersion.active.is_(True),
+                ControlPriceVersion.business_confirmed.is_(True),
+                ControlPriceVersion.effective_from <= date.today(),
+                (ControlPriceVersion.effective_to.is_(None) | (ControlPriceVersion.effective_to >= date.today())),
             )
         )
     )
@@ -271,6 +274,15 @@ def evaluate_fixed_result(session: Session, spec: CollectionTaskSpec, result: Co
             price=Decimal(row.price_per_min_unit),
             min_unit=row.min_unit,
             source_line=row.source_line,
+            source_file=row.source,
+            source_line_number=row.source_line_number,
+            effective_from=row.effective_from,
+            effective_to=row.effective_to,
+            active=row.active,
+            business_confirmed=row.business_confirmed,
+            confirmed_by=row.confirmed_by,
+            confirmed_at=row.confirmed_at,
+            approval_reference=row.approval_reference,
         )
         for row in rows
     ]

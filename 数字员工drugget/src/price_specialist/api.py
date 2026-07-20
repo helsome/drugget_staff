@@ -1,9 +1,11 @@
+import csv
+import io
 from collections.abc import Generator
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,7 +14,7 @@ from .collector import OpenCLIComputerUseCollector
 from .database import create_db_engine, init_database, make_session_factory
 from .errors import AppError
 from .incidents import IncidentService
-from .models import CollectionRun
+from .models import CentralAssignmentQueue, CollectionRun, NotificationDelivery, PriceBreakEvent, PriceComparison
 from .schemas import IncidentAction
 
 
@@ -84,6 +86,36 @@ async function load(){let x=await(await fetch('/v1/incidents?limit=100')).json()
             "finished_at": run.finished_at,
             "summary": run.summary,
         }
+
+    @app.get("/v1/price-comparisons")
+    def list_price_comparisons(session: SessionDependency) -> dict[str, object]:
+        rows = list(session.scalars(select(PriceComparison).order_by(PriceComparison.created_at.desc())))
+        return {"items": [{"id": row.id, "observation_id": row.observation_id, "verdict": row.verdict, "reason_code": row.reason_code, "comparison_unit_price": row.comparison_unit_price, "control_price": row.control_price, "difference": row.difference, "rule": row.rule_snapshot, "evidence": row.detail_evidence_snapshot} for row in rows]}
+
+    @app.get("/v1/price-break-events")
+    def list_price_break_events(session: SessionDependency) -> dict[str, object]:
+        rows = list(session.scalars(select(PriceBreakEvent).order_by(PriceBreakEvent.created_at.desc())))
+        return {"items": [{"id": row.id, "comparison_id": row.comparison_id, "observation_id": row.observation_id, "routing_status": row.routing_status, "event_status": row.event_status, "payload": row.payload} for row in rows]}
+
+    @app.get("/v1/assignment-queue")
+    def list_assignment_queue(session: SessionDependency) -> dict[str, object]:
+        rows = list(session.scalars(select(CentralAssignmentQueue).order_by(CentralAssignmentQueue.created_at.desc())))
+        return {"items": [{"id": row.id, "event_id": row.event_id, "reason_code": row.reason_code, "status": row.status, "payload": row.payload} for row in rows]}
+
+    @app.get("/v1/price-break-events/export.csv")
+    def export_price_break_events(session: SessionDependency) -> StreamingResponse:
+        rows = list(session.scalars(select(PriceBreakEvent).order_by(PriceBreakEvent.created_at.desc())))
+        output = io.StringIO()
+        fields = ["event_id", "verdict", "药品", "规格", "店铺", "页面价格", "单盒价格", "最小单位价格", "控价", "差额", "责任人", "联系人", "路由状态", "控价来源", "详情证据"]
+        writer = csv.DictWriter(output, fieldnames=fields)
+        writer.writeheader()
+        for event in rows:
+            detail = event.payload.get("detail_evidence", {})
+            rule = event.payload.get("control_rule", {})
+            delivery = session.scalar(select(NotificationDelivery).where(NotificationDelivery.event_id == event.id))
+            preview = delivery.payload if delivery else {}
+            writer.writerow({"event_id": event.id, "verdict": event.payload.get("verdict"), "药品": detail.get("brand"), "规格": detail.get("selected_spec"), "店铺": detail.get("page_shop"), "页面价格": detail.get("page_price"), "单盒价格": detail.get("single_box_price"), "最小单位价格": detail.get("single_unit_price"), "控价": rule.get("price_per_min_unit"), "差额": event.payload.get("difference"), "责任人": preview.get("responsible_person"), "联系人": delivery.recipient if delivery else None, "路由状态": event.routing_status, "控价来源": f"{rule.get('source_file') or ''}:{rule.get('source_line_number') or ''} {rule.get('source_line') or ''}".strip(), "详情证据": detail.get("evidence_path")})
+        return StreamingResponse(iter([output.getvalue()]), media_type="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=price-break-events.csv"})
 
     @app.get("/v1/incidents")
     def list_incidents(

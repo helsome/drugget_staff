@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import json
-from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .catalog import BRAND_TO_GENERIC, parse_control_prices, parse_package_units
+from .catalog import BRAND_TO_GENERIC, parse_control_price_rules, parse_package_units
 from .data_quality import ANTUO_FILE, QUWEI_FILE, STORE_FILE, STORE_SNAPSHOT_FILE, load_store_records, valid_value
 from .models import (
     ControlPriceVersion,
@@ -149,7 +148,8 @@ def bootstrap_reference_data(
                     )
                 )
 
-    control_entries = parse_control_prices(source_dir / "价格标准表.md")
+    control_path = source_dir.parent / "knowledge-base" / "control_price_rules.csv"
+    control_entries = parse_control_price_rules(control_path)
     for entry in control_entries:
         drug = drugs[entry.brand]
         existing = session.scalar(
@@ -159,19 +159,25 @@ def bootstrap_reference_data(
                 ControlPriceVersion.active.is_(True),
             )
         )
+        values = {
+            "price_per_min_unit": entry.price,
+            "min_unit": entry.min_unit,
+            "effective_from": entry.effective_from,
+            "effective_to": entry.effective_to,
+            "source": entry.source_file or control_path.name,
+            "source_line": entry.source_line,
+            "source_line_number": entry.source_line_number,
+            "active": entry.active,
+            "business_confirmed": entry.business_confirmed,
+            "confirmed_by": entry.confirmed_by,
+            "confirmed_at": entry.confirmed_at,
+            "approval_reference": entry.approval_reference,
+        }
         if existing is None:
-            session.add(
-                ControlPriceVersion(
-                    drug_id=drug.id,
-                    spec_key=entry.spec_key,
-                    price_per_min_unit=entry.price,
-                    min_unit=entry.min_unit,
-                    effective_from=date.today(),
-                    source=str(source_dir / "价格标准表.md"),
-                    source_line=entry.source_line,
-                    active=True,
-                )
-            )
+            session.add(ControlPriceVersion(drug_id=drug.id, spec_key=entry.spec_key, **values))
+        else:
+            for field, value in values.items():
+                setattr(existing, field, value)
 
     stores: dict[tuple[str, str], StoreResponsibility] = {}
     stores_by_internal_id: dict[str, StoreResponsibility] = {}

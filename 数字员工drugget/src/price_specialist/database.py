@@ -30,6 +30,23 @@ def init_database(engine: Engine) -> None:
         if "shop_home_url" not in columns:
             with engine.begin() as connection:
                 connection.execute(text("ALTER TABLE store_responsibilities ADD COLUMN shop_home_url TEXT"))
+        event_columns = {item["name"] for item in inspect(engine).get_columns("price_break_events")}
+        if "comparison_id" not in event_columns:
+            with engine.begin() as connection:
+                connection.execute(text("ALTER TABLE price_break_events ADD COLUMN comparison_id VARCHAR(36)"))
+    if engine.dialect.name == "sqlite" and "control_price_versions" in inspect(engine).get_table_names():
+        columns = {item["name"] for item in inspect(engine).get_columns("control_price_versions")}
+        additive_columns = {
+            "source_line_number": "INTEGER",
+            "business_confirmed": "BOOLEAN NOT NULL DEFAULT 0",
+            "confirmed_by": "VARCHAR(100)",
+            "confirmed_at": "DATE",
+            "approval_reference": "VARCHAR(300)",
+        }
+        with engine.begin() as connection:
+            for name, ddl in additive_columns.items():
+                if name not in columns:
+                    connection.execute(text(f"ALTER TABLE control_price_versions ADD COLUMN {name} {ddl}"))
 
 
 @contextmanager

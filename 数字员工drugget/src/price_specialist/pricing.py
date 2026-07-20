@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import re
 
-from .catalog import ControlPriceEntry, normalize_spec
+from .catalog import ControlPriceEntry, normalize_spec, parse_package_units
 from .enums import CalculationStatus, CollectionStatus, PriceStatus
 from .errors import AmbiguousControlPrice
 from .schemas import CollectionResult
@@ -30,6 +31,7 @@ def resolve_control_price(
     *,
     brand: str,
     spec: str | None,
+    on_date: date | None = None,
 ) -> ControlPriceEntry | None:
     """Resolve a control price without converting units or guessing a specification.
 
@@ -37,11 +39,27 @@ def resolve_control_price(
     the verified page specification. General (spec-less) rules are retained as
     reference data but must not produce a break-price conclusion.
     """
-    brand_entries = [entry for entry in entries if entry.brand == brand]
+    comparison_date = on_date or date.today()
+    brand_entries = [
+        entry
+        for entry in entries
+        if entry.brand == brand
+        and entry.active
+        and entry.business_confirmed
+        and entry.effective_from is not None
+        and entry.effective_from <= comparison_date
+        and (entry.effective_to is None or comparison_date <= entry.effective_to)
+    ]
     if not brand_entries:
         return None
-    specific = [entry for entry in brand_entries if entry.spec_key]
     normalized = (normalize_spec(spec) or "").replace(" ", "").lower()
+    if parse_package_units(normalized)[0] is None:
+        return None
+    specific = [
+        entry
+        for entry in brand_entries
+        if entry.spec_key and parse_package_units((normalize_spec(entry.spec_key) or "").replace(" ", ""))[0] is not None
+    ]
     matches = [
         entry
         for entry in specific

@@ -4,7 +4,9 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import sqlite3
+import tempfile
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -214,7 +216,24 @@ def select_fixture(source: Path) -> dict[str, list[dict[str, str]]]:
     }
 
 
+def required_source_files(source: Path) -> list[Path]:
+    return [
+        source / "manifest.json", source / "store_master.csv", source / "drug_master.csv",
+        source / "drug_package_master.csv", source / "control_price_rules.csv",
+        source / "monitor_task_master.csv", source / "price_observations_clean.csv",
+        source / "data_quality_issues.csv",
+    ]
+
+
+def validate_source(source: Path) -> None:
+    missing = [path for path in required_source_files(source) if not path.is_file()]
+    if missing:
+        raise FileNotFoundError("测试库来源不完整: " + ", ".join(str(path) for path in missing))
+
+
 def build_database(source: Path, output: Path) -> dict[str, object]:
+    """Build a fixture snapshot in an isolated output directory."""
+    validate_source(source)
     manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
     fixture = select_fixture(source)
     output.mkdir(parents=True, exist_ok=True)
@@ -304,12 +323,64 @@ cd "{ROOT}"
     return summary
 
 
+def validate_fixture(output: Path) -> None:
+    database = output / "price_specialist_test.sqlite3"
+    summary_path = output / "summary.json"
+    readme = output / "README.md"
+    if not database.is_file() or not summary_path.is_file() or not readme.is_file():
+        raise ValueError("测试库快照不完整")
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    with sqlite3.connect(database) as connection:
+        version = connection.execute("SELECT value FROM fixture_info WHERE key='fixture_version'").fetchone()
+        if version is None or version[0] != summary["fixture_version"]:
+            raise ValueError("测试库 summary 与 SQLite fixture_version 不一致")
+
+
+def rebuild_source_snapshot(raw_source: Path, destination: Path) -> Path:
+    """Recreate a disposable complete source snapshot; never publish it as KB."""
+    from build_knowledge_base import build_atomically
+
+    build_atomically(raw_source.resolve(), destination.resolve())
+    validate_source(destination)
+    return destination
+
+
+def build_atomically(source: Path, output: Path) -> dict[str, object]:
+    output = output.resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="fixture-", dir=output.parent) as temp:
+        staged = Path(temp) / "fixture"
+        summary = build_database(source, staged)
+        validate_fixture(staged)
+        output.mkdir(parents=True, exist_ok=True)
+        for path in staged.iterdir():
+            os.replace(path, output / path.name)
+    return summary
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="从正式业务知识库生成店铺驱动测试库")
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--rebuild-source", action="store_true",
+        help="当来源缺少 price_observations_clean.csv 时，在临时目录重建完整来源快照",
+    )
+    parser.add_argument(
+        "--raw-source", type=Path, default=ROOT / "data/raw",
+        help="--rebuild-source 使用的原始数据目录",
+    )
     args = parser.parse_args()
-    print(json.dumps(build_database(args.source.resolve(), args.output.resolve()), ensure_ascii=False, indent=2))
+    source = args.source.resolve()
+    if not (source / "price_observations_clean.csv").is_file() and not args.rebuild_source:
+        parser.error("来源缺少 price_observations_clean.csv；如需临时恢复，请显式传入 --rebuild-source")
+    if args.rebuild_source and not (source / "price_observations_clean.csv").is_file():
+        with tempfile.TemporaryDirectory(prefix="fixture-source-", dir=args.output.resolve().parent) as temp:
+            source = rebuild_source_snapshot(args.raw_source, Path(temp) / "knowledge-base")
+            summary = build_atomically(source, args.output)
+    else:
+        summary = build_atomically(source, args.output)
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

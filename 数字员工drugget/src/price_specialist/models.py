@@ -52,7 +52,12 @@ class ControlPriceVersion(Base):
     effective_to: Mapped[date | None] = mapped_column(Date)
     source: Mapped[str] = mapped_column(String(200), nullable=False)
     source_line: Mapped[str] = mapped_column(Text, nullable=False)
+    source_line_number: Mapped[int | None] = mapped_column(Integer)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    business_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    confirmed_by: Mapped[str | None] = mapped_column(String(100))
+    confirmed_at: Mapped[date | None] = mapped_column(Date)
+    approval_reference: Mapped[str | None] = mapped_column(String(300))
 
 
 class StoreResponsibility(Base):
@@ -196,11 +201,45 @@ class Incident(Base):
 
 class PriceBreakEvent(Base):
     __tablename__ = "price_break_events"
+    __table_args__ = (UniqueConstraint("comparison_id", name="uq_price_break_comparison"),)
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     observation_id: Mapped[str] = mapped_column(ForeignKey("price_observations.id"), nullable=False)
+    comparison_id: Mapped[str | None] = mapped_column(ForeignKey("price_comparisons.id"))
     store_id: Mapped[str | None] = mapped_column(ForeignKey("store_responsibilities.id"))
     routing_status: Mapped[str] = mapped_column(String(40), nullable=False)
     event_status: Mapped[str] = mapped_column(String(40), nullable=False, default="dry_run")
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
+
+
+class PriceComparison(Base):
+    """An auditable, strict control-price decision for one detail observation."""
+
+    __tablename__ = "price_comparisons"
+    __table_args__ = (UniqueConstraint("observation_id", name="uq_price_comparison_observation"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    observation_id: Mapped[str] = mapped_column(ForeignKey("price_observations.id"), nullable=False)
+    control_price_version_id: Mapped[str | None] = mapped_column(ForeignKey("control_price_versions.id"))
+    verdict: Mapped[str] = mapped_column(String(40), nullable=False)
+    reason_code: Mapped[str] = mapped_column(String(100), nullable=False)
+    reason_detail: Mapped[str | None] = mapped_column(Text)
+    comparison_unit_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
+    control_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
+    min_unit: Mapped[str | None] = mapped_column(String(20))
+    difference: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
+    rule_snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    detail_evidence_snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now, onupdate=datetime.now)
+
+
+class CentralAssignmentQueue(Base):
+    __tablename__ = "central_assignment_queue"
+    __table_args__ = (UniqueConstraint("event_id", name="uq_assignment_event"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    event_id: Mapped[str] = mapped_column(ForeignKey("price_break_events.id"), nullable=False)
+    reason_code: Mapped[str] = mapped_column(String(100), nullable=False)
+    status: Mapped[str] = mapped_column(String(40), nullable=False, default="pending_assignment")
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
 
