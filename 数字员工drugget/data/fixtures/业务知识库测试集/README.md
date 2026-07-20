@@ -1,6 +1,6 @@
 # 价格专员测试知识库
 
-这个目录由 `build_test_knowledge_base.py` 从正式业务知识库确定性抽取，用于验证以店铺为入口的双路线调度。正式知识库和原始数据不会被修改。
+这个目录由 `scripts/build_test_knowledge_base.py` 从正式业务知识库确定性抽取，用于验证以店铺为入口的双路线调度。正式知识库和原始数据不会被修改。
 
 ## 当前规模
 
@@ -31,7 +31,7 @@
 
 ```bash
 cd "/Users/helson/coding/cttq_work/数字员工drugget"
-.venv/bin/python build_test_knowledge_base.py
+.venv/bin/python scripts/build_test_knowledge_base.py
 ```
 
 输出数据库：`price_specialist_test.sqlite3`  

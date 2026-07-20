@@ -25,4 +25,4 @@ opencli taobao shop-search '品牌名 通用名' \
 1. 静态：`opencli validate taobao`。
 2. 回归：`pytest -q tests/test_collector.py tests/test_orchestrator.py tests/test_search.py`。
 3. 在线受限验证：使用 W00001 阿里健康大药房与 `托妥 瑞舒伐他汀钙片`；检查 JSON 的 `query_verified`、`current_url`、候选标题、`item_id`。
-4. 闭环验证：运行 `采集器/run_taobao_store_closed_loop.py`，仅当 CSV 同时出现详情任务成功、`verified_detail`、`是否正式价格=True` 才算成功。
+4. 闭环验证：运行 `collectors/run_taobao_store_closed_loop.py`，仅当 CSV 同时出现详情任务成功、`verified_detail`、`是否正式价格=True` 才算成功。

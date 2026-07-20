@@ -37,9 +37,9 @@ class Settings:
         return cls(
             project_dir=root,
             database_url=database_url,
-            evidence_dir=resolve_path("PRICE_SPECIALIST_EVIDENCE_DIR", "evidence"),
+            evidence_dir=resolve_path("PRICE_SPECIALIST_EVIDENCE_DIR", "artifacts/evidence"),
             output_dir=resolve_path("PRICE_SPECIALIST_OUTPUT_DIR", "outputs"),
-            source_dir=resolve_path("PRICE_SPECIALIST_SOURCE_DIR", "过往抓取数据"),
+            source_dir=resolve_path("PRICE_SPECIALIST_SOURCE_DIR", "data/raw"),
             opencli_bin=os.getenv("PRICE_SPECIALIST_OPENCLI_BIN", "opencli"),
             allowed_platforms=allowed,
             dry_run_notifications=os.getenv("PRICE_SPECIALIST_DRY_RUN_NOTIFICATIONS", "true").lower()

@@ -47,7 +47,7 @@ def db_init() -> None:
 
 @app.command("audit-data")
 def audit_data(
-    source_dir: Path = typer.Option(PROJECT_DIR / "过往抓取数据", exists=True, file_okay=False),
+    source_dir: Path = typer.Option(PROJECT_DIR / "data/raw", exists=True, file_okay=False),
     output_dir: Path = typer.Option(PROJECT_DIR / "outputs/data-quality", file_okay=False),
 ) -> None:
     """Audit source workbooks read-only and produce row-level quarantine records."""
@@ -58,8 +58,8 @@ def audit_data(
 
 @app.command("build-smoke-plan")
 def smoke_plan(
-    source_dir: Path = typer.Option(PROJECT_DIR / "过往抓取数据", exists=True, file_okay=False),
-    stores: Path = typer.Option(PROJECT_DIR / "7.14抓取结果/smoke_test_stores.json", exists=True, dir_okay=False),
+    source_dir: Path = typer.Option(PROJECT_DIR / "data/raw", exists=True, file_okay=False),
+    stores: Path = typer.Option(PROJECT_DIR / "archive/legacy-2026-07-14/smoke_test_stores.json", exists=True, dir_okay=False),
     output: Path = typer.Option(PROJECT_DIR / "outputs/smoke/smoke_plan.json", dir_okay=False),
 ) -> None:
     result = build_smoke_plan(source_dir=source_dir, smoke_store_path=stores, output_path=output)
@@ -68,7 +68,7 @@ def smoke_plan(
 
 @app.command("bootstrap")
 def bootstrap(
-    source_dir: Path = typer.Option(PROJECT_DIR / "过往抓取数据", exists=True, file_okay=False),
+    source_dir: Path = typer.Option(PROJECT_DIR / "data/raw", exists=True, file_okay=False),
     smoke_plan_path: Path = typer.Option(PROJECT_DIR / "outputs/smoke/smoke_plan.json", exists=True, dir_okay=False),
 ) -> None:
     """Load the 30-drug catalog, packages, current controls, stores and fixed targets."""
@@ -89,9 +89,9 @@ def bootstrap(
 
 @app.command("classify-search")
 def classify_search(
-    results: Path = typer.Option(PROJECT_DIR / "7.14抓取结果/smoke_test_results_fixed.json", exists=True, dir_okay=False),
-    targets: Path = typer.Option(PROJECT_DIR / "7.14抓取结果/smoke_test_targets.json", exists=True, dir_okay=False),
-    stores: Path = typer.Option(PROJECT_DIR / "7.14抓取结果/store_matching.json", exists=True, dir_okay=False),
+    results: Path = typer.Option(PROJECT_DIR / "archive/legacy-2026-07-14/smoke_test_results_fixed.json", exists=True, dir_okay=False),
+    targets: Path = typer.Option(PROJECT_DIR / "archive/legacy-2026-07-14/smoke_test_targets.json", exists=True, dir_okay=False),
+    stores: Path = typer.Option(PROJECT_DIR / "archive/legacy-2026-07-14/store_matching.json", exists=True, dir_okay=False),
     output: Path = typer.Option(PROJECT_DIR / "outputs/search/offline_candidates.json", dir_okay=False),
 ) -> None:
     report = classify_existing_search(
@@ -236,7 +236,7 @@ def session_health() -> None:
 
 @app.command("replay-smoke")
 def replay_smoke(
-    source: Path = typer.Option(PROJECT_DIR / "7.14抓取结果/smoke_test_results_fixed.json", exists=True, dir_okay=False),
+    source: Path = typer.Option(PROJECT_DIR / "archive/legacy-2026-07-14/smoke_test_results_fixed.json", exists=True, dir_okay=False),
     metrics: Path = typer.Option(PROJECT_DIR / "METRICS.json", dir_okay=False),
     report: Path = typer.Option(PROJECT_DIR / "outputs/replay/7.14烟测纠偏回放.md", dir_okay=False),
 ) -> None:

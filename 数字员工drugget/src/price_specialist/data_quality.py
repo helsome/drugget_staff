@@ -17,7 +17,7 @@ from .catalog import BRAND_TO_GENERIC, find_target_brand, normalize_brand, norma
 ANTUO_FILE = "安托监控数据2026年4-6月.xlsx"
 QUWEI_FILE = "趣维1-3月总数据.xlsx"
 STORE_FILE = "网络店铺档案明细表_2026.xlsx"
-STORE_SNAPSHOT_FILE = "7.14抓取结果/store_archive_full.json"
+STORE_SNAPSHOT_FILE = "archive/legacy-2026-07-14/store_archive_full.json"
 
 
 def sha256_file(path: Path) -> str:
@@ -304,7 +304,7 @@ def audit_sources(source_dir: Path) -> DataAuditReport:
             ANTUO_FILE: sha256_file(antuo_path),
             QUWEI_FILE: sha256_file(quwei_path),
             STORE_FILE: sha256_file(store_path),
-            STORE_SNAPSHOT_FILE: sha256_file(source_dir.parent / STORE_SNAPSHOT_FILE),
+            STORE_SNAPSHOT_FILE: sha256_file(source_dir.parent.parent / STORE_SNAPSHOT_FILE),
         },
         recognized_rows=recognized,
         unrecognized_rows=unrecognized,

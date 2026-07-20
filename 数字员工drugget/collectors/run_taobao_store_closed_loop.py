@@ -21,7 +21,7 @@ from export_fixture_run_csv import export_run
 
 
 ROOT = Path(__file__).resolve().parent.parent
-FIXTURE = ROOT / "测试数据/业务知识库测试集/price_specialist_test.sqlite3"
+FIXTURE = ROOT / "data/fixtures/业务知识库测试集/price_specialist_test.sqlite3"
 PRIORITY_STORES = ("W00038", "W00001")
 TECHNICAL_HOME = "https://shop163215406.taobao.com/"
 
@@ -87,7 +87,7 @@ async def main() -> None:
             return
         db.commit()
         outcome = await BatchOrchestrator(session=db, collector=collector, evidence_store=EvidenceStore(settings.evidence_dir), run_id=run.id).execute_all({"taobao": "taobao-p0"})
-        output = ROOT / "采集器" / f"taobao-store-closed-loop-{run.id}"
+        output = ROOT / "artifacts/runs/current" / run.id
         export_run(run.id, output)
         print({"run_id": run.id, "store": chosen.shop_name, "outcome": outcome, "attempts": attempts, "csv_output": str(output)})
 

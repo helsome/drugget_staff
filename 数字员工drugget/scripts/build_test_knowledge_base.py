@@ -10,9 +10,9 @@ from datetime import datetime
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parent
-DEFAULT_SOURCE = ROOT / "业务知识库"
-DEFAULT_OUTPUT = ROOT / "测试数据" / "业务知识库测试集"
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_SOURCE = ROOT / "data/knowledge-base"
+DEFAULT_OUTPUT = ROOT / "data/fixtures" / "业务知识库测试集"
 PLATFORMS = ("taobao", "yaoshibang")
 
 TARGETS = {
@@ -263,7 +263,7 @@ def build_database(source: Path, output: Path) -> dict[str, object]:
     (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     readme = f"""# 价格专员测试知识库
 
-这个目录由 `build_test_knowledge_base.py` 从正式业务知识库确定性抽取，用于验证以店铺为入口的双路线调度。正式知识库和原始数据不会被修改。
+这个目录由 `scripts/build_test_knowledge_base.py` 从正式业务知识库确定性抽取，用于验证以店铺为入口的双路线调度。正式知识库和原始数据不会被修改。
 
 ## 当前规模
 
@@ -294,7 +294,7 @@ def build_database(source: Path, output: Path) -> dict[str, object]:
 
 ```bash
 cd "{ROOT}"
-.venv/bin/python build_test_knowledge_base.py
+.venv/bin/python scripts/build_test_knowledge_base.py
 ```
 
 输出数据库：`{database.name}`  

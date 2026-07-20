@@ -28,7 +28,7 @@ from export_fixture_run_csv import export_run
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-FIXTURE = PROJECT_ROOT / "测试数据/业务知识库测试集/price_specialist_test.sqlite3"
+FIXTURE = PROJECT_ROOT / "data/fixtures/业务知识库测试集/price_specialist_test.sqlite3"
 # Do not infer Taobao storefront URLs from shop names.  Store routes remain
 # auditable human-review cases until a verified homepage is supplied.
 VERIFIED_TAOBAO_HOMES: dict[str, str] = {}
@@ -164,7 +164,7 @@ async def run_yaoshibang_seed(*, seed: dict[str, str], max_candidates: int, outp
                        "product_id": detail_spec.product_id, "formal_price": str(detail.page_price_value),
                        "spec": detail.selected_spec, "sale_box_count": str(detail.sale_box_count)}
         db.commit()
-        destination = (output_root or (PROJECT_ROOT / "outputs" / "runs" / datetime.now().strftime("%Y-%m-%d"))) / run.id
+        destination = (output_root or (PROJECT_ROOT / "artifacts/runs/current" / datetime.now().strftime("%Y-%m-%d"))) / run.id
         export_run(run.id, destination)
         return {"run_id": run.id, "seed_key": seed["seed_key"], "provider_id": provider_id,
                 "shop_name": detail.page_shop, "price": str(detail.page_price_value),

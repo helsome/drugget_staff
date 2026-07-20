@@ -13,7 +13,7 @@ from price_specialist.schemas import CollectionTaskSpec
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-COLLECTOR_DIR = PROJECT_ROOT / "采集器"
+COLLECTOR_DIR = PROJECT_ROOT / "collectors"
 
 
 @pytest.fixture(scope="module")

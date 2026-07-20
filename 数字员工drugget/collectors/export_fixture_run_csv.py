@@ -17,7 +17,7 @@ from price_specialist.models import CollectionRun, CollectionTask, Incident, Pri
 
 COLLECTOR_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = COLLECTOR_DIR.parent
-FIXTURE = PROJECT_ROOT / "测试数据/业务知识库测试集/price_specialist_test.sqlite3"
+FIXTURE = PROJECT_ROOT / "data/fixtures/业务知识库测试集/price_specialist_test.sqlite3"
 
 # CSV is the business-facing audit deliverable.  Keep database field names in
 # code, but always expose a stable Chinese header to spreadsheet users.
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     parser.add_argument("run_id")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
-    destination = args.output or COLLECTOR_DIR / f"fixture-live-smoke-{args.run_id}"
+    destination = args.output or PROJECT_ROOT / "artifacts/runs/current" / args.run_id
     print(export_run(args.run_id, destination.resolve()))

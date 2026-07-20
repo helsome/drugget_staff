@@ -1,2 +1,0 @@
-[console_scripts]
-price-specialist = price_specialist.cli:app

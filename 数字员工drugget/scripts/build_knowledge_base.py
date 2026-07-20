@@ -22,9 +22,9 @@ from price_specialist.catalog import (
     parse_package_units,
 )
 
-ROOT = Path(__file__).resolve().parent
-SOURCE = ROOT / "过往抓取数据"
-OUT = ROOT / "业务知识库"
+ROOT = Path(__file__).resolve().parent.parent
+SOURCE = ROOT / "data/raw"
+OUT = ROOT / "data/knowledge-base"
 ANTUO = SOURCE / "安托监控数据2026年4-6月.xlsx"
 QUWEI = SOURCE / "趣维1-3月总数据.xlsx"
 STORES = SOURCE / "网络店铺档案明细表_2026.xlsx"

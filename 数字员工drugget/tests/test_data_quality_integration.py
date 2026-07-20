@@ -16,10 +16,10 @@ def test_official_catalog_and_package_parser() -> None:
 
 
 def test_historical_data_quality_contract() -> None:
-    report = audit_sources(PROJECT / "过往抓取数据")
+    report = audit_sources(PROJECT / "data/raw")
     assert report.source_rows["安托监控数据2026年4-6月.xlsx"] == 168_797
     assert report.source_rows["趣维1-3月总数据.xlsx"] == 18_176
-    assert report.source_rows["7.14抓取结果/store_archive_full.json"] == 10_507
+    assert report.source_rows["archive/legacy-2026-07-14/store_archive_full.json"] == 10_507
     assert report.recognized_rows == 186_619
     assert report.unrecognized_rows == 354
     assert len(report.covered_brands) == 14

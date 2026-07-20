@@ -41,7 +41,7 @@
 | 工作环节 | 状态 | 当前结果 |
 | --- | --- | --- |
 | 业务资料清洗 | 已完成基础版 | 已形成店铺、药品、包装、控价、责任关系和历史价格数据 |
-| 小规模测试库 | 可用，但重建有阻塞 | 当前 SQLite 可以使用；源文件 `price_observations_clean.csv` 缺失，暂时不要删除现有测试库 |
+| 小规模测试库 | 可用 | 当前 SQLite 可用；重建前先运行知识库构建脚本以生成本地 `price_observations_clean.csv` |
 | 药师帮双路线闭环 | 已验证 | 葛泰详情价 16.17 元，并反向保存 `provider_id=18650` 供店内复用 |
 | 淘宝/天猫店内闭环 | 已验证 | 阿里健康大药房中新托妥 `10mg*48片/盒`，详情价 124 元 |
 | 京东闭环 | 待建设 | 核心层保留通用平台接口与限速策略，但当前没有可验收的京东入口和 OpenCLI 适配器 |
@@ -56,17 +56,17 @@
 
 | 功能 | 主要文件 | 说明 |
 | --- | --- | --- |
-| 原始业务文档 | `过往抓取数据/*` | 店铺档案、历史价格和控价标准；只读，不直接改写 |
-| 知识库构建 | `build_knowledge_base.py` | 清洗 Excel/文本，输出业务 CSV、质量问题和源文件哈希 |
+| 原始业务文档 | `data/raw/*` | 店铺档案、历史价格和控价标准；只读，不直接改写 |
+| 知识库构建 | `scripts/build_knowledge_base.py` | 清洗 Excel/文本，输出业务 CSV、质量问题和源文件哈希 |
 | 数据质量检查 | `src/price_specialist/data_quality.py` | 读取原始表格，识别重复、店铺未匹配、药品未识别和公式异常 |
-| 业务知识输出 | `业务知识库/*.csv` | 店铺、药品、包装、控价、责任关系、历史线索和质量问题 |
+| 业务知识输出 | `data/knowledge-base/*.csv` | 店铺、药品、包装、控价、责任关系、历史线索和质量问题 |
 
 ### 2. 业务知识库转为小规模测试库
 
 | 功能 | 主要文件 | 说明 |
 | --- | --- | --- |
-| 测试样本抽取 | `build_test_knowledge_base.py` | 选出测试店铺、药品、规格、历史线索和两类任务种子 |
-| 测试数据库 | `测试数据/业务知识库测试集/price_specialist_test.sqlite3` | 只读的小规模调度输入；当前包含淘宝和药师帮，不包含京东 |
+| 测试样本抽取 | `scripts/build_test_knowledge_base.py` | 选出测试店铺、药品、规格、历史线索和两类任务种子 |
+| 测试数据库 | `data/fixtures/业务知识库测试集/price_specialist_test.sqlite3` | 只读的小规模调度输入；当前包含淘宝和药师帮，不包含京东 |
 | 任务种子 | 测试库 `task_seeds` | `STORE_SEARCH` 代表店内搜索，`GLOBAL_SEARCH` 代表平台全站搜索 |
 | 历史链接 | 测试库 `historical_product_clues` | 只作历史线索，不用于长期任务调度 |
 
@@ -74,8 +74,8 @@
 
 | 功能 | 主要文件 | 说明 |
 | --- | --- | --- |
-| 运行入口 | `采集器/run_fixture_live_smoke.py` | 测试库通用入口；单种子全闭环当前支持药师帮 |
-| 淘宝受限闭环 | `采集器/run_taobao_store_closed_loop.py` | 使用已验证店铺主页，最多进入 1 个候选详情页 |
+| 运行入口 | `collectors/run_fixture_live_smoke.py` | 测试库通用入口；单种子全闭环当前支持药师帮 |
+| 淘宝受限闭环 | `collectors/run_taobao_store_closed_loop.py` | 使用已验证店铺主页，最多进入 1 个候选详情页 |
 | 任务队列 | `src/price_specialist/services.py` | 创建批次、入队、租约任务、保存结果和候选 |
 | 批次编排 | `src/price_specialist/orchestrator.py` | 分平台执行、限速、搜索后创建详情任务、一个平台异常时不停其他平台 |
 | 任务与结果模型 | `src/price_specialist/models.py` | 数据库表：批次、任务、候选、价格、店铺、事件、破价和通知 |
@@ -101,8 +101,8 @@
 | 链接规范化与去重 | `src/price_specialist/search.py` | 统一淘宝、京东、药师帮商品链接，按商品 ID 去重 |
 | 药品/店铺/规格候选分类 | `search.py` + `services.py` | 区分既有对象、同店新链接、新店、规格可疑和不匹配 |
 | 搜索后详情任务 | `orchestrator.py` | 只将有效候选升级为 `inspect_candidate`，并将药师帮 `provider_id` 传入详情页 |
-| 正式价格放行 | `采集器/run_fixture_live_smoke.py` / `run_taobao_store_closed_loop.py` | 将详情核验成功的候选标记为 `verified_detail` 和 `is_formal_price=True` |
-| CSV 导出 | `采集器/export_fixture_run_csv.py` | 按批次导出中文列名的任务、候选、价格、事件和测试种子 |
+| 正式价格放行 | `collectors/run_fixture_live_smoke.py` / `run_taobao_store_closed_loop.py` | 将详情核验成功的候选标记为 `verified_detail` 和 `is_formal_price=True` |
+| CSV 导出 | `collectors/export_fixture_run_csv.py` | 按批次导出中文列名的任务、候选、价格、事件和测试种子 |
 
 ### 6. 包装换算、控价比较和破价事件
 
@@ -170,7 +170,7 @@ PRICE_SPECIALIST_ALLOWED_PLATFORMS=jd,taobao,yaoshibang
 ### 药师帮单种子受限闭环
 
 ```bash
-.venv/bin/python 采集器/run_fixture_live_smoke.py \
+.venv/bin/python collectors/run_fixture_live_smoke.py \
   --seed-key 'GLOBAL_SEARCH|yaoshibang|优立维|brand_generic' \
   --platform yaoshibang
 ```
@@ -178,14 +178,14 @@ PRICE_SPECIALIST_ALLOWED_PLATFORMS=jd,taobao,yaoshibang
 或：
 
 ```bash
-.venv/bin/python 采集器/run_fixture_live_smoke.py \
+.venv/bin/python collectors/run_fixture_live_smoke.py \
   --store-id W00010 --brand 葛泰 --platform yaoshibang
 ```
 
 ### 淘宝店内受限闭环
 
 ```bash
-.venv/bin/python 采集器/run_taobao_store_closed_loop.py
+.venv/bin/python collectors/run_taobao_store_closed_loop.py
 ```
 
 ### 本地 API 和人工工作台
@@ -198,13 +198,13 @@ PRICE_SPECIALIST_ALLOWED_PLATFORMS=jd,taobao,yaoshibang
 
 ## 数据与输出边界
 
-- `过往抓取数据/`：原始业务文档，只读。
-- `业务知识库/`：由构建脚本生成的全量标准化数据。
-- `测试数据/`：小规模快速验证输入，不能反写全量知识库。
+- `data/raw/`：原始业务文档，只读。
+- `data/knowledge-base/`：由构建脚本生成的全量标准化数据。
+- `data/fixtures/`：小规模快速验证输入，不能反写全量知识库。
 - `price_specialist.db`：当前本地运行库，是生成文件，不是源数据。
-- `evidence/<run_id>/<task_id>/`：截图、原始字段、元数据和哈希。
-- `采集器/<批次名>/`：面向复核的中文列名 CSV 审计包；每次建新目录，不覆盖历史。
-- `outputs/current-stage/`：旧原型与历史证据，已废弃为正式入口。
+- `artifacts/evidence/<run_id>/<task_id>/`：截图、原始字段、元数据和哈希。
+- `artifacts/runs/`：按批次保存中文列名 CSV 审计包；`verified/` 为在线闭环基线，`history/` 和 `retired/` 仅供回溯。
+- `archive/prototypes/current-stage/`：旧原型与历史证据，已废弃为正式入口。
 
 ## 当前不得误解的三件事
 
