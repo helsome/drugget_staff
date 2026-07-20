@@ -23,6 +23,7 @@ from price_specialist.catalog import (
     normalize_spec,
     parse_control_prices,
     parse_package_units,
+    CONTROL_PRICE_RULE_FIELDNAMES,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -102,10 +103,47 @@ def product_id(platform, url, raw=None):
 def write_csv(name, fields, records):
     p = OUT / name
     with p.open("w", encoding="utf-8-sig", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+        w = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
         w.writeheader()
         for r in records: w.writerow({k: "" if r.get(k) is None else r.get(k) for k in fields})
     return p
+
+
+def existing_control_metadata(output: Path) -> dict[tuple[str, str, str, str, str], dict[str, str]]:
+    """Keep business approval fields when raw-source reconstruction is repeated."""
+    path = output / "control_price_rules.csv"
+    if not path.is_file():
+        return {}
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        return {
+            (row.get("brand", ""), row.get("generic_name", ""), row.get("spec_key", ""), row.get("min_unit", ""), row.get("source_line", "")): row
+            for row in csv.DictReader(handle)
+        }
+
+
+def rebuilt_control_records(controls, preserved_controls, source_name: str):
+    """Generate legacy rows while retaining approved full-spec business rows."""
+    records = []
+    for x in controls:
+        key = (x.brand, x.generic_name, x.spec_key or "", x.min_unit, x.source_line)
+        prior = preserved_controls.get(key, {})
+        records.append({
+            "brand": x.brand, "generic_name": x.generic_name, "spec_key": x.spec_key,
+            "control_price_value": prior.get("control_price_value") or str(x.price),
+            "control_price_basis": prior.get("control_price_basis") or "per_min_unit",
+            "control_price_per_min_unit": prior.get("control_price_per_min_unit") or str(x.price),
+            "min_unit": x.min_unit, "effective_from": prior.get("effective_from") or "2026-04-01",
+            "effective_to": prior.get("effective_to") or "", "active": prior.get("active") or "True",
+            "source_file": source_name, "source_line": x.source_line,
+            "business_confirmed": prior.get("business_confirmed") or "False",
+            "confirmed_by": prior.get("confirmed_by") or "", "confirmed_at": prior.get("confirmed_at") or "",
+            "approval_reference": prior.get("approval_reference") or "",
+        })
+    generated_keys = {(row["brand"], row["generic_name"], row.get("spec_key") or "", row["min_unit"], row["source_line"]) for row in records}
+    for key, prior in preserved_controls.items():
+        if key not in generated_keys and prior.get("business_confirmed", "").strip().lower() == "true":
+            records.append({field: prior.get(field, "") for field in CONTROL_PRICE_RULE_FIELDNAMES})
+    return records
 
 
 def build_knowledge_base(source: Path = SOURCE, output: Path = OUT) -> dict[str, object]:
@@ -124,6 +162,7 @@ def build_knowledge_base(source: Path = SOURCE, output: Path = OUT) -> dict[str,
     missing = [path for path in (STORES, QUWEI, ANTUO, CONTROL) if not path.is_file()]
     if missing:
         raise FileNotFoundError("缺少知识库原始输入: " + ", ".join(str(path) for path in missing))
+    preserved_controls = existing_control_metadata(OUT)
     OUT.mkdir(exist_ok=True)
     issues = []
     source_stats = {}
@@ -219,8 +258,8 @@ def build_knowledge_base(source: Path = SOURCE, output: Path = OUT) -> dict[str,
             package_records.append({"package_id": f"{brand}|{spec}", "brand": brand, "generic_name": BRAND_TO_GENERIC[brand], "spec_normalized": spec, "spec_raw_examples": "；".join(raws), "units_per_box": units, "min_unit": unit, "source_count": sum(1 for r in observations if r["brand"] == brand and r["spec_normalized"] == spec), "verified": "historical_observation"})
     write_csv("drug_package_master.csv", ["package_id","brand","generic_name","spec_normalized","spec_raw_examples","units_per_box","min_unit","source_count","verified"], package_records)
 
-    control_records = [{"brand": x.brand, "generic_name": x.generic_name, "spec_key": x.spec_key, "control_price_per_min_unit": x.price, "min_unit": x.min_unit, "effective_from": "2026-04-01", "active": True, "source_file": CONTROL.name, "source_line": x.source_line} for x in controls]
-    write_csv("control_price_rules.csv", ["brand","generic_name","spec_key","control_price_per_min_unit","min_unit","effective_from","active","source_file","source_line"], control_records)
+    control_records = rebuilt_control_records(controls, preserved_controls, CONTROL.name)
+    write_csv("control_price_rules.csv", CONTROL_PRICE_RULE_FIELDNAMES, control_records)
 
     drug_records = []
     categories = {}

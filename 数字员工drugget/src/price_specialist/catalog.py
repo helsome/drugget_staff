@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 import csv
+import os
+import tempfile
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
@@ -176,8 +178,11 @@ CONTROL_PRICE_RULE_COLUMNS = {
     "generic_name",
     "spec_key",
     "control_price_per_min_unit",
+    "control_price_value",
+    "control_price_basis",
     "min_unit",
     "effective_from",
+    "effective_to",
     "active",
     "source_file",
     "source_line",
@@ -186,6 +191,13 @@ CONTROL_PRICE_RULE_COLUMNS = {
     "confirmed_at",
     "approval_reference",
 }
+
+CONTROL_PRICE_RULE_FIELDNAMES = [
+    "brand", "generic_name", "spec_key", "control_price_value", "control_price_basis",
+    "control_price_per_min_unit", "min_unit", "effective_from", "effective_to", "active",
+    "source_file", "source_line", "business_confirmed", "confirmed_by", "confirmed_at",
+    "approval_reference",
+]
 
 
 def _parse_bool(value: str, *, field: str, line_number: int) -> bool:
@@ -230,11 +242,31 @@ def parse_control_price_rules(path: Path) -> list[ControlPriceEntry]:
             if not all((brand, generic_name, min_unit, source_file, source_line)):
                 raise ValueError(f"控价规则第 {line_number} 行缺少必要的业务字段")
             try:
-                price = Decimal((row.get("control_price_per_min_unit") or "").strip())
+                input_price = Decimal((row.get("control_price_value") or "").strip())
             except Exception as exc:
-                raise ValueError(f"控价规则第 {line_number} 行控价值无效") from exc
-            if price <= 0:
+                raise ValueError(f"控价规则第 {line_number} 行录入控价值无效") from exc
+            if input_price <= 0:
                 raise ValueError(f"控价规则第 {line_number} 行控价值必须大于 0")
+            basis = (row.get("control_price_basis") or "").strip()
+            if basis not in {"per_min_unit", "per_box"}:
+                raise ValueError(f"控价规则第 {line_number} 行 control_price_basis 必须为 per_min_unit 或 per_box")
+            spec_key = normalize_spec(row.get("spec_key")) if (row.get("spec_key") or "").strip() else None
+            if basis == "per_box":
+                units, spec_unit = parse_package_units(spec_key)
+                if units is None or spec_unit != min_unit:
+                    raise ValueError(f"控价规则第 {line_number} 行每盒控价必须提供可解析且单位一致的完整规格")
+                price = input_price / units
+            else:
+                price = input_price
+            declared = (row.get("control_price_per_min_unit") or "").strip()
+            if declared:
+                try:
+                    if Decimal(declared) != price:
+                        raise ValueError(f"控价规则第 {line_number} 行单最小单位控价与录入金额换算不一致")
+                except ValueError:
+                    raise
+                except Exception as exc:
+                    raise ValueError(f"控价规则第 {line_number} 行单最小单位控价值无效") from exc
             business_confirmed = _parse_bool(
                 row.get("business_confirmed") or "", field="business_confirmed", line_number=line_number
             )
@@ -243,19 +275,24 @@ def parse_control_price_rules(path: Path) -> list[ControlPriceEntry]:
             approval_reference = (row.get("approval_reference") or "").strip() or None
             if business_confirmed and not all((confirmed_by, confirmed_at, approval_reference)):
                 raise ValueError(f"控价规则第 {line_number} 行已业务确认时必须填写确认人、确认时间和审批凭证")
+            effective_from = _parse_date(
+                row.get("effective_from") or "", field="effective_from", line_number=line_number, required=True
+            )
+            effective_to = _parse_date(row.get("effective_to") or "", field="effective_to", line_number=line_number)
+            if effective_to is not None and effective_to < effective_from:
+                raise ValueError(f"控价规则第 {line_number} 行 effective_to 不能早于 effective_from")
             entries.append(
                 ControlPriceEntry(
                     brand=brand,
                     generic_name=generic_name,
-                    spec_key=normalize_spec(row.get("spec_key")) if (row.get("spec_key") or "").strip() else None,
+                    spec_key=spec_key,
                     price=price,
                     min_unit=min_unit,
                     source_line=source_line,
                     source_file=source_file,
                     source_line_number=line_number,
-                    effective_from=_parse_date(
-                        row.get("effective_from") or "", field="effective_from", line_number=line_number, required=True
-                    ),
+                    effective_from=effective_from,
+                    effective_to=effective_to,
                     active=_parse_bool(row.get("active") or "", field="active", line_number=line_number),
                     business_confirmed=business_confirmed,
                     confirmed_by=confirmed_by,
@@ -264,6 +301,56 @@ def parse_control_price_rules(path: Path) -> list[ControlPriceEntry]:
                 )
             )
     return entries
+
+
+def control_rule_rows(path: Path) -> list[dict[str, str]]:
+    """Validate a business-maintained rule file and return canonical CSV rows."""
+    entries = parse_control_price_rules(path)
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        original = list(csv.DictReader(handle))
+    return [
+        {
+            "brand": entry.brand,
+            "generic_name": entry.generic_name,
+            "spec_key": entry.spec_key or "",
+            "control_price_value": (original[index].get("control_price_value") or "").strip(),
+            "control_price_basis": (original[index].get("control_price_basis") or "").strip(),
+            "control_price_per_min_unit": str(entry.price),
+            "min_unit": entry.min_unit,
+            "effective_from": entry.effective_from.isoformat() if entry.effective_from else "",
+            "effective_to": entry.effective_to.isoformat() if entry.effective_to else "",
+            "active": str(entry.active),
+            "source_file": entry.source_file or "",
+            "source_line": entry.source_line,
+            "business_confirmed": str(entry.business_confirmed),
+            "confirmed_by": entry.confirmed_by or "",
+            "confirmed_at": entry.confirmed_at.isoformat() if entry.confirmed_at else "",
+            "approval_reference": entry.approval_reference or "",
+        }
+        for index, entry in enumerate(entries)
+    ]
+
+
+def import_control_price_rules(*, input_path: Path, target_path: Path) -> dict[str, int]:
+    """Validate and merge business rule rows into the curated CSV, never SQLite."""
+    incoming = control_rule_rows(input_path)
+    existing = control_rule_rows(target_path) if target_path.is_file() else []
+
+    def key(row: dict[str, str]) -> tuple[str, str, str, str, str, str]:
+        return tuple(row.get(name, "") for name in ("brand", "generic_name", "spec_key", "effective_from", "effective_to", "source_line"))
+
+    merged = {key(row): row for row in existing}
+    before = len(merged)
+    for row in incoming:
+        merged[key(row)] = row
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8-sig", newline="", dir=target_path.parent, delete=False) as handle:
+        writer = csv.DictWriter(handle, fieldnames=CONTROL_PRICE_RULE_FIELDNAMES, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(merged.values())
+        temporary = Path(handle.name)
+    os.replace(temporary, target_path)
+    return {"input_rows": len(incoming), "updated_rows": len(incoming), "total_rows": len(merged), "new_rows": max(0, len(merged) - before)}
 
 
 def parse_control_prices(path: Path) -> list[ControlPriceEntry]:

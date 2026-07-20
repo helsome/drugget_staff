@@ -11,7 +11,7 @@ from sqlalchemy import select
 
 from .api import create_app
 from .bootstrap import bootstrap_reference_data
-from .catalog import BRAND_TO_GENERIC
+from .catalog import BRAND_TO_GENERIC, import_control_price_rules
 from .collector import OpenCLIComputerUseCollector
 from .config import Settings
 from .data_quality import audit_sources, write_audit_report
@@ -45,6 +45,15 @@ def db_init() -> None:
     engine, _ = configured_database(settings())
     init_database(engine)
     typer.echo("database schema ready")
+
+
+@app.command("control-rules-import")
+def control_rules_import(
+    input_path: Path = typer.Option(..., "--input", exists=True, dir_okay=False),
+    target_path: Path = typer.Option(PROJECT_DIR / "data/knowledge-base/control_price_rules.csv", "--target", dir_okay=False),
+) -> None:
+    """Validate and merge approved control rules into CSV only; never writes SQLite."""
+    typer.echo(json.dumps(import_control_price_rules(input_path=input_path, target_path=target_path), ensure_ascii=False))
 
 
 @app.command("price-judge")
