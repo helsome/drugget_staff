@@ -1,0 +1,73 @@
+{
+  "task": {
+    "task_id": "44c0d089-42ca-4c55-84af-94f0ff78f85c",
+    "run_id": "6382d151-dbce-4f68-8c18-c423adfadd91",
+    "platform": "taobao",
+    "task_type": "inspect_candidate",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "托妥",
+    "generic_name": "瑞舒伐他汀钙片",
+    "spec": null,
+    "shop_name": "阿里健康大药房",
+    "product_id": "730730569342",
+    "url": "https://item.taobao.com/item.htm?id=730730569342",
+    "query": "托妥 瑞舒伐他汀钙片",
+    "fixed_tier": null,
+    "priority": 110,
+    "metadata": {
+      "drug_id": "1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9",
+      "target_brand": "托妥",
+      "route": "shop_home",
+      "shop_home_url": "https://shop163215406.taobao.com/",
+      "platform_store_key": "163215406",
+      "homepage_discovery": {
+        "shop_home_url": "https://shop163215406.taobao.com/",
+        "platform_store_key": "163215406",
+        "source": "technical_closed_loop_fixture"
+      },
+      "inspect_limit": 1,
+      "selection_reason": "technical_closed_loop_fixture",
+      "source_task_id": "942a5691-a32c-4d9c-b355-30a205eb3d08",
+      "candidate_type": "new_store",
+      "candidate_product_id": "730730569342"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": "[自营][新托妥]瑞舒伐他汀钙片 10mg*48片/盒",
+    "final_url": "https://detail.tmall.com/item.htm?id=730730569342",
+    "page_shop": "阿里健康大药房",
+    "selected_spec": null,
+    "page_price_raw": "¥124",
+    "page_price_value": "124",
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": "https://detail.tmall.com/item.htm?id=730730569342",
+    "page_title": "[自营][新托妥]瑞舒伐他汀钙片 10mg*48片/盒",
+    "raw_fields": {
+      "商品名称": "[自营][新托妥]瑞舒伐他汀钙片 10mg*48片/盒",
+      "价格": "¥124",
+      "ID": "730730569342",
+      "链接": "https://detail.tmall.com/item.htm?id=730730569342",
+      "店铺": "阿里健康大药房",
+      "店铺主页": "https://shop163215406.taobao.com/"
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T13:22:56.248476"
+  }
+}

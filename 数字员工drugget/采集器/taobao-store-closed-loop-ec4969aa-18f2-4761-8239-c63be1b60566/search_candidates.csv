@@ -1,0 +1,2 @@
+﻿记录ID,采集批次ID,药品ID,平台,搜索关键词,搜索排名,商品ID,店铺名称,商品链接,商品标题,列表原始价格,候选类型,规格核验状态,责任店匹配状态,是否正式价格,判定原因,原始候选数据,发现时间
+76e037aa-c475-48a6-a769-7d5819876721,ec4969aa-18f2-4761-8239-c63be1b60566,1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9,taobao,托妥 瑞舒伐他汀钙片,1,730730569342,阿里健康大药房,https://item.taobao.com/item.htm?id=730730569342,[自营][新托妥]瑞舒伐他汀钙片 10mg*48片/盒,,known_non_fixed_store,verified_detail,matched,True,责任档案已有但未纳入固定线,"{""route"": ""shop_home"", ""shop_home_url"": ""https://shop163215406.taobao.com/"", ""adapter"": ""taobao/shop-search""}",2026-07-20 13:26:43.221054

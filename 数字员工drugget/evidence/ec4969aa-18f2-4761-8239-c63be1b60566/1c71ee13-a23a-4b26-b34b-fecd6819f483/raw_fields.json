@@ -1,0 +1,25 @@
+{
+  "query": "托妥 瑞舒伐他汀钙片",
+  "query_verified": true,
+  "route": "shop_home",
+  "shop_home_url": "https://shop163215406.taobao.com/",
+  "current_url": "https://maiyao.liangxinyao.com/shop/view_shop.htm?q=%CD%D0%CD%D7%20%C8%F0%CA%E6%B7%A5%CB%FB%CD%A1%B8%C6%C6%AC&type=p&search=y&newHeader_b=s_from&searcy_type=item&from=liangxinyao.shop.pc_1_placeholder&spm=a1z10.3-b-s.a2227oh.d101",
+  "adapter": "taobao/shop-search",
+  "hits": [
+    {
+      "platform": "taobao",
+      "query": "托妥 瑞舒伐他汀钙片",
+      "rank": 1,
+      "title": "[自营][新托妥]瑞舒伐他汀钙片 10mg*48片/盒",
+      "url": "https://item.taobao.com/item.htm?id=730730569342",
+      "product_id": "730730569342",
+      "shop_name": "阿里健康大药房",
+      "list_price_raw": null,
+      "raw": {
+        "route": "shop_home",
+        "shop_home_url": "https://shop163215406.taobao.com/",
+        "adapter": "taobao/shop-search"
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+﻿档案店铺ID,档案店铺名称,问题类型,详情,source_route
+ALL,（全平台）,平台异常,"京东访问被中断：rate_limited；stderr片段：Extension update available: v1.0.0 → v1.0.22
+  Download: https://github.com/jackwener/opencli/releases",platform
+W04557,上元堂大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W01549,康药师旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W01027,高济再康大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W06561,汇华强盛大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W06614,贝克大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W03569,江苏省医药大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W05560,千百方大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W03785,金湖金普大药房官方旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W02865,贵和祥大药房旗舰店,平台异常,因平台异常(rate_limited)未处理,platform
+W03547,奇冠大药房官方旗舰店,平台异常,"欣速安 托伐普坦片 15mg*7片 pid=10116210815224 status=rate_limited err= Extension update available: v1.0.0 → v1.0.22
+  Download: https://github.com/jackwener/opencli/releases",historical_link
+W03547,奇冠大药房官方旗舰店,药品未找到,托妥 瑞舒伐他汀钙片 10mg*28片 pid=66809443804 未处理,historical_link
+W03547,奇冠大药房官方旗舰店,药品未找到,希佳 奥美沙坦酯片 20mg*7片 pid=10128645470447 未处理,historical_link
+W04557,上元堂大药房旗舰店,药品未找到,希佳 奥美沙坦酯片 20mg*7片 pid=10020343903147 未处理,historical_link
+W04557,上元堂大药房旗舰店,药品未找到,天舒平 奥美沙坦酯氨氯地平片 20mg:5mg*14片 pid=10032838750590 未处理,historical_link
+W04557,上元堂大药房旗舰店,药品未找到,葛泰 地奥司明片 0.45g*20片 pid=30686019248 未处理,historical_link
+W01549,康药师旗舰店,药品未找到,欣速安 托伐普坦片 15mg*7片 pid=10212026200722 未处理,historical_link
+W01549,康药师旗舰店,药品未找到,品多 西格列汀二甲双胍缓释片 0.1g:1g*16片 pid=10209384152056 未处理,historical_link
+W01549,康药师旗舰店,药品未找到,畅凡 芦比前列酮软胶囊 24μg*10粒 pid=10212026894043 未处理,historical_link
+W01027,高济再康大药房旗舰店,药品未找到,欣速安 托伐普坦片 15mg*7片 pid=10041982962216 未处理,historical_link
+W01027,高济再康大药房旗舰店,药品未找到,希佳 奥美沙坦酯片 20mg*14片 pid=10026270173665 未处理,historical_link
+W01027,高济再康大药房旗舰店,药品未找到,葛泰 地奥司明片 0.45g*24片 pid=72479658543 未处理,historical_link
+W06561,汇华强盛大药房旗舰店,药品未找到,欣速安 托伐普坦片 15mg*7片 pid=10167382509683 未处理,historical_link
+W06561,汇华强盛大药房旗舰店,药品未找到,依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片 pid=10094884017655 未处理,historical_link
+W06561,汇华强盛大药房旗舰店,药品未找到,托妥 瑞舒伐他汀钙片 10mg*28片 pid=10088623979746 未处理,historical_link
+W06614,贝克大药房旗舰店,药品未找到,葛泰 地奥司明片 0.45g*20片 pid=10028212264659 未处理,historical_link
+W06614,贝克大药房旗舰店,药品未找到,托妥 瑞舒伐他汀钙片 10mg*28片 pid=10044279182099 未处理,historical_link
+W06614,贝克大药房旗舰店,药品未找到,优立维 硫酸氢氯吡格雷片 75mg*48片 pid=10112439939307 未处理,historical_link
+W03569,江苏省医药大药房旗舰店,药品未找到,欣速安 托伐普坦片 15mg*7片 pid=10090511581510 未处理,historical_link
+W03569,江苏省医药大药房旗舰店,药品未找到,葛泰 地奥司明片 0.45g*20片 pid=10117293223720 未处理,historical_link
+W03569,江苏省医药大药房旗舰店,药品未找到,天舒平 奥美沙坦酯氨氯地平片 20mg:5mg*7片 pid=10090511040886 未处理,historical_link
+W05560,千百方大药房旗舰店,药品未找到,葛泰 地奥司明片 0.45g*20片 pid=10134912614557 未处理,historical_link
+W03785,金湖金普大药房官方旗舰店,药品未找到,托妥 瑞舒伐他汀钙片 10mg*28片 pid=10131833668933 未处理,historical_link
+W03785,金湖金普大药房官方旗舰店,药品未找到,依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片 pid=10059018363133 未处理,historical_link
+W03785,金湖金普大药房官方旗舰店,药品未找到,天舒平 奥美沙坦酯氨氯地平片 20mg:5mg*7片 pid=10073738598593 未处理,historical_link
+W02865,贵和祥大药房旗舰店,药品未找到,欣速安 托伐普坦片 15mg*7片 pid=10131339284603 未处理,historical_link
+W02865,贵和祥大药房旗舰店,药品未找到,依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片 pid=10051721495577 未处理,historical_link
+W02865,贵和祥大药房旗舰店,药品未找到,天依宁 氨氯地平阿托伐他汀钙片 10mg*7片 pid=10143729353714 未处理,historical_link
+W00001,阿里健康大药房,店铺待确认,药品=托妥 瑞舒伐他汀钙片 规格=10mg*28片 item_id=648878452873 原因=detail_page_missing_shop_field,historical_link
+W00001,阿里健康大药房,店铺待确认,药品=依伦平 厄贝沙坦氢氯噻嗪片 规格=0.15g:12.5mg*28片 item_id=616813986176 原因=detail_page_missing_shop_field,historical_link
+W00001,阿里健康大药房,店铺待确认,药品=葛泰 地奥司明片 规格=0.45g*24片 item_id=610185190310 原因=detail_page_missing_shop_field,historical_link
+W00001,阿里健康大药房,药品未找到,药品=托妥 瑞舒伐他汀钙片 规格=10mg*28片 原因=候选详情页均不满足要求,platform_search
+W00001,阿里健康大药房,药品未找到,药品=依伦平 厄贝沙坦氢氯噻嗪片 规格=0.15g:12.5mg*28片 原因=候选详情页均不满足要求,platform_search
+W00001,阿里健康大药房,药品未找到,药品=葛泰 地奥司明片 规格=0.45g*24片 原因=候选详情页均不满足要求,platform_search
+W00003,依伦平旗舰店,药品未找到,药品=欣速安 托伐普坦片 规格=15mg*7片 原因=候选详情页均不满足要求,platform_search
+W00003,依伦平旗舰店,药品未找到,药品=葛泰 地奥司明片 规格=0.45g*20片 原因=候选详情页均不满足要求,platform_search
+W04566,上元堂大药房旗舰店,价格可疑,药品=葛泰 地奥司明片 规格=0.45g*24片 price=¥1 原因=suspicious_price（低于¥2，需人工复核）,historical_link
+W04566,上元堂大药房旗舰店,药品未找到,药品=葛泰 地奥司明片 规格=0.45g*24片 原因=候选详情页均不满足要求,platform_search
+W04566,上元堂大药房旗舰店,药品未找到,药品=依伦平 厄贝沙坦氢氯噻嗪片 规格=0.15g:12.5mg*28片 原因=候选详情页均不满足要求,platform_search

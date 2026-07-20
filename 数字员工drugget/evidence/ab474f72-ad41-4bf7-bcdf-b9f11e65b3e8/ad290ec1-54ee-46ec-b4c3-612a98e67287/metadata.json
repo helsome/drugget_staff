@@ -1,0 +1,287 @@
+{
+  "task": {
+    "task_id": "ad290ec1-54ee-46ec-b4c3-612a98e67287",
+    "run_id": "ab474f72-ad41-4bf7-bcdf-b9f11e65b3e8",
+    "platform": "taobao",
+    "task_type": "store_search",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "托妥",
+    "generic_name": "瑞舒伐他汀钙片",
+    "spec": null,
+    "shop_name": "百年传徽医药专营店",
+    "product_id": null,
+    "url": null,
+    "query": "托妥",
+    "fixed_tier": null,
+    "priority": 10,
+    "metadata": {
+      "drug_id": "1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9",
+      "target_brand": "托妥",
+      "target_spec": null,
+      "route": "shop_home",
+      "shop_home_url": "https://shop202802473.taobao.com/",
+      "fixture_seed_key": "STORE_SEARCH|taobao|W00017|托妥"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "托妥",
+      "route": "shop_home",
+      "shop_home_url": "https://shop202802473.taobao.com/",
+      "hits": [
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 1,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=975079107364",
+          "product_id": "975079107364",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 3,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=975178814032",
+          "product_id": "975178814032",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 5,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=976313221434",
+          "product_id": "976313221434",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 7,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=976339305569",
+          "product_id": "976339305569",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 9,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=977788393548",
+          "product_id": "977788393548",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 11,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=978779274785",
+          "product_id": "978779274785",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 13,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=979338792546",
+          "product_id": "979338792546",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 15,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=980699672780",
+          "product_id": "980699672780",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 17,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=996049743824",
+          "product_id": "996049743824",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 19,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1024241619821",
+          "product_id": "1024241619821",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 21,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1026612956208",
+          "product_id": "1026612956208",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 23,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1048360076899",
+          "product_id": "1048360076899",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 25,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1050864818731",
+          "product_id": "1050864818731",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 27,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1052734108891",
+          "product_id": "1052734108891",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 29,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1052737592456",
+          "product_id": "1052737592456",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥",
+          "rank": 31,
+          "title": "",
+          "url": "https://item.taobao.com/item.htm?id=1056982570137",
+          "product_id": "1056982570137",
+          "shop_name": "百年传徽医药专营店",
+          "list_price_raw": null,
+          "raw": {
+            "route": "shop_home",
+            "shop_home_url": "https://shop202802473.taobao.com/"
+          }
+        }
+      ]
+    },
+    "collector_version": null,
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-17T16:24:27.482976"
+  }
+}

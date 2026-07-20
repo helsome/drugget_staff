@@ -1,0 +1,3 @@
+﻿平台,档案店铺名称,店铺主页链接,药品名称,药品规格,商品详情链接,商品ID,SKU ID,页面价格,是否有货,抓取时间,抓取结果,source_route,失败原因
+jd,奇冠大药房官方旗舰店,,欣速安,15mg*7片,https://pc-frequent-pro.pf.jd.com/?from=pc_item&reason=403,10116210815224,,,,2026-07-16 14:26:47,平台异常,historical_link," Extension update available: v1.0.0 → v1.0.22
+  Download: https://github.com/jackwener/opencli/releases"

@@ -1,0 +1,65 @@
+{
+  "query": "葛泰 地奥司明片",
+  "hits": [
+    {
+      "platform": "taobao",
+      "query": "葛泰 地奥司明片",
+      "rank": 1,
+      "title": "葛泰 地奥司明片 0.45g*24片/盒",
+      "url": "https://item.taobao.com/item.htm?id=1054514852337",
+      "product_id": "1054514852337",
+      "shop_name": "医医药专营店",
+      "list_price_raw": "¥13.8",
+      "raw": {
+        "item_id": "1054514852337",
+        "location": "江苏淮安",
+        "price": "¥13.8",
+        "rank": 1,
+        "sales": "300+人付款",
+        "shop": "医医药专营店",
+        "title": "葛泰 地奥司明片 0.45g*24片/盒",
+        "url": "https://item.taobao.com/item.htm?id=1054514852337"
+      }
+    },
+    {
+      "platform": "taobao",
+      "query": "葛泰 地奥司明片",
+      "rank": 2,
+      "title": "葛泰 0.45g*48片/盒 地奥司明片",
+      "url": "https://item.taobao.com/item.htm?id=1065865275950",
+      "product_id": "1065865275950",
+      "shop_name": "满康堂医药专营店",
+      "list_price_raw": "¥31.6",
+      "raw": {
+        "item_id": "1065865275950",
+        "location": "辽宁沈阳",
+        "price": "¥31.6",
+        "rank": 2,
+        "sales": "0人付款",
+        "shop": "满康堂医药专营店",
+        "title": "葛泰 0.45g*48片/盒 地奥司明片",
+        "url": "https://item.taobao.com/item.htm?id=1065865275950"
+      }
+    },
+    {
+      "platform": "taobao",
+      "query": "葛泰 地奥司明片",
+      "rank": 3,
+      "title": "葛泰 地奥司明片 0.45g*20片/盒",
+      "url": "https://item.taobao.com/item.htm?id=1066800026246",
+      "product_id": "1066800026246",
+      "shop_name": "冠瑞智医药专营店",
+      "list_price_raw": "¥28.49",
+      "raw": {
+        "item_id": "1066800026246",
+        "location": "浙江杭州",
+        "price": "¥28.49",
+        "rank": 3,
+        "sales": "0人付款",
+        "shop": "冠瑞智医药专营店",
+        "title": "葛泰 地奥司明片 0.45g*20片/盒",
+        "url": "https://item.taobao.com/item.htm?id=1066800026246"
+      }
+    }
+  ]
+}

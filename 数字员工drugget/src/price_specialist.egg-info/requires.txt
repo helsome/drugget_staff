@@ -1,0 +1,14 @@
+alembic<2,>=1.14
+apscheduler<4,>=3.10
+fastapi<1,>=0.115
+openpyxl<4,>=3.1
+psycopg[binary]<4,>=3.2
+pydantic<3,>=2.10
+sqlalchemy<3,>=2.0
+typer<1,>=0.15
+uvicorn<1,>=0.34
+
+[dev]
+httpx<1,>=0.28
+pytest<9,>=8.3
+pytest-asyncio<1,>=0.25

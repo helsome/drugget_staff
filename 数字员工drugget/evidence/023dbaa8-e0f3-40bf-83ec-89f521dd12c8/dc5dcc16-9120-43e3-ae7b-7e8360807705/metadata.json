@@ -1,0 +1,182 @@
+{
+  "task": {
+    "task_id": "dc5dcc16-9120-43e3-ae7b-7e8360807705",
+    "run_id": "023dbaa8-e0f3-40bf-83ec-89f521dd12c8",
+    "platform": "taobao",
+    "task_type": "search",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "托妥",
+    "generic_name": "瑞舒伐他汀钙片",
+    "spec": null,
+    "shop_name": null,
+    "product_id": null,
+    "url": null,
+    "query": "托妥 瑞舒伐他汀钙片",
+    "fixed_tier": null,
+    "priority": 20,
+    "metadata": {
+      "drug_id": "1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9",
+      "target_brand": "托妥",
+      "target_spec": null,
+      "route": "global",
+      "shop_home_url": null,
+      "provider_id": null,
+      "fixture_seed_key": "GLOBAL_SEARCH|taobao|托妥|brand_generic"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "托妥 瑞舒伐他汀钙片",
+      "hits": [
+        {
+          "platform": "taobao",
+          "query": "托妥 瑞舒伐他汀钙片",
+          "rank": 1,
+          "title": "正大天晴 10mg*28片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=613550172973",
+          "product_id": "613550172973",
+          "shop_name": "泉源堂大药房旗舰店",
+          "list_price_raw": "¥18.5",
+          "raw": {
+            "item_id": "613550172973",
+            "location": "四川成都",
+            "price": "¥18.5",
+            "rank": 1,
+            "sales": "78人付款",
+            "shop": "泉源堂大药房旗舰店",
+            "title": "正大天晴 10mg*28片/盒 瑞舒伐他汀钙片",
+            "url": "https://item.taobao.com/item.htm?id=613550172973"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥 瑞舒伐他汀钙片",
+          "rank": 2,
+          "title": "新托妥 10mg*28片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=648878452873",
+          "product_id": "648878452873",
+          "shop_name": "买过的店阿里健康大药房",
+          "list_price_raw": "¥20.93",
+          "raw": {
+            "item_id": "648878452873",
+            "location": "江苏苏州",
+            "price": "¥20.93",
+            "rank": 2,
+            "sales": "1万+人付款",
+            "shop": "买过的店阿里健康大药房",
+            "title": "新托妥 10mg*28片/盒 瑞舒伐他汀钙片",
+            "url": "https://item.taobao.com/item.htm?id=648878452873"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥 瑞舒伐他汀钙片",
+          "rank": 3,
+          "title": "新托妥 10mg*14片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=618203002365",
+          "product_id": "618203002365",
+          "shop_name": "买过的店阿里健康大药房",
+          "list_price_raw": "¥10.9",
+          "raw": {
+            "item_id": "618203002365",
+            "location": "江苏苏州",
+            "price": "¥10.9",
+            "rank": 3,
+            "sales": "400+人付款",
+            "shop": "买过的店阿里健康大药房",
+            "title": "新托妥 10mg*14片/盒 瑞舒伐他汀钙片",
+            "url": "https://item.taobao.com/item.htm?id=618203002365"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥 瑞舒伐他汀钙片",
+          "rank": 4,
+          "title": "新托妥 10mg*48片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=1062313753815",
+          "product_id": "1062313753815",
+          "shop_name": "善禾医药专营店",
+          "list_price_raw": "¥22.25",
+          "raw": {
+            "item_id": "1062313753815",
+            "location": "安徽亳州",
+            "price": "¥22.25",
+            "rank": 4,
+            "sales": "1人付款",
+            "shop": "善禾医药专营店",
+            "title": "新托妥 10mg*48片/盒 瑞舒伐他汀钙片",
+            "url": "https://item.taobao.com/item.htm?id=1062313753815"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥 瑞舒伐他汀钙片",
+          "rank": 5,
+          "title": "新托妥 10mg*24片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=1067586164493",
+          "product_id": "1067586164493",
+          "shop_name": "友和之家大药房旗舰店",
+          "list_price_raw": "¥19.6",
+          "raw": {
+            "item_id": "1067586164493",
+            "location": "广东深圳",
+            "price": "¥19.6",
+            "rank": 5,
+            "sales": "0人付款",
+            "shop": "友和之家大药房旗舰店",
+            "title": "新托妥 10mg*24片/盒 瑞舒伐他汀钙片",
+            "url": "https://item.taobao.com/item.htm?id=1067586164493"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "托妥 瑞舒伐他汀钙片",
+          "rank": 6,
+          "title": "新托妥 瑞舒伐他汀钙片 10mg*35片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1065932210217",
+          "product_id": "1065932210217",
+          "shop_name": "永泰大药房旗舰店",
+          "list_price_raw": "¥22.4",
+          "raw": {
+            "item_id": "1065932210217",
+            "location": "江苏盐城",
+            "price": "¥22.4",
+            "rank": 6,
+            "sales": "0人付款",
+            "shop": "永泰大药房旗舰店",
+            "title": "新托妥 瑞舒伐他汀钙片 10mg*35片/盒",
+            "url": "https://item.taobao.com/item.htm?id=1065932210217"
+          }
+        }
+      ]
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T09:51:18.647102"
+  }
+}

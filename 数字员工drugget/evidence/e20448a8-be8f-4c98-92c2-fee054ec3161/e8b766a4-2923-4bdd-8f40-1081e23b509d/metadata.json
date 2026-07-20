@@ -1,0 +1,108 @@
+{
+  "task": {
+    "task_id": "e8b766a4-2923-4bdd-8f40-1081e23b509d",
+    "run_id": "e20448a8-be8f-4c98-92c2-fee054ec3161",
+    "platform": "yaoshibang",
+    "task_type": "store_search",
+    "session_alias": "yaoshibang-p0",
+    "target_id": null,
+    "drug_name": "葛泰",
+    "generic_name": "地奥司明片",
+    "spec": null,
+    "shop_name": "药实在",
+    "product_id": null,
+    "url": null,
+    "query": "葛泰 地奥司明片",
+    "fixed_tier": null,
+    "priority": 20,
+    "metadata": {
+      "drug_id": "93fe971e-608a-4274-882b-422f49c87406",
+      "target_brand": "葛泰",
+      "target_spec": null,
+      "provider_id": "18650",
+      "route": "provider_profile",
+      "source": "verified_global_detail"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "葛泰 地奥司明片",
+      "provider_resolution": null,
+      "hits": [
+        {
+          "platform": "yaoshibang",
+          "query": "葛泰 地奥司明片",
+          "rank": 1,
+          "title": "10盒包邮 葛泰 地奥司明片0.45g*20片",
+          "url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=840884379&providerId=18650",
+          "product_id": "840884379",
+          "shop_name": "药实在",
+          "list_price_raw": "16.17",
+          "raw": {
+            "rank": 1,
+            "title": "10盒包邮 葛泰 地奥司明片0.45g*20片",
+            "price": "16.17",
+            "spec": "0.45g*20片",
+            "shop": "药实在",
+            "wholesale_id": "840884379",
+            "provider_id": "18650",
+            "manufacturer": "南京正大天晴制药有限公司",
+            "unit": "盒",
+            "stock": "4835",
+            "url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=840884379&providerId=18650"
+          }
+        },
+        {
+          "platform": "yaoshibang",
+          "query": "葛泰 地奥司明片",
+          "rank": 11,
+          "title": "10盒包邮 葛泰 地奥司明片0.45g*24片",
+          "url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=921769408&providerId=18650",
+          "product_id": "921769408",
+          "shop_name": "药实在",
+          "list_price_raw": "20.79",
+          "raw": {
+            "rank": 11,
+            "title": "10盒包邮 葛泰 地奥司明片0.45g*24片",
+            "price": "20.79",
+            "spec": "0.45g*24片",
+            "shop": "药实在",
+            "wholesale_id": "921769408",
+            "provider_id": "18650",
+            "manufacturer": "南京正大天晴制药有限公司",
+            "unit": "盒",
+            "stock": "1461",
+            "url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=921769408&providerId=18650"
+          }
+        }
+      ]
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T11:08:12.517609"
+  }
+}

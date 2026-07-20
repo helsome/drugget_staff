@@ -1,0 +1,14 @@
+{
+  "query": "优立维",
+  "provider_resolution": [
+    {
+      "shop_name": "扶正药局",
+      "provider_id": "21288",
+      "match_confidence": "exact",
+      "evidence": "store_search:扶正药局; matched_provider:扶正药局",
+      "shop_url": "https://dian.ysbang.cn/#/provider?providerId=21288",
+      "platform": "yaoshibang"
+    }
+  ],
+  "hits": []
+}

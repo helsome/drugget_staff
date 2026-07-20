@@ -1,0 +1,162 @@
+{
+  "task": {
+    "task_id": "9e7a7877-a607-4e12-a29d-ff1568b71bca",
+    "run_id": "023dbaa8-e0f3-40bf-83ec-89f521dd12c8",
+    "platform": "taobao",
+    "task_type": "search",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "优立维",
+    "generic_name": "硫酸氢氯吡格雷片",
+    "spec": null,
+    "shop_name": null,
+    "product_id": null,
+    "url": null,
+    "query": "优立维 硫酸氢氯吡格雷片",
+    "fixed_tier": null,
+    "priority": 20,
+    "metadata": {
+      "drug_id": "bc1b5923-0ebb-43ce-9e78-e9f93cbbb069",
+      "target_brand": "优立维",
+      "target_spec": null,
+      "route": "global",
+      "shop_home_url": null,
+      "provider_id": null,
+      "fixture_seed_key": "GLOBAL_SEARCH|taobao|优立维|brand_generic"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "优立维 硫酸氢氯吡格雷片",
+      "hits": [
+        {
+          "platform": "taobao",
+          "query": "优立维 硫酸氢氯吡格雷片",
+          "rank": 1,
+          "title": "优立维 75mg*48片/盒 硫酸氢氯吡格雷片",
+          "url": "https://item.taobao.com/item.htm?id=1034532947139",
+          "product_id": "1034532947139",
+          "shop_name": "健尔堂大药房旗舰店",
+          "list_price_raw": "¥28",
+          "raw": {
+            "item_id": "1034532947139",
+            "location": "四川成都",
+            "price": "¥28",
+            "rank": 1,
+            "sales": "600+人付款",
+            "shop": "健尔堂大药房旗舰店",
+            "title": "优立维 75mg*48片/盒 硫酸氢氯吡格雷片",
+            "url": "https://item.taobao.com/item.htm?id=1034532947139"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "优立维 硫酸氢氯吡格雷片",
+          "rank": 2,
+          "title": "优立维 硫酸氢氯吡格雷片 75mg*36片/盒",
+          "url": "https://item.taobao.com/item.htm?id=775678181447",
+          "product_id": "775678181447",
+          "shop_name": "美锐大药房旗舰店",
+          "list_price_raw": "¥20.8",
+          "raw": {
+            "item_id": "775678181447",
+            "location": "河南信阳",
+            "price": "¥20.8",
+            "rank": 2,
+            "sales": "37人付款",
+            "shop": "美锐大药房旗舰店",
+            "title": "优立维 硫酸氢氯吡格雷片 75mg*36片/盒",
+            "url": "https://item.taobao.com/item.htm?id=775678181447"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "优立维 硫酸氢氯吡格雷片",
+          "rank": 3,
+          "title": "优立维 75mg*14片/盒 硫酸氢氯吡格雷片",
+          "url": "https://item.taobao.com/item.htm?id=1016504739977",
+          "product_id": "1016504739977",
+          "shop_name": "上元堂大药房旗舰店",
+          "list_price_raw": "¥5.79",
+          "raw": {
+            "item_id": "1016504739977",
+            "location": "江苏南京",
+            "price": "¥5.79",
+            "rank": 3,
+            "sales": "11人付款",
+            "shop": "上元堂大药房旗舰店",
+            "title": "优立维 75mg*14片/盒 硫酸氢氯吡格雷片",
+            "url": "https://item.taobao.com/item.htm?id=1016504739977"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "优立维 硫酸氢氯吡格雷片",
+          "rank": 4,
+          "title": "波立维 波立维 硫酸氢氯吡格雷片 75mg*7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1064581889295",
+          "product_id": "1064581889295",
+          "shop_name": "小药典药品专营店",
+          "list_price_raw": "¥27",
+          "raw": {
+            "item_id": "1064581889295",
+            "location": "广东惠州",
+            "price": "¥27",
+            "rank": 4,
+            "sales": "0人付款",
+            "shop": "小药典药品专营店",
+            "title": "波立维 波立维 硫酸氢氯吡格雷片 75mg*7片/盒",
+            "url": "https://item.taobao.com/item.htm?id=1064581889295"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "优立维 硫酸氢氯吡格雷片",
+          "rank": 5,
+          "title": "优立维 75mg*7片/盒 硫酸氢氯吡格雷片",
+          "url": "https://item.taobao.com/item.htm?id=681162096935",
+          "product_id": "681162096935",
+          "shop_name": "同德堂大药房旗舰店",
+          "list_price_raw": "¥12.5",
+          "raw": {
+            "item_id": "681162096935",
+            "location": "山东枣庄",
+            "price": "¥12.5",
+            "rank": 5,
+            "sales": "0人付款",
+            "shop": "同德堂大药房旗舰店",
+            "title": "优立维 75mg*7片/盒 硫酸氢氯吡格雷片",
+            "url": "https://item.taobao.com/item.htm?id=681162096935"
+          }
+        }
+      ]
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T09:49:36.410940"
+  }
+}

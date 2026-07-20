@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-price_specialist}
+      POSTGRES_USER: ${POSTGRES_USER:-price_specialist}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-development-only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - price_specialist_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U price_specialist -d price_specialist"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  price_specialist_pgdata:

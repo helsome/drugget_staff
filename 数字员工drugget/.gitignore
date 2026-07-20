@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+price_specialist.db
+evidence/
+outputs/
+*.log
+.DS_Store

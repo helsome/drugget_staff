@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-07-17T11:01:00.820771",
+  "source_directory": "/Users/helson/coding/cttq_work/数字员工drugget/过往抓取数据",
+  "source_files": [
+    {
+      "file": "网络店铺档案明细表_2026.xlsx",
+      "sha256": "c8d601626775fb162ded4a5ee027e28808d562dc5735773acd308def2f0f70e6",
+      "row_count": 10507,
+      "role": "raw_source"
+    },
+    {
+      "file": "趣维1-3月总数据.xlsx",
+      "sha256": "7bd9cc983ee02667e51f9a567fea0216c16e369cb9441d02fee86062f5593883",
+      "row_count": 17822,
+      "role": "raw_source"
+    },
+    {
+      "file": "安托监控数据2026年4-6月.xlsx",
+      "sha256": "04cd7a35b69b55f81e4b52843fed1ba0ae0797f97979dc93dfc7cd100d702404",
+      "row_count": 168797,
+      "role": "raw_source"
+    },
+    {
+      "file": "价格标准表.md",
+      "sha256": "4ca9462a9b97b434d337763b2ba17cd7ccaf83ce075247479178fde114b80c2d",
+      "row_count": null,
+      "role": "raw_source"
+    }
+  ],
+  "outputs": {
+    "store_master": 10507,
+    "responsibility_relations": 10507,
+    "drug_master": 30,
+    "control_price_rules": 31,
+    "drug_package_master": 30,
+    "price_observations_clean": 185529,
+    "monitor_task_master": 39399,
+    "data_quality_issues": 14407
+  },
+  "quality_summary": {
+    "raw_recognized_observation_rows": 186619,
+    "exact_duplicates_removed": 1090,
+    "unrecognized_rows": 354,
+    "unmatched_store_rows": 6075,
+    "formula_mismatch_rows": 164,
+    "exact_duplicates_extra_rows": 1144,
+    "business_key_duplicate_extra_rows": 29082
+  },
+  "rules": {
+    "canonical_price_source": "价格标准表.md",
+    "historical_source_flag_preserved": true,
+    "formal_price_requires_detail_page": true,
+    "responsibility_source": "网络店铺档案明细表_2026.xlsx",
+    "unmatched_or_unstable_tasks_enabled": false
+  }
+}

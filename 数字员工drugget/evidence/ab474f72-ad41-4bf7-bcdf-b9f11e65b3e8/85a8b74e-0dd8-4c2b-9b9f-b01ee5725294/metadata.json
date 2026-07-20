@@ -1,0 +1,60 @@
+{
+  "task": {
+    "task_id": "85a8b74e-0dd8-4c2b-9b9f-b01ee5725294",
+    "run_id": "ab474f72-ad41-4bf7-bcdf-b9f11e65b3e8",
+    "platform": "taobao",
+    "task_type": "search",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "托妥",
+    "generic_name": "瑞舒伐他汀钙片",
+    "spec": null,
+    "shop_name": null,
+    "product_id": null,
+    "url": null,
+    "query": "托妥 瑞舒伐他汀钙片",
+    "fixed_tier": null,
+    "priority": 20,
+    "metadata": {
+      "drug_id": "1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9",
+      "target_brand": "托妥",
+      "target_spec": null,
+      "route": "global",
+      "shop_home_url": null,
+      "fixture_seed_key": "GLOBAL_SEARCH|taobao|托妥|brand_generic"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "托妥 瑞舒伐他汀钙片",
+      "hits": []
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-17T16:26:10.062130"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "fixture_version": "kb-2026-07-17T11:01:00.820771-87d3a94d7868",
+  "database": "/Users/helson/coding/cttq_work/数字员工drugget/测试数据/业务知识库测试集/price_specialist_test.sqlite3",
+  "source_manifest_sha256": "87d3a94d7868ccd9bb40f5a6ee1411342abc2c3c6454d4a06fde6a066636e730",
+  "counts": {
+    "store_master": 5,
+    "store_drug_targets": 7,
+    "historical_product_clues": 13,
+    "task_seeds": 19,
+    "drug_master": 4,
+    "drug_package_master": 9,
+    "control_price_rules": 4,
+    "price_observations_clean": 50,
+    "data_quality_issues": 0
+  },
+  "seed_counts": {
+    "STORE_SEARCH:taobao": 3,
+    "STORE_SEARCH:yaoshibang": 4,
+    "GLOBAL_SEARCH:taobao": 6,
+    "GLOBAL_SEARCH:yaoshibang": 6
+  },
+  "manual_exclusions": [
+    {
+      "platform_code": "taobao",
+      "store_id": "W00017",
+      "shop_name": "百年传徽医药专营店",
+      "reason": "人工核验确认该店不销售托妥，已从店铺驱动测试样本移除"
+    }
+  ],
+  "links_live_checked": false
+}

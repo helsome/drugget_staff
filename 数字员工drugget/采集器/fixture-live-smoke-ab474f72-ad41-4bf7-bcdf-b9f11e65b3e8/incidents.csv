@@ -1,0 +1,4 @@
+﻿id,task_id,platform,incident_type,status,session_alias,current_url,page_title,screenshot_path,detected_at,updated_at,resume_count,operator_note
+00b44149-6cfd-4df9-b0a6-7594fc5457c7,0dd5f42d-9879-4926-a378-5659aa611cf1,taobao,page_changed,pending_human,taobao-p0,,,,2026-07-20 09:38:13.556964,2026-07-20 09:38:13.556970,0,
+bbb241c8-66e9-4d39-9626-dac788122a9e,ea8d5369-913c-44bf-ae5a-de66d26faa43,taobao,page_changed,pending_human,taobao-p0,,,,2026-07-20 09:39:32.705530,2026-07-20 09:39:32.705535,0,
+d38ad471-2f0e-405e-9af6-0df119d04dad,f9b332e6-db71-48f0-9548-e856c8ed06a7,taobao,page_changed,pending_human,taobao-p0,,,,2026-07-20 09:40:07.717347,2026-07-20 09:40:07.717354,0,

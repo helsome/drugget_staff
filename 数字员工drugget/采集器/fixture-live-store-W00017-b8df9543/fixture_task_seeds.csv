@@ -1,0 +1,21 @@
+﻿种子标识,种子类型,平台代码,店铺ID,品牌名,通用名,标准规格,搜索关键词,关键词类型,优先级,预期路线
+STORE_SEARCH|taobao|W00001|依伦平,STORE_SEARCH,taobao,W00001,依伦平,厄贝沙坦氢氯噻嗪片,,依伦平,store_product_search,10,store_driven
+STORE_SEARCH|taobao|W00001|优立维,STORE_SEARCH,taobao,W00001,优立维,硫酸氢氯吡格雷片,,优立维,store_product_search,10,store_driven
+STORE_SEARCH|taobao|W00017|托妥,STORE_SEARCH,taobao,W00017,托妥,瑞舒伐他汀钙片,,托妥,store_product_search,10,store_driven
+STORE_SEARCH|taobao|W00038|托妥,STORE_SEARCH,taobao,W00038,托妥,瑞舒伐他汀钙片,,托妥,store_product_search,10,store_driven
+STORE_SEARCH|yaoshibang|W00010|葛泰,STORE_SEARCH,yaoshibang,W00010,葛泰,地奥司明片,,葛泰,store_product_search,10,store_driven
+STORE_SEARCH|yaoshibang|W00019|优立维,STORE_SEARCH,yaoshibang,W00019,优立维,硫酸氢氯吡格雷片,,优立维,store_product_search,10,store_driven
+STORE_SEARCH|yaoshibang|W06410|依伦平,STORE_SEARCH,yaoshibang,W06410,依伦平,厄贝沙坦氢氯噻嗪片,,依伦平,store_product_search,10,store_driven
+STORE_SEARCH|yaoshibang|W06410|托妥,STORE_SEARCH,yaoshibang,W06410,托妥,瑞舒伐他汀钙片,,托妥,store_product_search,10,store_driven
+GLOBAL_SEARCH|taobao|优立维|brand_generic,GLOBAL_SEARCH,taobao,,优立维,硫酸氢氯吡格雷片,,优立维 硫酸氢氯吡格雷片,brand_generic,20,global_search
+GLOBAL_SEARCH|taobao|优立维|75mg*36片,GLOBAL_SEARCH,taobao,,优立维,硫酸氢氯吡格雷片,75mg*36片,优立维 75mg*36片,brand_spec,21,global_search
+GLOBAL_SEARCH|taobao|依伦平|brand_generic,GLOBAL_SEARCH,taobao,,依伦平,厄贝沙坦氢氯噻嗪片,,依伦平 厄贝沙坦氢氯噻嗪片,brand_generic,20,global_search
+GLOBAL_SEARCH|taobao|依伦平|0.15g:12.5mg*14片,GLOBAL_SEARCH,taobao,,依伦平,厄贝沙坦氢氯噻嗪片,0.15g:12.5mg*14片,依伦平 0.15g:12.5mg*14片,brand_spec,21,global_search
+GLOBAL_SEARCH|taobao|托妥|brand_generic,GLOBAL_SEARCH,taobao,,托妥,瑞舒伐他汀钙片,,托妥 瑞舒伐他汀钙片,brand_generic,20,global_search
+GLOBAL_SEARCH|taobao|托妥|10mg*14片,GLOBAL_SEARCH,taobao,,托妥,瑞舒伐他汀钙片,10mg*14片,托妥 10mg*14片,brand_spec,21,global_search
+GLOBAL_SEARCH|yaoshibang|优立维|brand_generic,GLOBAL_SEARCH,yaoshibang,,优立维,硫酸氢氯吡格雷片,,优立维 硫酸氢氯吡格雷片,brand_generic,20,global_search
+GLOBAL_SEARCH|yaoshibang|优立维|75mg*36片,GLOBAL_SEARCH,yaoshibang,,优立维,硫酸氢氯吡格雷片,75mg*36片,优立维 75mg*36片,brand_spec,21,global_search
+GLOBAL_SEARCH|yaoshibang|依伦平|brand_generic,GLOBAL_SEARCH,yaoshibang,,依伦平,厄贝沙坦氢氯噻嗪片,,依伦平 厄贝沙坦氢氯噻嗪片,brand_generic,20,global_search
+GLOBAL_SEARCH|yaoshibang|依伦平|0.15g:12.5mg*14片,GLOBAL_SEARCH,yaoshibang,,依伦平,厄贝沙坦氢氯噻嗪片,0.15g:12.5mg*14片,依伦平 0.15g:12.5mg*14片,brand_spec,21,global_search
+GLOBAL_SEARCH|yaoshibang|托妥|brand_generic,GLOBAL_SEARCH,yaoshibang,,托妥,瑞舒伐他汀钙片,,托妥 瑞舒伐他汀钙片,brand_generic,20,global_search
+GLOBAL_SEARCH|yaoshibang|托妥|10mg*14片,GLOBAL_SEARCH,yaoshibang,,托妥,瑞舒伐他汀钙片,10mg*14片,托妥 10mg*14片,brand_spec,21,global_search

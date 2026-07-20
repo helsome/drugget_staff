@@ -1,0 +1,8 @@
+{
+  "name": "opencli-yaoshibang",
+  "version": "1.0.0",
+  "description": "药师帮药品价格监控CLI适配器 - 基于opencli框架",
+  "type": "module",
+  "keywords": ["opencli", "yaoshibang", "药师帮", "drug", "price-monitor"],
+  "license": "MIT"
+}

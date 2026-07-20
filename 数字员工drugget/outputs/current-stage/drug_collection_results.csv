@@ -1,0 +1,21 @@
+﻿平台,档案店铺名称,店铺主页链接,药品名称,药品规格,商品详情链接,商品ID,SKU ID,页面价格,是否有货,抓取时间,抓取结果,source_route,失败原因
+jd,奇冠大药房官方旗舰店,,欣速安,15mg*7片,https://pc-frequent-pro.pf.jd.com/?from=pc_item&reason=403,10116210815224,,,,2026-07-16 14:26:47,平台异常,historical_link,"Extension update available: v1.0.0 → v1.0.22
+  Download: https://github.com/jackwener/opencli/releases"
+天猫,阿里健康大药房,https://shop163215406.taobao.com/,托妥 瑞舒伐他汀钙片,10mg*28片,https://detail.tmall.com/item.htm?id=648878452873,648878452873,（平台详情未返回）,,,2026-07-17 08:36:30,店铺待确认,historical_link,detail_page_missing_shop_field
+天猫,阿里健康大药房,https://shop163215406.taobao.com/,依伦平 厄贝沙坦氢氯噻嗪片,0.15g:12.5mg*28片,https://detail.tmall.com/item.htm?id=616813986176,616813986176,（平台详情未返回）,,,2026-07-17 08:36:56,店铺待确认,historical_link,detail_page_missing_shop_field
+天猫,阿里健康大药房,https://shop163215406.taobao.com/,葛泰 地奥司明片,0.45g*24片,https://detail.tmall.com/item.htm?id=610185190310,610185190310,（平台详情未返回）,,,2026-07-17 08:37:24,店铺待确认,historical_link,detail_page_missing_shop_field
+天猫,阿里健康大药房,https://shop163215406.taobao.com/,托妥 瑞舒伐他汀钙片,10mg*28片,,648878452873,,,,2026-07-17 08:38:38,未找到药品,platform_search,候选详情页均不满足要求 query=阿里健康大药房 托妥 瑞舒伐他汀钙片 10mg*28片
+天猫,阿里健康大药房,https://shop163215406.taobao.com/,依伦平 厄贝沙坦氢氯噻嗪片,0.15g:12.5mg*28片,,616813986176,,,,2026-07-17 08:39:48,未找到药品,platform_search,候选详情页均不满足要求 query=阿里健康大药房 依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片
+天猫,阿里健康大药房,https://shop163215406.taobao.com/,葛泰 地奥司明片,0.45g*24片,,610185190310,,,,2026-07-17 08:41:05,未找到药品,platform_search,候选详情页均不满足要求 query=阿里健康大药房 葛泰 地奥司明片 0.45g*24片
+天猫,依伦平旗舰店,https://shop405070601.taobao.com/,依伦平 厄贝沙坦氢氯噻嗪片,12.5mg:150mg*14片,https://detail.tmall.com/item.htm?id=674234987846,674234987846,（平台详情未返回）,¥86,是,2026-07-17 08:47:40,成功,historical_link,
+天猫,依伦平旗舰店,https://shop405070601.taobao.com/,欣速安 托伐普坦片,15mg*7片,https://detail.tmall.com/item.htm?id=674937001552,674937001552,（平台详情未返回）,¥211.89,是,2026-07-17 08:48:12,成功,historical_link,
+天猫,依伦平旗舰店,https://shop405070601.taobao.com/,葛泰 地奥司明片,0.45g*20片,https://detail.tmall.com/item.htm?id=673188996607,673188996607,（平台详情未返回）,¥23,是,2026-07-17 08:48:40,成功,historical_link,
+天猫,依伦平旗舰店,https://shop405070601.taobao.com/,依伦平 厄贝沙坦氢氯噻嗪片,12.5mg:150mg*14片,https://detail.tmall.com/item.htm?id=676811555503,676811555503,（平台详情未返回）,¥85.8,是,2026-07-17 08:49:31,成功,platform_search,
+天猫,依伦平旗舰店,https://shop405070601.taobao.com/,欣速安 托伐普坦片,15mg*7片,,674937001552,,,,2026-07-17 08:50:54,未找到药品,platform_search,候选详情页均不满足要求 query=依伦平旗舰店 欣速安 托伐普坦片 15mg*7片
+天猫,依伦平旗舰店,https://shop405070601.taobao.com/,葛泰 地奥司明片,0.45g*20片,,673188996607,,,,2026-07-17 08:52:03,未找到药品,platform_search,候选详情页均不满足要求 query=依伦平旗舰店 葛泰 地奥司明片 0.45g*20片
+天猫,上元堂大药房旗舰店,https://shop71084247.taobao.com/,葛泰 地奥司明片,0.45g*24片,https://detail.tmall.com/item.htm?id=708364294118,708364294118,（平台详情未返回）,,,2026-07-17 08:52:30,价格不明,historical_link,suspicious_price=¥1（低于¥2，可能为促销提示或券后价，需人工复核）
+天猫,上元堂大药房旗舰店,https://shop71084247.taobao.com/,托妥 瑞舒伐他汀钙片,10mg*28片,https://detail.tmall.com/item.htm?id=724641013687,724641013687,（平台详情未返回）,¥112,是,2026-07-17 08:52:52,成功,historical_link,
+天猫,上元堂大药房旗舰店,https://shop71084247.taobao.com/,依伦平 厄贝沙坦氢氯噻嗪片,12.5mg:150mg*28片,https://detail.tmall.com/item.htm?id=612586557167,612586557167,（平台详情未返回）,¥142.8,是,2026-07-17 08:53:20,成功,historical_link,
+天猫,上元堂大药房旗舰店,https://shop71084247.taobao.com/,葛泰 地奥司明片,0.45g*24片,,708364294118,,,,2026-07-17 08:54:30,未找到药品,platform_search,候选详情页均不满足要求 query=上元堂大药房旗舰店 葛泰 地奥司明片 0.45g*24片
+天猫,上元堂大药房旗舰店,https://shop71084247.taobao.com/,托妥 瑞舒伐他汀钙片,10mg*28片,https://detail.tmall.com/item.htm?id=614182635861,614182635861,（平台详情未返回）,¥112,是,2026-07-17 08:55:27,成功,platform_search,
+天猫,上元堂大药房旗舰店,https://shop71084247.taobao.com/,依伦平 厄贝沙坦氢氯噻嗪片,0.15g:12.5mg*28片,,612586557167,,,,2026-07-17 08:56:39,未找到药品,platform_search,候选详情页均不满足要求 query=上元堂大药房旗舰店 依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片

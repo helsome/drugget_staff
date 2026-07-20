@@ -1,0 +1,14 @@
+{
+  "query": "葛泰",
+  "provider_resolution": [
+    {
+      "shop_name": "云天下",
+      "provider_id": "5201",
+      "match_confidence": "exact",
+      "evidence": "store_search:云天下; matched_provider:云天下",
+      "shop_url": "https://dian.ysbang.cn/#/provider?providerId=5201",
+      "platform": "yaoshibang"
+    }
+  ],
+  "hits": []
+}

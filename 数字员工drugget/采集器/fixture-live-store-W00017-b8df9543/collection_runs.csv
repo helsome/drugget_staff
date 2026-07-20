@@ -1,0 +1,2 @@
+﻿记录ID,状态,固定任务状态,搜索任务状态,批次开始时间,批次结束时间,批次摘要
+b8df9543-ab50-4a18-b9da-028092fad58f,completed,pending,pending,,,"{""task_status_counts"": {""succeeded"": 1}, ""platform_outcomes"": {""taobao"": {""platform"": ""taobao"", ""completed"": 1, ""paused"": 0, ""reason"": ""queue_empty""}, ""yaoshibang"": {""platform"": ""yaoshibang"", ""completed"": 0, ""paused"": 0, ""reason"": ""queue_empty""}}}"

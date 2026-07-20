@@ -1,0 +1,71 @@
+{
+  "task": {
+    "task_id": "9dc48cf8-545d-4250-8a98-1c543129e235",
+    "run_id": "e20448a8-be8f-4c98-92c2-fee054ec3161",
+    "platform": "yaoshibang",
+    "task_type": "inspect_candidate",
+    "session_alias": "yaoshibang-p0",
+    "target_id": null,
+    "drug_name": "葛泰",
+    "generic_name": "地奥司明片",
+    "spec": null,
+    "shop_name": "药实在",
+    "product_id": "840884379",
+    "url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=840884379&providerId=18650",
+    "query": "葛泰 地奥司明片",
+    "fixed_tier": null,
+    "priority": 110,
+    "metadata": {
+      "drug_id": "93fe971e-608a-4274-882b-422f49c87406",
+      "target_brand": "葛泰",
+      "target_spec": null,
+      "inspect_limit": 1,
+      "source_task_id": "4be9663e-b2d1-4a58-a1f5-9ceedfdb88a2",
+      "candidate_type": "new_store",
+      "provider_id": "18650"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": "10盒包邮 葛泰 地奥司明片0.45g*20片",
+    "final_url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=840884379&providerId=18650",
+    "page_shop": "药实在",
+    "selected_spec": "0.45g*20片",
+    "page_price_raw": "16.17",
+    "page_price_value": "16.17",
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": "https://dian.ysbang.cn/#/druginfo?wholesaleId=840884379&providerId=18650",
+    "page_title": "10盒包邮 葛泰 地奥司明片0.45g*20片",
+    "raw_fields": {
+      "商品名称": "10盒包邮 葛泰 地奥司明片0.45g*20片",
+      "价格": "16.17",
+      "规格": "0.45g*20片",
+      "商品ID": "840884379",
+      "供应商ID": "18650",
+      "供应商名称": "药实在",
+      "生产厂家": "南京正大天晴制药有限公司",
+      "单位": "盒",
+      "库存": "4835",
+      "起购数量": "10",
+      "有效期": "2029-12-31",
+      "链接": "https://dian.ysbang.cn/#/druginfo?wholesaleId=840884379&providerId=18650"
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T11:07:26.571712"
+  }
+}

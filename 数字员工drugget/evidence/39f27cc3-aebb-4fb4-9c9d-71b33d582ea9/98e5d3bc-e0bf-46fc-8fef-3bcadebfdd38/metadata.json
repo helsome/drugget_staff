@@ -1,0 +1,71 @@
+{
+  "task": {
+    "task_id": "98e5d3bc-e0bf-46fc-8fef-3bcadebfdd38",
+    "run_id": "39f27cc3-aebb-4fb4-9c9d-71b33d582ea9",
+    "platform": "taobao",
+    "task_type": "inspect_candidate",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "托妥",
+    "generic_name": "瑞舒伐他汀钙片",
+    "spec": null,
+    "shop_name": "阿里健康大药房",
+    "product_id": "730730569342",
+    "url": "https://item.taobao.com/item.htm?id=730730569342",
+    "query": "托妥 瑞舒伐他汀钙片",
+    "fixed_tier": null,
+    "priority": 110,
+    "metadata": {
+      "drug_id": "1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9",
+      "target_brand": "托妥",
+      "route": "shop_home",
+      "shop_home_url": "https://shop163215406.taobao.com/",
+      "platform_store_key": "163215406",
+      "homepage_discovery": {
+        "shop_home_url": "https://shop163215406.taobao.com/",
+        "platform_store_key": "163215406",
+        "source": "technical_closed_loop_fixture"
+      },
+      "inspect_limit": 1,
+      "selection_reason": "technical_closed_loop_fixture",
+      "source_task_id": "47910fab-50d9-4306-92b7-5a949204e90d",
+      "candidate_type": "new_store",
+      "candidate_product_id": "730730569342"
+    }
+  },
+  "result": {
+    "collection_status": "page_changed",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": "page_changed",
+    "error_detail": "店铺主页路线未完成"
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "route": "shop_home",
+      "shop_home_url": "https://shop163215406.taobao.com/",
+      "search_url": "https://shop163215406.taobao.com/search.htm?q=%E6%89%98%E5%A6%A5%20%E7%91%9E%E8%88%92%E4%BC%90%E4%BB%96%E6%B1%80%E9%92%99%E7%89%87",
+      "candidate_count": 0
+    },
+    "collector_version": null,
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T13:20:44.923603"
+  }
+}

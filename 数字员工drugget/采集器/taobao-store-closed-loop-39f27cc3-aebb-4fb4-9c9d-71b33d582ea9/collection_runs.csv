@@ -1,0 +1,2 @@
+﻿记录ID,状态,固定任务状态,搜索任务状态,批次开始时间,批次结束时间,批次摘要
+39f27cc3-aebb-4fb4-9c9d-71b33d582ea9,human_required,pending,pending,,,"{""task_status_counts"": {""human_required"": 1, ""succeeded"": 1}, ""platform_outcomes"": {""taobao"": {""platform"": ""taobao"", ""completed"": 2, ""paused"": 0, ""reason"": ""queue_empty""}}}"

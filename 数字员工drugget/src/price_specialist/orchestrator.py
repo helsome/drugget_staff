@@ -1,0 +1,488 @@
+from __future__ import annotations
+
+import asyncio
+import random
+import uuid
+from dataclasses import dataclass, field
+from decimal import Decimal
+from typing import Any, Awaitable, Callable
+
+from sqlalchemy.orm import Session
+from sqlalchemy import func, select
+
+from .alerts import AlertDryRunService
+from .collector import ComputerUseCollector
+from .enums import CollectionStatus, TaskStatus, TaskType
+from .evidence import EvidenceStore
+from .errors import CollectorAccessError
+from .incidents import IncidentService
+from .models import CollectionRun, CollectionTask, Incident, SearchCandidate, StoreResponsibility
+from .pricing import evaluate_price
+from .schemas import BrowserSession, ClassifiedCandidate, CollectionResult, CollectionTaskSpec, SearchHit
+from .search import SearchClassifier, deduplicate_hits
+from .services import SearchCandidateService, TaskQueueService, evaluate_fixed_result
+
+
+HUMAN_OR_DEFERRED_STATUSES = {
+    CollectionStatus.CHALLENGE_DETECTED,
+    CollectionStatus.LOGIN_REQUIRED,
+    CollectionStatus.RATE_LIMITED,
+    CollectionStatus.PAGE_CHANGED,
+    CollectionStatus.STORE_UNVERIFIED,
+}
+
+
+@dataclass(frozen=True)
+class FixedWork:
+    task: CollectionTaskSpec
+    session: BrowserSession
+    expected_box_count: Decimal | None
+    units_per_box: Decimal | None
+    min_unit: str | None
+    control_price: Decimal | None
+
+
+@dataclass(frozen=True)
+class SearchWork:
+    query: str
+    target_brand: str
+    target_spec: str | None
+    session: BrowserSession
+    classifier: SearchClassifier
+
+
+@dataclass
+class RouteOutcome:
+    status: str
+    results: list[Any] = field(default_factory=list)
+    incidents: list[dict[str, Any]] = field(default_factory=list)
+    errors: list[dict[str, Any]] = field(default_factory=list)
+
+
+@dataclass
+class DualRouteOutcome:
+    fixed: RouteOutcome
+    search: RouteOutcome
+
+
+class DualRouteRunner:
+    """Run fixed monitoring and heuristic discovery as independent state machines."""
+
+    def __init__(self, collector: ComputerUseCollector, evidence_store: EvidenceStore, *, network_retry_limit: int = 2):
+        self.collector = collector
+        self.evidence_store = evidence_store
+        self.network_retry_limit = network_retry_limit
+
+    async def _collect_with_policy(self, work: FixedWork) -> CollectionResult:
+        retries = 0
+        while True:
+            result = await self.collector.collect_fixed(work.task, work.session)
+            if result.collection_status != CollectionStatus.NETWORK_ERROR:
+                return result
+            if retries >= self.network_retry_limit:
+                return result
+            retries += 1
+
+    async def run_fixed(self, work_items: list[FixedWork]) -> RouteOutcome:
+        outcome = RouteOutcome(status="completed")
+        for work in work_items:
+            try:
+                result = await self._collect_with_policy(work)
+                if result.collection_status == CollectionStatus.SUCCESS:
+                    result = evaluate_price(
+                        result,
+                        expected_box_count=work.expected_box_count,
+                        units_per_box=work.units_per_box,
+                        min_unit=work.min_unit,
+                        control_price=work.control_price,
+                    )
+                evidence_path, digest = self.evidence_store.save(work.task, result)
+                result.evidence.raw_fields["evidence_sha256"] = digest
+                result.evidence.raw_fields["evidence_path"] = str(evidence_path)
+                outcome.results.append(result)
+                if result.collection_status in HUMAN_OR_DEFERRED_STATUSES:
+                    outcome.incidents.append(
+                        {
+                            "task_id": work.task.task_id,
+                            "platform": work.task.platform,
+                            "incident_type": result.collection_status.value,
+                            "status": "deferred" if result.collection_status == CollectionStatus.RATE_LIMITED else "pending_human",
+                            "current_url": result.final_url,
+                            "page_title": result.page_title,
+                            "evidence_path": str(evidence_path),
+                        }
+                    )
+            except Exception as exc:  # keep one SKU from stopping the fixed route
+                outcome.errors.append({"task_id": work.task.task_id, "error": type(exc).__name__, "detail": str(exc)})
+        if outcome.errors or outcome.incidents:
+            outcome.status = "partial"
+        return outcome
+
+    async def run_search(self, work_items: list[SearchWork]) -> RouteOutcome:
+        outcome = RouteOutcome(status="completed")
+        for work in work_items:
+            try:
+                hits = deduplicate_hits(await self.collector.search(work.query, work.session))
+                classified: list[ClassifiedCandidate] = [
+                    work.classifier.classify(
+                        hit,
+                        target_brand=work.target_brand,
+                        target_spec=work.target_spec,
+                    )
+                    for hit in hits
+                ]
+                outcome.results.extend(classified)
+            except CollectorAccessError as exc:
+                outcome.errors.append(
+                    {
+                        "query": work.query,
+                        "platform": work.session.platform,
+                        "collection_status": exc.collection_status,
+                        "detail": exc.message,
+                    }
+                )
+            except Exception as exc:
+                outcome.errors.append({"query": work.query, "error": type(exc).__name__, "detail": str(exc)})
+        if outcome.errors:
+            outcome.status = "partial"
+        return outcome
+
+    async def run(self, *, fixed: list[FixedWork], search: list[SearchWork]) -> DualRouteOutcome:
+        # Deliberately do not short-circuit: either route can finish when the other fails.
+        fixed_outcome = await self.run_fixed(fixed)
+        search_outcome = await self.run_search(search)
+        return DualRouteOutcome(fixed=fixed_outcome, search=search_outcome)
+
+
+@dataclass(frozen=True)
+class RatePolicy:
+    detail_interval_seconds: float
+    search_interval_seconds: float
+    batch_size: int
+    batch_cooldown_seconds: float
+    interval_jitter_seconds: float = 0
+    cooldown_jitter_seconds: float = 0
+
+    def delay_for(self, task_type: str, *, batch_complete: bool) -> float:
+        """Return a bounded, non-bursting interval for normal browser pacing."""
+        if batch_complete:
+            return max(0, self.batch_cooldown_seconds + random.uniform(-self.cooldown_jitter_seconds, self.cooldown_jitter_seconds))
+        base = self.search_interval_seconds if task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH} else self.detail_interval_seconds
+        return max(0, base + random.uniform(-self.interval_jitter_seconds, self.interval_jitter_seconds))
+
+
+DEFAULT_RATE_POLICIES = {
+    "jd": RatePolicy(30, 45, 3, 300),
+    "taobao": RatePolicy(25, 35, 5, 180),
+    # B2B 药师帮使用更保守的节奏：单会话、前台操作、小批次及冷却。
+    "yaoshibang": RatePolicy(32, 45, 4, 240, interval_jitter_seconds=8, cooldown_jitter_seconds=45),
+}
+
+
+class BatchOrchestrator:
+    """Persistent DB queue runner with one isolated session per platform."""
+
+    def __init__(
+        self,
+        *,
+        session: Session,
+        collector: ComputerUseCollector,
+        evidence_store: EvidenceStore,
+        sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        rate_policies: dict[str, RatePolicy] | None = None,
+        run_id: str | None = None,
+    ):
+        self.session = session
+        self.collector = collector
+        self.evidence_store = evidence_store
+        self.sleep = sleep
+        self.policies = rate_policies or DEFAULT_RATE_POLICIES
+        self.queue = TaskQueueService(session)
+        self.incidents = IncidentService(session)
+        self.candidates = SearchCandidateService(session)
+        self.alerts = AlertDryRunService()
+        self.run_id = run_id
+
+    async def _execute(self, spec: CollectionTaskSpec, browser: BrowserSession) -> CollectionResult:
+        if spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH}:
+            if spec.metadata.get("fallback_only") and self.candidates.has_valid_candidate(
+                run_id=spec.run_id,
+                drug_id=str(spec.metadata.get("drug_id") or ""),
+                platform=spec.platform,
+            ):
+                return CollectionResult(
+                    collection_status=CollectionStatus.SUCCESS,
+                    evidence={"raw_fields": {"hits": [], "fallback_skipped": True}},
+                )
+            try:
+                hits = deduplicate_hits(
+                    await (
+                        self.collector.search_store(spec, browser)
+                        if spec.task_type == TaskType.STORE_SEARCH
+                        else self.collector.search(spec.query or "", browser)
+                    )
+                )
+            except CollectorAccessError as exc:
+                try:
+                    status = CollectionStatus(exc.collection_status)
+                except ValueError:
+                    status = CollectionStatus.PARSE_ERROR
+                return CollectionResult(
+                    collection_status=status,
+                    error_code=exc.code,
+                    error_detail=exc.message,
+                    evidence={
+                        "raw_fields": {
+                            key: value for key, value in exc.details.items()
+                            if key != "screenshot_bytes_b64"
+                        },
+                        "screenshot_bytes_b64": exc.details.get("screenshot_bytes_b64"),
+                    },
+                )
+            except Exception as exc:
+                return CollectionResult(
+                    collection_status=CollectionStatus.UNKNOWN_ERROR,
+                    error_code=type(exc).__name__,
+                    error_detail=str(exc)[:1000],
+                    evidence={"raw_fields": {"query": spec.query, "platform": spec.platform}},
+                )
+            search_evidence = self.collector.last_search_evidence(browser)
+            search_evidence.raw_fields["hits"] = [hit.model_dump(mode="json") for hit in hits]
+            return CollectionResult(
+                collection_status=CollectionStatus.SUCCESS,
+                evidence=search_evidence,
+            )
+
+        retries = 0
+        while True:
+            result = (
+                await self.collector.inspect_candidate(spec, browser)
+                if spec.task_type == TaskType.INSPECT_CANDIDATE
+                else await self.collector.collect_fixed(spec, browser)
+            )
+            if result.collection_status != CollectionStatus.NETWORK_ERROR or retries >= 2:
+                return result
+            retries += 1
+
+    async def execute_platform(
+        self,
+        platform: str,
+        session_alias: str,
+        *,
+        max_tasks: int | None = None,
+        task_types: set[str] | None = None,
+    ) -> dict[str, int | str]:
+        blocking_filters = [
+            Incident.platform == platform,
+            Incident.incident_type.in_(
+                (
+                    CollectionStatus.CHALLENGE_DETECTED.value,
+                    CollectionStatus.LOGIN_REQUIRED.value,
+                    CollectionStatus.RATE_LIMITED.value,
+                )
+            ),
+            Incident.status.in_(("pending_human", "in_progress", "deferred", "session_disabled")),
+        ]
+        if self.run_id:
+            blocking_filters.append(CollectionTask.run_id == self.run_id)
+        blocking = self.session.scalar(
+            select(Incident.id)
+            .join(CollectionTask, Incident.task_id == CollectionTask.id)
+            .where(*blocking_filters)
+            .limit(1)
+        )
+        if blocking:
+            return {"platform": platform, "completed": 0, "paused": 1, "reason": "unresolved_incident"}
+        browser = BrowserSession(platform=platform, alias=session_alias)
+        health = await self.collector.health_check(browser)
+        if health.collection_status != CollectionStatus.SUCCESS:
+            return {"platform": platform, "completed": 0, "paused": 1, "reason": health.collection_status.value}
+
+        completed = 0
+        batch_count = 0
+        while (max_tasks is None or completed < max_tasks) and (
+            task := self.queue.lease(
+                platform=platform,
+                session_alias=session_alias,
+                run_id=self.run_id,
+                task_types=task_types,
+            )
+        ):
+            spec = CollectionTaskSpec.model_validate(task.payload)
+            task.status = TaskStatus.RUNNING.value
+            self.session.commit()
+            result = await self._execute(spec, browser)
+            # Store-resolution may enrich metadata (for example a verified
+            # 药师帮 provider_id). Persist it with the queued task for audit and
+            # future replay before writing the observation.
+            task.payload = spec.model_dump(mode="json")
+            if spec.platform == "yaoshibang" and spec.shop_name and spec.metadata.get("provider_id"):
+                store = self.session.scalar(
+                    select(StoreResponsibility).where(
+                        StoreResponsibility.platform == "yaoshibang",
+                        StoreResponsibility.shop_name == spec.shop_name,
+                    )
+                )
+                if store and not store.platform_store_key:
+                    store.platform_store_key = str(spec.metadata["provider_id"])
+            if spec.platform == "taobao" and spec.shop_name and spec.metadata.get("shop_home_url"):
+                store = self.session.scalar(
+                    select(StoreResponsibility).where(
+                        StoreResponsibility.platform == "taobao",
+                        StoreResponsibility.shop_name == spec.shop_name,
+                    )
+                )
+                if store:
+                    store.shop_home_url = str(spec.metadata["shop_home_url"])
+                    if spec.metadata.get("platform_store_key"):
+                        store.platform_store_key = str(spec.metadata["platform_store_key"])
+            if spec.task_type not in {TaskType.SEARCH, TaskType.STORE_SEARCH, TaskType.INSPECT_CANDIDATE}:
+                result = evaluate_fixed_result(self.session, spec, result)
+            evidence_path, digest = self.evidence_store.save(spec, result)
+
+            if result.collection_status in {
+                CollectionStatus.CHALLENGE_DETECTED,
+                CollectionStatus.LOGIN_REQUIRED,
+                CollectionStatus.RATE_LIMITED,
+            }:
+                screenshot = evidence_path / "screenshot.png"
+                self.incidents.create(task, result, str(screenshot) if screenshot.exists() else None)
+                self.session.commit()
+                return {
+                    "platform": platform,
+                    "completed": completed,
+                    "paused": 1,
+                    "reason": result.collection_status.value,
+                }
+
+            if result.collection_status in {CollectionStatus.PAGE_CHANGED, CollectionStatus.STORE_UNVERIFIED}:
+                screenshot = evidence_path / "screenshot.png"
+                self.incidents.create(task, result, str(screenshot) if screenshot.exists() else None)
+
+            if spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH} and result.collection_status == CollectionStatus.SUCCESS:
+                hits = [SearchHit.model_validate(item) for item in result.evidence.raw_fields.get("hits", [])]
+                candidates = self.candidates.classify_and_save(task=task, spec=spec, hits=hits)
+                inspection_limit = int(spec.metadata.get("inspect_limit", 0) or 0)
+                inspections_enqueued = 0
+                for candidate in candidates:
+                    if inspection_limit < 0:
+                        break
+                    if candidate.candidate_type.value not in SearchCandidateService.VALID_TYPES:
+                        continue
+                    if inspection_limit and inspections_enqueued >= inspection_limit:
+                        break
+                    metadata = {
+                        **spec.metadata,
+                        "source_task_id": task.id,
+                        "candidate_type": candidate.candidate_type.value,
+                        "candidate_product_id": candidate.product_id,
+                    }
+                    if spec.platform == "yaoshibang":
+                        provider_id = str(candidate.raw.get("provider_id") or metadata.get("provider_id") or "")
+                        if not provider_id:
+                            continue
+                        metadata["provider_id"] = provider_id
+                    self.queue.enqueue(CollectionTaskSpec(
+                        task_id=str(uuid.uuid4()), run_id=spec.run_id, platform=spec.platform,
+                        task_type=TaskType.INSPECT_CANDIDATE, session_alias=spec.session_alias,
+                        priority=spec.priority + 100, drug_name=spec.drug_name,
+                        generic_name=spec.generic_name, spec=spec.spec,
+                        shop_name=spec.shop_name or candidate.shop_name,
+                        product_id=candidate.product_id, url=candidate.url,
+                        query=spec.query, metadata=metadata,
+                    ))
+                    inspections_enqueued += 1
+            observation = self.queue.record_result(task, result, str(evidence_path))
+            observation.evidence_sha256 = digest
+            observation.collector_version = result.evidence.collector_version
+            observation.raw_evidence = result.evidence.raw_fields
+            if spec.task_type == TaskType.INSPECT_CANDIDATE and result.collection_status == CollectionStatus.SUCCESS:
+                candidate = self.session.scalar(
+                    select(SearchCandidate).where(
+                        SearchCandidate.run_id == spec.run_id,
+                        SearchCandidate.platform == spec.platform,
+                        SearchCandidate.drug_id == str(spec.metadata.get("drug_id") or ""),
+                        SearchCandidate.product_id == str(spec.metadata.get("candidate_product_id") or spec.product_id or ""),
+                    )
+                )
+                if candidate:
+                    candidate.is_formal_price = True
+                    candidate.sku_verification_status = "verified_detail"
+            self.alerts.record_event(self.session, observation=observation)
+            if result.collection_status in {CollectionStatus.PAGE_CHANGED, CollectionStatus.STORE_UNVERIFIED}:
+                task.status = TaskStatus.HUMAN_REQUIRED.value
+            self.session.commit()
+            completed += 1
+            batch_count += 1
+
+            policy = self.policies[platform]
+            if batch_count >= policy.batch_size:
+                await self.sleep(policy.delay_for(spec.task_type, batch_complete=True))
+                batch_count = 0
+            else:
+                await self.sleep(policy.delay_for(spec.task_type, batch_complete=False))
+        return {"platform": platform, "completed": completed, "paused": 0, "reason": "queue_empty"}
+
+    async def execute_all(
+        self,
+        sessions: dict[str, str],
+        *,
+        max_tasks_per_platform: int | None = None,
+    ) -> list[dict[str, int | str]]:
+        # Global stage order: every healthy platform completes fixed work before
+        # any Search work begins. A challenge removes only that platform.
+        summary = {
+            platform: {"platform": platform, "completed": 0, "paused": 0, "reason": "queue_empty"}
+            for platform in sessions
+        }
+        paused: set[str] = set()
+        stages = [
+            {TaskType.FIXED_CORE.value, TaskType.FIXED_OBSERVATION.value},
+            {TaskType.STORE_SEARCH.value},
+            {TaskType.SEARCH.value},
+            {TaskType.INSPECT_CANDIDATE.value},
+        ]
+        for task_types in stages:
+            for platform, alias in sessions.items():
+                if platform in paused:
+                    continue
+                remaining = (
+                    None
+                    if max_tasks_per_platform is None
+                    else max_tasks_per_platform - int(summary[platform]["completed"])
+                )
+                if remaining is not None and remaining <= 0:
+                    continue
+                outcome = await self.execute_platform(
+                    platform,
+                    alias,
+                    max_tasks=remaining,
+                    task_types=task_types,
+                )
+                summary[platform]["completed"] = int(summary[platform]["completed"]) + int(outcome["completed"])
+                summary[platform]["paused"] = outcome["paused"]
+                summary[platform]["reason"] = outcome["reason"]
+                if outcome["paused"]:
+                    paused.add(platform)
+
+        if self.run_id:
+            run = self.session.get(CollectionRun, self.run_id)
+            if run:
+                counts = dict(
+                    self.session.execute(
+                        select(CollectionTask.status, func.count())
+                        .where(CollectionTask.run_id == self.run_id)
+                        .group_by(CollectionTask.status)
+                    ).all()
+                )
+                run.summary = {**(run.summary or {}), "task_status_counts": counts, "platform_outcomes": summary}
+                unfinished = sum(counts.get(status, 0) for status in ("pending", "leased", "running", "human_required"))
+                run.status = (
+                    "completed"
+                    if unfinished == 0
+                    else "human_required"
+                    if paused or counts.get(TaskStatus.HUMAN_REQUIRED.value, 0)
+                    else "pending"
+                )
+                self.session.commit()
+        return list(summary.values())

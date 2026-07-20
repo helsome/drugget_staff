@@ -1,0 +1,7 @@
+{
+  "name": "opencli-taobao-store-search",
+  "version": "1.0.0",
+  "description": "淘宝店内搜索 OpenCLI 扩展",
+  "type": "module",
+  "license": "MIT"
+}

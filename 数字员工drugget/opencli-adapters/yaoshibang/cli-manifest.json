@@ -1,0 +1,101 @@
+[
+  {
+    "site": "yaoshibang",
+    "name": "auth",
+    "description": "药师帮登录认证 - 检查登录状态或打开登录页面",
+    "access": "write",
+    "domain": "dian.ysbang.cn",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      { "name": "timeout", "type": "int", "default": 300, "required": false, "help": "登录等待超时秒数" }
+    ],
+    "columns": ["status", "logged_in", "site", "user_name"],
+    "type": "js",
+    "modulePath": "yaoshibang/auth.js",
+    "sourceFile": "yaoshibang/auth.js",
+    "navigateBefore": false,
+    "siteSession": "persistent",
+    "defaultWindowMode": "foreground"
+  },
+  {
+    "site": "yaoshibang",
+    "name": "search",
+    "description": "药师帮药品搜索 - 搜索药品并返回商品列表",
+    "access": "read",
+    "domain": "dian.ysbang.cn",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      { "name": "query", "positional": true, "required": true, "help": "搜索关键词（品牌+通用名）" },
+      { "name": "limit", "type": "int", "default": 10, "help": "返回结果数量 (max 60)" },
+      { "name": "page", "type": "int", "default": 1, "help": "页码" }
+    ],
+    "columns": ["rank", "title", "price", "spec", "shop", "wholesale_id", "provider_id", "manufacturer", "unit", "stock", "url"],
+    "type": "js",
+    "modulePath": "yaoshibang/search.js",
+    "sourceFile": "yaoshibang/search.js",
+    "navigateBefore": false,
+    "siteSession": "persistent",
+    "defaultWindowMode": "foreground"
+  },
+  {
+    "site": "yaoshibang",
+    "name": "detail",
+    "description": "药师帮商品详情 - 获取商品详细信息（价格、SKU、规格、店铺等）",
+    "access": "read",
+    "domain": "dian.ysbang.cn",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      { "name": "wholesale_id", "positional": true, "required": true, "help": "商品批发ID" },
+      { "name": "provider_id", "required": true, "help": "供应商ID" }
+    ],
+    "columns": ["商品名称", "价格", "规格", "商品ID", "供应商ID", "供应商名称", "生产厂家", "单位", "库存", "起购数量", "有效期", "链接"],
+    "type": "js",
+    "modulePath": "yaoshibang/detail.js",
+    "sourceFile": "yaoshibang/detail.js",
+    "navigateBefore": false,
+    "siteSession": "persistent",
+    "defaultWindowMode": "foreground"
+  },
+  {
+    "site": "yaoshibang",
+    "name": "shop",
+    "description": "药师帮店铺信息 - 获取供应商店铺信息",
+    "access": "read",
+    "domain": "dian.ysbang.cn",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      { "name": "provider_id", "positional": true, "required": true, "help": "供应商ID" }
+    ],
+    "columns": ["shop_name", "provider_id", "shop_url", "platform"],
+    "type": "js",
+    "modulePath": "yaoshibang/shop.js",
+    "sourceFile": "yaoshibang/shop.js",
+    "navigateBefore": false,
+    "siteSession": "persistent",
+    "defaultWindowMode": "foreground"
+  },
+  {
+    "site": "yaoshibang",
+    "name": "resolve-provider",
+    "description": "按店铺名称解析药师帮供应商ID",
+    "access": "read",
+    "domain": "dian.ysbang.cn",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      { "name": "shop_name", "positional": true, "required": true, "help": "责任档案中的药师帮店铺名称" },
+      { "name": "limit", "type": "int", "default": 20, "help": "最多返回候选数" }
+    ],
+    "columns": ["shop_name", "provider_id", "match_confidence", "evidence", "shop_url", "platform"],
+    "type": "js",
+    "modulePath": "yaoshibang/resolve-provider.js",
+    "sourceFile": "yaoshibang/resolve-provider.js",
+    "navigateBefore": false,
+    "siteSession": "persistent",
+    "defaultWindowMode": "foreground"
+  }
+]

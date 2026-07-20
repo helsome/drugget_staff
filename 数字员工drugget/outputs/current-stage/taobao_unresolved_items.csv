@@ -1,0 +1,12 @@
+﻿档案店铺ID,档案店铺名称,问题类型,详情,source_route
+W00001,阿里健康大药房,店铺待确认,药品=托妥 瑞舒伐他汀钙片 规格=10mg*28片 item_id=648878452873 原因=detail_page_missing_shop_field,historical_link
+W00001,阿里健康大药房,店铺待确认,药品=依伦平 厄贝沙坦氢氯噻嗪片 规格=0.15g:12.5mg*28片 item_id=616813986176 原因=detail_page_missing_shop_field,historical_link
+W00001,阿里健康大药房,店铺待确认,药品=葛泰 地奥司明片 规格=0.45g*24片 item_id=610185190310 原因=detail_page_missing_shop_field,historical_link
+W00001,阿里健康大药房,药品未找到,药品=托妥 瑞舒伐他汀钙片 规格=10mg*28片 原因=候选详情页均不满足要求,platform_search
+W00001,阿里健康大药房,药品未找到,药品=依伦平 厄贝沙坦氢氯噻嗪片 规格=0.15g:12.5mg*28片 原因=候选详情页均不满足要求,platform_search
+W00001,阿里健康大药房,药品未找到,药品=葛泰 地奥司明片 规格=0.45g*24片 原因=候选详情页均不满足要求,platform_search
+W00003,依伦平旗舰店,药品未找到,药品=欣速安 托伐普坦片 规格=15mg*7片 原因=候选详情页均不满足要求,platform_search
+W00003,依伦平旗舰店,药品未找到,药品=葛泰 地奥司明片 规格=0.45g*20片 原因=候选详情页均不满足要求,platform_search
+W04566,上元堂大药房旗舰店,价格可疑,药品=葛泰 地奥司明片 规格=0.45g*24片 price=¥1 原因=suspicious_price（低于¥2，需人工复核）,historical_link
+W04566,上元堂大药房旗舰店,药品未找到,药品=葛泰 地奥司明片 规格=0.45g*24片 原因=候选详情页均不满足要求,platform_search
+W04566,上元堂大药房旗舰店,药品未找到,药品=依伦平 厄贝沙坦氢氯噻嗪片 规格=0.15g:12.5mg*28片 原因=候选详情页均不满足要求,platform_search

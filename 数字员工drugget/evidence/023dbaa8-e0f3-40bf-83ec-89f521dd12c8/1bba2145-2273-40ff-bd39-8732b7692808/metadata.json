@@ -1,0 +1,162 @@
+{
+  "task": {
+    "task_id": "1bba2145-2273-40ff-bd39-8732b7692808",
+    "run_id": "023dbaa8-e0f3-40bf-83ec-89f521dd12c8",
+    "platform": "taobao",
+    "task_type": "search",
+    "session_alias": "taobao-p0",
+    "target_id": null,
+    "drug_name": "依伦平",
+    "generic_name": "厄贝沙坦氢氯噻嗪片",
+    "spec": null,
+    "shop_name": null,
+    "product_id": null,
+    "url": null,
+    "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+    "fixed_tier": null,
+    "priority": 20,
+    "metadata": {
+      "drug_id": "f84641b2-d406-4376-8a85-1e4b778c6989",
+      "target_brand": "依伦平",
+      "target_spec": null,
+      "route": "global",
+      "shop_home_url": null,
+      "provider_id": null,
+      "fixture_seed_key": "GLOBAL_SEARCH|taobao|依伦平|brand_generic"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+      "hits": [
+        {
+          "platform": "taobao",
+          "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+          "rank": 1,
+          "title": "依伦平 150mg:12.5mg*14片/盒 厄贝沙坦氢氯噻嗪片",
+          "url": "https://item.taobao.com/item.htm?id=674234987846",
+          "product_id": "674234987846",
+          "shop_name": "依伦平旗舰店",
+          "list_price_raw": "¥14.3",
+          "raw": {
+            "item_id": "674234987846",
+            "location": "浙江杭州",
+            "price": "¥14.3",
+            "rank": 1,
+            "sales": "2000+人付款",
+            "shop": "依伦平旗舰店",
+            "title": "依伦平 150mg:12.5mg*14片/盒 厄贝沙坦氢氯噻嗪片",
+            "url": "https://item.taobao.com/item.htm?id=674234987846"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+          "rank": 2,
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片/盒",
+          "url": "https://item.taobao.com/item.htm?id=852080134956",
+          "product_id": "852080134956",
+          "shop_name": "益丰大药房大药房旗舰店",
+          "list_price_raw": "¥18.5",
+          "raw": {
+            "item_id": "852080134956",
+            "location": "上海",
+            "price": "¥18.5",
+            "rank": 2,
+            "sales": "200+人付款",
+            "shop": "益丰大药房大药房旗舰店",
+            "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片/盒",
+            "url": "https://item.taobao.com/item.htm?id=852080134956"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+          "rank": 3,
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*14片/盒",
+          "url": "https://item.taobao.com/item.htm?id=676811555503",
+          "product_id": "676811555503",
+          "shop_name": "依伦平旗舰店",
+          "list_price_raw": "¥85.8",
+          "raw": {
+            "item_id": "676811555503",
+            "location": "浙江杭州",
+            "price": "¥85.8",
+            "rank": 3,
+            "sales": "100+人付款",
+            "shop": "依伦平旗舰店",
+            "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*14片/盒",
+            "url": "https://item.taobao.com/item.htm?id=676811555503"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+          "rank": 4,
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=587681721605",
+          "product_id": "587681721605",
+          "shop_name": "奇冠大药房旗舰店",
+          "list_price_raw": "¥7.14",
+          "raw": {
+            "item_id": "587681721605",
+            "location": "江苏南京",
+            "price": "¥7.14",
+            "rank": 4,
+            "sales": "100+人付款",
+            "shop": "奇冠大药房旗舰店",
+            "title": "依伦平 厄贝沙坦氢氯噻嗪片 7片/盒",
+            "url": "https://item.taobao.com/item.htm?id=587681721605"
+          }
+        },
+        {
+          "platform": "taobao",
+          "query": "依伦平 厄贝沙坦氢氯噻嗪片",
+          "rank": 5,
+          "title": "利培 厄贝沙坦氢氯噻嗪分散片 0.15g:12.5mg*14片/盒",
+          "url": "https://item.taobao.com/item.htm?id=675684220388",
+          "product_id": "675684220388",
+          "shop_name": "非凡大药房旗舰店",
+          "list_price_raw": "¥10.5",
+          "raw": {
+            "item_id": "675684220388",
+            "location": "江苏宿迁",
+            "price": "¥10.5",
+            "rank": 5,
+            "sales": "300+人付款",
+            "shop": "非凡大药房旗舰店",
+            "title": "利培 厄贝沙坦氢氯噻嗪分散片 0.15g:12.5mg*14片/盒",
+            "url": "https://item.taobao.com/item.htm?id=675684220388"
+          }
+        }
+      ]
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T09:48:44.827656"
+  }
+}

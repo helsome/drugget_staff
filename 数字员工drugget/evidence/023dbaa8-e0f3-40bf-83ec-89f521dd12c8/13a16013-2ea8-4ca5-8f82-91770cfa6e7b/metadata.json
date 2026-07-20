@@ -1,0 +1,62 @@
+{
+  "task": {
+    "task_id": "13a16013-2ea8-4ca5-8f82-91770cfa6e7b",
+    "run_id": "023dbaa8-e0f3-40bf-83ec-89f521dd12c8",
+    "platform": "yaoshibang",
+    "task_type": "store_search",
+    "session_alias": "yaoshibang-p0",
+    "target_id": null,
+    "drug_name": "依伦平",
+    "generic_name": "厄贝沙坦氢氯噻嗪片",
+    "spec": null,
+    "shop_name": "敬一堂",
+    "product_id": null,
+    "url": null,
+    "query": "依伦平",
+    "fixed_tier": null,
+    "priority": 10,
+    "metadata": {
+      "drug_id": "f84641b2-d406-4376-8a85-1e4b778c6989",
+      "target_brand": "依伦平",
+      "target_spec": null,
+      "route": "provider_profile",
+      "shop_home_url": null,
+      "provider_id": "9023",
+      "fixture_seed_key": "STORE_SEARCH|yaoshibang|W06410|依伦平"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "依伦平",
+      "provider_resolution": null,
+      "hits": []
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T09:41:05.745365"
+  }
+}

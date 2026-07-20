@@ -1,0 +1,3714 @@
+{
+  "run_id": "20260716_smoke_v2",
+  "started_at": "2026-07-16T09:11:52.770315",
+  "fixed_at": "2026-07-16T10:02:38.036477",
+  "whoami_check": {
+    "jd": [
+      {
+        "platform": "jd",
+        "checked_at": "2026-07-16T09:19:40.124341",
+        "logged_in": true,
+        "data": {
+          "logged_in": true,
+          "site": "jd",
+          "pin": "jd_6ee84c4de3519",
+          "nickname": ""
+        }
+      }
+    ],
+    "taobao": [
+      {
+        "platform": "taobao",
+        "checked_at": "2026-07-16T09:33:04.017088",
+        "logged_in": true,
+        "data": {
+          "logged_in": true,
+          "site": "taobao",
+          "user_id": "4086213930",
+          "nickname": "tb646832046\n"
+        }
+      }
+    ]
+  },
+  "tmall_sku_verification": [
+    {
+      "item_id": "648878452873",
+      "brand": "托妥",
+      "spec_requested": "10mg*28片",
+      "command": "opencli taobao add-cart \"648878452873\" --spec \"10mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "[自营][新托妥]瑞舒伐他汀钙片 10mg*28片/盒",
+          "price": "¥79.99",
+          "selected_spec": "10mg*28片",
+          "item_id": "648878452873"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:27:52.118902",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥79.99",
+      "dry_run_selected_spec": "10mg*28片"
+    },
+    {
+      "item_id": "616813986176",
+      "brand": "依伦平",
+      "spec_requested": "0.15g:12.5mg*28片",
+      "command": "opencli taobao add-cart \"616813986176\" --spec \"0.15g:12.5mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "[自营][依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒",
+          "price": "¥126",
+          "selected_spec": "0.15g:12.5mg*28片",
+          "item_id": "616813986176"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:28:33.228160",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥126",
+      "dry_run_selected_spec": "0.15g:12.5mg*28片"
+    },
+    {
+      "item_id": "610185190310",
+      "brand": "葛泰",
+      "spec_requested": "0.45g*24片",
+      "command": "opencli taobao add-cart \"610185190310\" --spec \"0.45g*24片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "[自营][葛泰]地奥司明片 0.45g*24片/盒",
+          "price": "¥38",
+          "selected_spec": "0.45g*24片",
+          "item_id": "610185190310"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:29:23.751787",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥38",
+      "dry_run_selected_spec": "0.45g*24片"
+    },
+    {
+      "item_id": "674234987846",
+      "brand": "依伦平",
+      "spec_requested": "150mg:12.5mg*14片",
+      "command": "opencli taobao add-cart \"674234987846\" --spec \"150mg:12.5mg*14片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "【依伦平】厄贝沙坦氢氯噻嗪片 12.5mg:150mg*14片/盒",
+          "price": "¥86",
+          "selected_spec": "150mg:12.5mg*14片",
+          "item_id": "674234987846"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:30:11.745478",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥86",
+      "dry_run_selected_spec": "150mg:12.5mg*14片"
+    },
+    {
+      "item_id": "674937001552",
+      "brand": "欣速安",
+      "spec_requested": "15mg*7片",
+      "command": "opencli taobao add-cart \"674937001552\" --spec \"15mg*7片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "【欣速安】托伐普坦片 15mg*7片/盒",
+          "price": "¥211.89",
+          "selected_spec": "15mg*7片",
+          "item_id": "674937001552"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:31:03.394601",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥211.89",
+      "dry_run_selected_spec": "15mg*7片"
+    },
+    {
+      "item_id": "673188996607",
+      "brand": "葛泰",
+      "spec_requested": "0.45g*20片",
+      "command": "opencli taobao add-cart \"673188996607\" --spec \"0.45g*20片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "【葛泰】地奥司明片 0.45g*20片/盒",
+          "price": "¥23",
+          "selected_spec": "0.45g*20片",
+          "item_id": "673188996607"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:33:46.187488",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥23",
+      "dry_run_selected_spec": "0.45g*20片"
+    },
+    {
+      "item_id": "1016182328456",
+      "brand": "欣速安",
+      "spec_requested": "15mg*7片",
+      "command": "opencli taobao add-cart \"1016182328456\" --spec \"15mg*7片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "【欣速安】托伐普坦片 15mg*7片/盒",
+          "price": "¥211.89",
+          "selected_spec": "15mg*7片",
+          "item_id": "1016182328456"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:34:36.582054",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥211.89",
+      "dry_run_selected_spec": "15mg*7片"
+    },
+    {
+      "item_id": "965221632170",
+      "brand": "依伦平",
+      "spec_requested": "0.15g:12.5mg*28片",
+      "command": "opencli taobao add-cart \"965221632170\" --spec \"0.15g:12.5mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒",
+          "price": "¥85.68",
+          "selected_spec": "0.15g:12.5mg*28片",
+          "item_id": "965221632170"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:35:27.114128",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥85.68",
+      "dry_run_selected_spec": "0.15g:12.5mg*28片"
+    },
+    {
+      "item_id": "953466798989",
+      "brand": "托妥",
+      "spec_requested": "10mg*28片",
+      "command": "opencli taobao add-cart \"953466798989\" --spec \"10mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "【正大天晴】瑞舒伐他汀钙片 10mg*28片/盒",
+          "price": "¥22.4",
+          "selected_spec": "10mg*28片",
+          "item_id": "953466798989"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:36:12.632475",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥22.4",
+      "dry_run_selected_spec": "10mg*28片"
+    },
+    {
+      "item_id": "923425060525",
+      "brand": "托妥",
+      "spec_requested": "10mg*14片",
+      "command": "opencli taobao add-cart \"923425060525\" --spec \"10mg*14片\" --dry-run -f json --window foreground --site-session persistent",
+      "result": [
+        {
+          "status": "dry-run",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*14片/盒",
+          "price": "¥62.97",
+          "selected_spec": "10mg*14片",
+          "item_id": "923425060525"
+        }
+      ],
+      "spec_verified": true,
+      "box_count_returned": false,
+      "captured_at": "2026-07-16T09:36:59.031436",
+      "dry_run_status": "dry-run",
+      "dry_run_price": "¥62.97",
+      "dry_run_selected_spec": "10mg*14片"
+    }
+  ],
+  "jd_smoke_observations": [
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:12:22.277664",
+      "drug_name_raw": "欣速安",
+      "generic_name_raw": "",
+      "spec_raw": "15mg*7片",
+      "spec_normalized": "15mg*7片",
+      "shop_name_raw": "奇冠大药房官方旗舰店",
+      "url_raw": "https://item.jd.com/10116210815224.html",
+      "sku_id": "10116210815224",
+      "page_title": "[欣速安]托伐普坦片 15mg*7片 1盒装",
+      "page_sale_price_raw": "¥211.89",
+      "page_sale_price_value": "211.89",
+      "page_shop": "奇冠大药房官方旗舰店",
+      "history_price": "211.89",
+      "history_single_box_price": "211.89",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "7",
+      "min_unit_name_raw": "片",
+      "single_box_price": "211.8900",
+      "single_unit_price": "30.2700",
+      "single_tablet_price": "30.2700",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "30.27",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "30.2700",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10116210815224\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[欣速安]托伐普坦片 15mg*7片 1盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥211.89"
+        },
+        {
+          "field": "SKU",
+          "value": "10116210815224"
+        },
+        {
+          "field": "店铺",
+          "value": "奇冠大药房官方旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "托伐普坦片(15) | 规格(15) | 盒装(15) | 盒装(15) | 盒装(15) | 盒装(15)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/10116210815224.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:16:31.750108",
+      "drug_name_raw": "托妥",
+      "generic_name_raw": "",
+      "spec_raw": "10mg*28片",
+      "spec_normalized": "10mg*28片",
+      "shop_name_raw": "奇冠大药房官方旗舰店",
+      "url_raw": "https://item.jd.com/66809443804.html",
+      "sku_id": "66809443804",
+      "page_title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 1盒装",
+      "page_sale_price_raw": "¥16.8",
+      "page_sale_price_value": "16.8",
+      "page_shop": "奇冠大药房官方旗舰店",
+      "history_price": "16.8",
+      "history_single_box_price": "16.8",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "28",
+      "min_unit_name_raw": "片",
+      "single_box_price": "16.8000",
+      "single_unit_price": "0.6000",
+      "single_tablet_price": "0.6000",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "0.80",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "0.6000",
+      "break_amount": "0.2000",
+      "result_status": "break_price",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"66809443804\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 1,
+      "block_type": null,
+      "block_history": [
+        {
+          "attempt": 0,
+          "block_type": "page_structure_changed",
+          "title": "PC频控页 -京东商城"
+        }
+      ],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[新托妥]瑞舒伐他汀钙片 10mg*28片 1盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥16.8"
+        },
+        {
+          "field": "SKU",
+          "value": "66809443804"
+        },
+        {
+          "field": "店铺",
+          "value": "奇冠大药房官方旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "瑞舒伐他汀钙片(10) | 规格(10) | 盒装(10) | 盒装(10) | 盒装(10) | 盒装(10)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/66809443804.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:17:04.802223",
+      "drug_name_raw": "希佳",
+      "generic_name_raw": "",
+      "spec_raw": "20mg*7片",
+      "spec_normalized": "20mg*7片",
+      "shop_name_raw": "奇冠大药房官方旗舰店",
+      "url_raw": "https://item.jd.com/10128645470447.html",
+      "sku_id": "10128645470447",
+      "page_title": "[希佳]奥美沙坦酯片 20mg*7片 2盒装",
+      "page_sale_price_raw": "¥20.58",
+      "page_sale_price_value": "20.58",
+      "page_shop": "奇冠大药房官方旗舰店",
+      "history_price": "21.6",
+      "history_single_box_price": "10.8",
+      "history_qty": 2,
+      "history_box_count": null,
+      "sale_box_count": "2",
+      "units_per_box": "7",
+      "min_unit_name_raw": "片",
+      "single_box_price": "10.2900",
+      "single_unit_price": "1.4700",
+      "single_tablet_price": "1.4700",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "1.47",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "1.4700",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10128645470447\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[希佳]奥美沙坦酯片 20mg*7片 2盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥20.58"
+        },
+        {
+          "field": "SKU",
+          "value": "10128645470447"
+        },
+        {
+          "field": "店铺",
+          "value": "奇冠大药房官方旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "奥美沙坦酯片(20) | 规格(20) | 盒装(20) | 盒装(20) | 盒装(20) | 盒装(20)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/10128645470447.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:18:57.109193",
+      "drug_name_raw": "希佳",
+      "generic_name_raw": "",
+      "spec_raw": "20mg*7片",
+      "spec_normalized": "20mg*7片",
+      "shop_name_raw": "上元堂大药房旗舰店",
+      "url_raw": "https://item.jd.com/10020343903147.html",
+      "sku_id": "10020343903147",
+      "page_title": "京东(JD.COM)-正品低价、品质保障、配送及时、轻松购物！",
+      "page_sale_price_raw": "¥288",
+      "page_sale_price_value": "288",
+      "page_shop": null,
+      "history_price": "115",
+      "history_single_box_price": "11.5",
+      "history_qty": 10,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "7",
+      "min_unit_name_raw": "片",
+      "single_box_price": "288.0000",
+      "single_unit_price": "41.1429",
+      "single_tablet_price": "41.1429",
+      "calculation_basis_source": "历史数据规格字段(归一化); 默认(京东detail单盒)",
+      "calculation_status": "success",
+      "control_price": "1.47",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "41.1429",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10020343903147\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "京东(JD.COM)-正品低价、品质保障、配送及时、轻松购物！"
+        },
+        {
+          "field": "价格",
+          "value": "¥288"
+        },
+        {
+          "field": "SKU",
+          "value": "10020343903147"
+        },
+        {
+          "field": "链接",
+          "value": "https://www.jd.com/?c"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:19:28.858003",
+      "drug_name_raw": "天舒平",
+      "generic_name_raw": "",
+      "spec_raw": "20mg:5mg*14片",
+      "spec_normalized": "20mg:5mg*14片",
+      "shop_name_raw": "上元堂大药房旗舰店",
+      "url_raw": "https://item.jd.com/10032838750590.html",
+      "sku_id": "10032838750590",
+      "page_title": "[天舒平]奥美沙坦酯氨氯地平片 20mg:5mg*14片 1盒装",
+      "page_sale_price_raw": "¥15",
+      "page_sale_price_value": "15",
+      "page_shop": "上元堂大药房旗舰店",
+      "history_price": "13.2",
+      "history_single_box_price": "13.2",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "14",
+      "min_unit_name_raw": "片",
+      "single_box_price": "15.0000",
+      "single_unit_price": "1.0714",
+      "single_tablet_price": "1.0714",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "1.30",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "1.0714",
+      "break_amount": "0.2286",
+      "result_status": "break_price",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10032838750590\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[天舒平]奥美沙坦酯氨氯地平片 20mg:5mg*14片 1盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥15"
+        },
+        {
+          "field": "SKU",
+          "value": "10032838750590"
+        },
+        {
+          "field": "店铺",
+          "value": "上元堂大药房旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "沙坦酯氨氯地平片(20) | 规格(20) | 盒装(20) | 盒装(20) | 盒装(20) | 盒装(20)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/10032838750590.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:20:06.224609",
+      "drug_name_raw": "葛泰",
+      "generic_name_raw": "",
+      "spec_raw": "0.45g*20片",
+      "spec_normalized": "0.45g*20片",
+      "shop_name_raw": "上元堂大药房旗舰店",
+      "url_raw": "https://item.jd.com/30686019248.html",
+      "sku_id": "30686019248",
+      "page_title": "[葛泰] 地奥司明片 0.45g*20片/盒 1盒装",
+      "page_sale_price_raw": "¥23",
+      "page_sale_price_value": "23",
+      "page_shop": "上元堂大药房旗舰店",
+      "history_price": "27.5",
+      "history_single_box_price": "27.5",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "20",
+      "min_unit_name_raw": "片",
+      "single_box_price": "23.0000",
+      "single_unit_price": "1.1500",
+      "single_tablet_price": "1.1500",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "1.15",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "1.1500",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"30686019248\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[葛泰] 地奥司明片 0.45g*20片/盒 1盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥23"
+        },
+        {
+          "field": "SKU",
+          "value": "30686019248"
+        },
+        {
+          "field": "店铺",
+          "value": "上元堂大药房旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "盒装(3) | 盒装(5) | 盒装(10) | 增值服务(2) | 首页(105)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/30686019248.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:21:51.357441",
+      "drug_name_raw": "欣速安",
+      "generic_name_raw": "",
+      "spec_raw": "15mg*7片",
+      "spec_normalized": "15mg*7片",
+      "shop_name_raw": "康药师旗舰店",
+      "url_raw": "https://item.jd.com/10212026200722.html",
+      "sku_id": "10212026200722",
+      "page_title": "[欣速安]托伐普坦片 15mg*7片 10盒装",
+      "page_sale_price_raw": "¥2118.9",
+      "page_sale_price_value": "2118.9",
+      "page_shop": "康药师旗舰店",
+      "history_price": "1420",
+      "history_single_box_price": "142",
+      "history_qty": 10,
+      "history_box_count": null,
+      "sale_box_count": "10",
+      "units_per_box": "7",
+      "min_unit_name_raw": "片",
+      "single_box_price": "211.8900",
+      "single_unit_price": "30.2700",
+      "single_tablet_price": "30.2700",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "30.27",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "30.2700",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10212026200722\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[欣速安]托伐普坦片 15mg*7片 10盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥2118.9"
+        },
+        {
+          "field": "SKU",
+          "value": "10212026200722"
+        },
+        {
+          "field": "店铺",
+          "value": "康药师旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "托伐普坦片(15) | 规格(15) | 盒装(15) | 盒装(15) | 盒装(15) | 盒装(15)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/10212026200722.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:22:17.144971",
+      "drug_name_raw": "品多",
+      "generic_name_raw": "",
+      "spec_raw": "0.1g:1g*16片",
+      "spec_normalized": "0.1g:1g*16片",
+      "shop_name_raw": "康药师旗舰店",
+      "url_raw": "https://item.jd.com/10209384152056.html",
+      "sku_id": "10209384152056",
+      "page_title": "[品多]西格列汀二甲双胍缓释片 0.1g:1g*16片 1盒装",
+      "page_sale_price_raw": "¥94.88",
+      "page_sale_price_value": "94.88",
+      "page_shop": "康药师旗舰店",
+      "history_price": "57.8",
+      "history_single_box_price": "57.8",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "16",
+      "min_unit_name_raw": "片",
+      "single_box_price": "94.8800",
+      "single_unit_price": "5.9300",
+      "single_tablet_price": "5.9300",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "5.93",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "5.9300",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10209384152056\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[品多]西格列汀二甲双胍缓释片 0.1g:1g*16片 1盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥94.88"
+        },
+        {
+          "field": "SKU",
+          "value": "10209384152056"
+        },
+        {
+          "field": "店铺",
+          "value": "康药师旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "年囤货补贴(7) | 首页(105)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/10209384152056.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:22:36.391741",
+      "drug_name_raw": "畅凡",
+      "generic_name_raw": "",
+      "spec_raw": "24μg*10粒",
+      "spec_normalized": "24μg*10粒",
+      "shop_name_raw": "康药师旗舰店",
+      "url_raw": "https://item.jd.com/10212026894043.html",
+      "sku_id": "10212026894043",
+      "page_title": "[畅凡]芦比前列酮软胶囊 24μg*10粒 1盒装",
+      "page_sale_price_raw": "¥58.8",
+      "page_sale_price_value": "58.8",
+      "page_shop": "康药师旗舰店",
+      "history_price": "58.8",
+      "history_single_box_price": "58.8",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": "1",
+      "units_per_box": "10",
+      "min_unit_name_raw": "粒",
+      "single_box_price": "58.8000",
+      "single_unit_price": "5.8800",
+      "single_tablet_price": "5.8800",
+      "calculation_basis_source": "历史数据规格字段(归一化); 页面商品名称(N盒装)",
+      "calculation_status": "success",
+      "control_price": "5.88",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "5.8800",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli jd detail \"10212026894043\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[畅凡]芦比前列酮软胶囊 24μg*10粒 1盒装"
+        },
+        {
+          "field": "价格",
+          "value": "¥58.8"
+        },
+        {
+          "field": "SKU",
+          "value": "10212026894043"
+        },
+        {
+          "field": "店铺",
+          "value": "康药师旗舰店"
+        },
+        {
+          "field": "评价标签",
+          "value": "芦比前列酮软胶囊(24) | 规格(24) | 盒装(24) | 盒装(24) | 盒装(24) | 盒装(24)"
+        },
+        {
+          "field": "链接",
+          "value": "https://item.jingdonghealth.cn/10212026894043.html"
+        }
+      ]
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "jd",
+      "captured_at": "2026-07-16T09:27:02.156038",
+      "drug_name_raw": "欣速安",
+      "generic_name_raw": "",
+      "spec_raw": "15mg*7片",
+      "spec_normalized": "15mg*7片",
+      "shop_name_raw": "高济再康大药房旗舰店",
+      "url_raw": "https://item.jd.com/10041982962216.html",
+      "sku_id": "10041982962216",
+      "page_title": "京东验证",
+      "page_sale_price_raw": null,
+      "page_sale_price_value": null,
+      "page_shop": null,
+      "history_price": "211.96",
+      "history_single_box_price": "211.96",
+      "history_qty": 1,
+      "history_box_count": null,
+      "sale_box_count": null,
+      "units_per_box": null,
+      "min_unit_name_raw": null,
+      "single_box_price": null,
+      "single_unit_price": null,
+      "single_tablet_price": null,
+      "calculation_basis_source": null,
+      "calculation_status": "not_applicable",
+      "control_price": null,
+      "control_price_source": null,
+      "control_price_basis": null,
+      "comparison_price": null,
+      "break_amount": null,
+      "result_status": "captcha_required",
+      "error_code": null,
+      "error_detail": "被拦截: 京东验证",
+      "opencli_cmd": "opencli jd detail \"10041982962216\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 1,
+      "block_type": "captcha_required",
+      "block_history": [
+        {
+          "attempt": 0,
+          "block_type": "page_structure_changed",
+          "title": "PC频控页 -京东商城"
+        },
+        {
+          "attempt": 1,
+          "block_type": "captcha_required",
+          "title": "京东验证"
+        }
+      ],
+      "sku_verification_status": null,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "京东验证"
+        },
+        {
+          "field": "SKU",
+          "value": "10041982962216"
+        },
+        {
+          "field": "链接",
+          "value": "https://cfe.m.jd.com/privatedomain/risk_handler/03101900/?returnurl=https%3A%2F%2Fitem.jd.com%2F10041982962216.html&rqhost=https%3A%2F%2Fapi.m.jd.com&rpid=rp-112047492-10504-1784165219952&evtype=2&evapi=color_getLegoWareDetailComment&source=1&forceCurrentView=1&evsid=AASWz-Ccn-fmDu0QbI5tPvKhWqjg6ThwbJIzA4N0BDR8umIdmsKRh_RGJV1NHwFtRBrSoznNEc5OkcUNuwz2ILhqUHzfNg%3D%3D"
+        }
+      ]
+    }
+  ],
+  "tmall_smoke_observations": [
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:27:30.283923",
+      "drug_name_raw": "托妥",
+      "generic_name_raw": "",
+      "spec_raw": "10mg*28片",
+      "spec_normalized": "10mg*28片",
+      "shop_name_raw": "阿里健康大药房",
+      "url_raw": "https://detail.tmall.com/item.htm?id=648878452873",
+      "sku_id": "648878452873",
+      "page_title": "[自营][新托妥]瑞舒伐他汀钙片 10mg*28片/盒",
+      "page_sale_price_raw": "¥79.99",
+      "page_sale_price_value": "79.99",
+      "page_shop": null,
+      "history_price": "21",
+      "history_single_box_price": "21",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "28",
+      "min_unit_name_raw": "片",
+      "single_box_price": "79.9900",
+      "single_unit_price": "2.8568",
+      "single_tablet_price": "2.8568",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "0.80",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "2.8568",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"648878452873\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[自营][新托妥]瑞舒伐他汀钙片 10mg*28片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥79.99"
+        },
+        {
+          "field": "ID",
+          "value": "648878452873"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=648878452873"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "648878452873",
+        "brand": "托妥",
+        "spec_requested": "10mg*28片",
+        "command": "opencli taobao add-cart \"648878452873\" --spec \"10mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "[自营][新托妥]瑞舒伐他汀钙片 10mg*28片/盒",
+            "price": "¥79.99",
+            "selected_spec": "10mg*28片",
+            "item_id": "648878452873"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:27:52.118902",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥79.99",
+        "dry_run_selected_spec": "10mg*28片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:28:17.548362",
+      "drug_name_raw": "依伦平",
+      "generic_name_raw": "",
+      "spec_raw": "0.15g:12.5mg*28片",
+      "spec_normalized": "0.15g:12.5mg*28片",
+      "shop_name_raw": "阿里健康大药房",
+      "url_raw": "https://detail.tmall.com/item.htm?id=616813986176",
+      "sku_id": "616813986176",
+      "page_title": "[自营][依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒",
+      "page_sale_price_raw": "¥126",
+      "page_sale_price_value": "126",
+      "page_shop": null,
+      "history_price": "26.4",
+      "history_single_box_price": "26.4",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "28",
+      "min_unit_name_raw": "片",
+      "single_box_price": "126.0000",
+      "single_unit_price": "4.5000",
+      "single_tablet_price": "4.5000",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "1.02",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "4.5000",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"616813986176\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[自营][依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥126"
+        },
+        {
+          "field": "ID",
+          "value": "616813986176"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=616813986176"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "616813986176",
+        "brand": "依伦平",
+        "spec_requested": "0.15g:12.5mg*28片",
+        "command": "opencli taobao add-cart \"616813986176\" --spec \"0.15g:12.5mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "[自营][依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒",
+            "price": "¥126",
+            "selected_spec": "0.15g:12.5mg*28片",
+            "item_id": "616813986176"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:28:33.228160",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥126",
+        "dry_run_selected_spec": "0.15g:12.5mg*28片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:29:02.969438",
+      "drug_name_raw": "葛泰",
+      "generic_name_raw": "",
+      "spec_raw": "0.45g*24片",
+      "spec_normalized": "0.45g*24片",
+      "shop_name_raw": "阿里健康大药房",
+      "url_raw": "https://detail.tmall.com/item.htm?id=610185190310",
+      "sku_id": "610185190310",
+      "page_title": "[自营][葛泰]地奥司明片 0.45g*24片/盒",
+      "page_sale_price_raw": "¥38",
+      "page_sale_price_value": "38",
+      "page_shop": null,
+      "history_price": "21.1",
+      "history_single_box_price": "21.1",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "24",
+      "min_unit_name_raw": "片",
+      "single_box_price": "38.0000",
+      "single_unit_price": "1.5833",
+      "single_tablet_price": "1.5833",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "1.15",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "1.5833",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"610185190310\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[自营][葛泰]地奥司明片 0.45g*24片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥38"
+        },
+        {
+          "field": "ID",
+          "value": "610185190310"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=610185190310"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "610185190310",
+        "brand": "葛泰",
+        "spec_requested": "0.45g*24片",
+        "command": "opencli taobao add-cart \"610185190310\" --spec \"0.45g*24片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "[自营][葛泰]地奥司明片 0.45g*24片/盒",
+            "price": "¥38",
+            "selected_spec": "0.45g*24片",
+            "item_id": "610185190310"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:29:23.751787",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥38",
+        "dry_run_selected_spec": "0.45g*24片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:29:52.669523",
+      "drug_name_raw": "依伦平",
+      "generic_name_raw": "",
+      "spec_raw": "150mg:12.5mg*14片",
+      "spec_normalized": "150mg:12.5mg*14片",
+      "shop_name_raw": "依伦平旗舰店",
+      "url_raw": "https://detail.tmall.com/item.htm?id=674234987846",
+      "sku_id": "674234987846",
+      "page_title": "【依伦平】厄贝沙坦氢氯噻嗪片 12.5mg:150mg*14片/盒",
+      "page_sale_price_raw": "¥86",
+      "page_sale_price_value": "86",
+      "page_shop": null,
+      "history_price": "14.3",
+      "history_single_box_price": "14.3",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "14",
+      "min_unit_name_raw": "片",
+      "single_box_price": "86.0000",
+      "single_unit_price": "6.1429",
+      "single_tablet_price": "6.1429",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "1.02",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "6.1429",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"674234987846\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "【依伦平】厄贝沙坦氢氯噻嗪片 12.5mg:150mg*14片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥86"
+        },
+        {
+          "field": "店铺",
+          "value": "依伦平旗舰店"
+        },
+        {
+          "field": "ID",
+          "value": "674234987846"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=674234987846"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "674234987846",
+        "brand": "依伦平",
+        "spec_requested": "150mg:12.5mg*14片",
+        "command": "opencli taobao add-cart \"674234987846\" --spec \"150mg:12.5mg*14片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "【依伦平】厄贝沙坦氢氯噻嗪片 12.5mg:150mg*14片/盒",
+            "price": "¥86",
+            "selected_spec": "150mg:12.5mg*14片",
+            "item_id": "674234987846"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:30:11.745478",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥86",
+        "dry_run_selected_spec": "150mg:12.5mg*14片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:30:43.178686",
+      "drug_name_raw": "欣速安",
+      "generic_name_raw": "",
+      "spec_raw": "15mg*7片",
+      "spec_normalized": "15mg*7片",
+      "shop_name_raw": "依伦平旗舰店",
+      "url_raw": "https://detail.tmall.com/item.htm?id=674937001552",
+      "sku_id": "674937001552",
+      "page_title": "【欣速安】托伐普坦片 15mg*7片/盒",
+      "page_sale_price_raw": "¥211.89",
+      "page_sale_price_value": "211.89",
+      "page_shop": null,
+      "history_price": "211.89",
+      "history_single_box_price": "211.89",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "7",
+      "min_unit_name_raw": "片",
+      "single_box_price": "211.8900",
+      "single_unit_price": "30.2700",
+      "single_tablet_price": "30.2700",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "30.27",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "30.2700",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"674937001552\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "【欣速安】托伐普坦片 15mg*7片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥211.89"
+        },
+        {
+          "field": "店铺",
+          "value": "依伦平旗舰店"
+        },
+        {
+          "field": "ID",
+          "value": "674937001552"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=674937001552"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "674937001552",
+        "brand": "欣速安",
+        "spec_requested": "15mg*7片",
+        "command": "opencli taobao add-cart \"674937001552\" --spec \"15mg*7片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "【欣速安】托伐普坦片 15mg*7片/盒",
+            "price": "¥211.89",
+            "selected_spec": "15mg*7片",
+            "item_id": "674937001552"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:31:03.394601",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥211.89",
+        "dry_run_selected_spec": "15mg*7片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:33:25.367754",
+      "drug_name_raw": "葛泰",
+      "generic_name_raw": "",
+      "spec_raw": "0.45g*20片",
+      "spec_normalized": "0.45g*20片",
+      "shop_name_raw": "依伦平旗舰店",
+      "url_raw": "https://detail.tmall.com/item.htm?id=673188996607",
+      "sku_id": "673188996607",
+      "page_title": "【葛泰】地奥司明片 0.45g*20片/盒",
+      "page_sale_price_raw": "¥23",
+      "page_sale_price_value": "23",
+      "page_shop": null,
+      "history_price": "20",
+      "history_single_box_price": "20",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "20",
+      "min_unit_name_raw": "片",
+      "single_box_price": "23.0000",
+      "single_unit_price": "1.1500",
+      "single_tablet_price": "1.1500",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "1.15",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "1.1500",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"673188996607\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "【葛泰】地奥司明片 0.45g*20片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥23"
+        },
+        {
+          "field": "店铺",
+          "value": "依伦平旗舰店"
+        },
+        {
+          "field": "ID",
+          "value": "673188996607"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=673188996607"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "673188996607",
+        "brand": "葛泰",
+        "spec_requested": "0.45g*20片",
+        "command": "opencli taobao add-cart \"673188996607\" --spec \"0.45g*20片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "【葛泰】地奥司明片 0.45g*20片/盒",
+            "price": "¥23",
+            "selected_spec": "0.45g*20片",
+            "item_id": "673188996607"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:33:46.187488",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥23",
+        "dry_run_selected_spec": "0.45g*20片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:34:14.519278",
+      "drug_name_raw": "欣速安",
+      "generic_name_raw": "",
+      "spec_raw": "15mg*7片",
+      "spec_normalized": "15mg*7片",
+      "shop_name_raw": "康药师大药房旗舰店",
+      "url_raw": "https://detail.tmall.com/item.htm?id=1016182328456",
+      "sku_id": "1016182328456",
+      "page_title": "【欣速安】托伐普坦片 15mg*7片/盒",
+      "page_sale_price_raw": "¥211.89",
+      "page_sale_price_value": "211.89",
+      "page_shop": null,
+      "history_price": "142",
+      "history_single_box_price": "142",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "7",
+      "min_unit_name_raw": "片",
+      "single_box_price": "211.8900",
+      "single_unit_price": "30.2700",
+      "single_tablet_price": "30.2700",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "30.27",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "30.2700",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"1016182328456\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "【欣速安】托伐普坦片 15mg*7片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥211.89"
+        },
+        {
+          "field": "店铺",
+          "value": "康药师大药房旗舰店"
+        },
+        {
+          "field": "ID",
+          "value": "1016182328456"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=1016182328456"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "1016182328456",
+        "brand": "欣速安",
+        "spec_requested": "15mg*7片",
+        "command": "opencli taobao add-cart \"1016182328456\" --spec \"15mg*7片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "【欣速安】托伐普坦片 15mg*7片/盒",
+            "price": "¥211.89",
+            "selected_spec": "15mg*7片",
+            "item_id": "1016182328456"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:34:36.582054",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥211.89",
+        "dry_run_selected_spec": "15mg*7片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:35:06.396679",
+      "drug_name_raw": "依伦平",
+      "generic_name_raw": "",
+      "spec_raw": "0.15g:12.5mg*28片",
+      "spec_normalized": "0.15g:12.5mg*28片",
+      "shop_name_raw": "康药师大药房旗舰店",
+      "url_raw": "https://detail.tmall.com/item.htm?id=965221632170",
+      "sku_id": "965221632170",
+      "page_title": "[依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒",
+      "page_sale_price_raw": "¥85.68",
+      "page_sale_price_value": "85.68",
+      "page_shop": null,
+      "history_price": "18.6",
+      "history_single_box_price": "18.6",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "28",
+      "min_unit_name_raw": "片",
+      "single_box_price": "85.6800",
+      "single_unit_price": "3.0600",
+      "single_tablet_price": "3.0600",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "1.02",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "3.0600",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"965221632170\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥85.68"
+        },
+        {
+          "field": "店铺",
+          "value": "康药师大药房旗舰店"
+        },
+        {
+          "field": "ID",
+          "value": "965221632170"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=965221632170"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "965221632170",
+        "brand": "依伦平",
+        "spec_requested": "0.15g:12.5mg*28片",
+        "command": "opencli taobao add-cart \"965221632170\" --spec \"0.15g:12.5mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "[依伦平]厄贝沙坦氢氯噻嗪片 12.5mg:150mg*28片/盒",
+            "price": "¥85.68",
+            "selected_spec": "0.15g:12.5mg*28片",
+            "item_id": "965221632170"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:35:27.114128",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥85.68",
+        "dry_run_selected_spec": "0.15g:12.5mg*28片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:35:55.045827",
+      "drug_name_raw": "托妥",
+      "generic_name_raw": "",
+      "spec_raw": "10mg*28片",
+      "spec_normalized": "10mg*28片",
+      "shop_name_raw": "康药师大药房旗舰店",
+      "url_raw": "https://detail.tmall.com/item.htm?id=953466798989",
+      "sku_id": "953466798989",
+      "page_title": "【正大天晴】瑞舒伐他汀钙片 10mg*28片/盒",
+      "page_sale_price_raw": "¥22.4",
+      "page_sale_price_value": "22.4",
+      "page_shop": null,
+      "history_price": "15.5",
+      "history_single_box_price": "15.5",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "28",
+      "min_unit_name_raw": "片",
+      "single_box_price": "22.4000",
+      "single_unit_price": "0.8000",
+      "single_tablet_price": "0.8000",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "0.80",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "0.8000",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"953466798989\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "【正大天晴】瑞舒伐他汀钙片 10mg*28片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥22.4"
+        },
+        {
+          "field": "店铺",
+          "value": "康药师大药房旗舰店"
+        },
+        {
+          "field": "ID",
+          "value": "953466798989"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=953466798989"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "953466798989",
+        "brand": "托妥",
+        "spec_requested": "10mg*28片",
+        "command": "opencli taobao add-cart \"953466798989\" --spec \"10mg*28片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "【正大天晴】瑞舒伐他汀钙片 10mg*28片/盒",
+            "price": "¥22.4",
+            "selected_spec": "10mg*28片",
+            "item_id": "953466798989"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:36:12.632475",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥22.4",
+        "dry_run_selected_spec": "10mg*28片"
+      }
+    },
+    {
+      "run_id": "20260716_smoke_v2",
+      "collection_channel": "fixed",
+      "platform": "taobao",
+      "captured_at": "2026-07-16T09:36:35.752939",
+      "drug_name_raw": "托妥",
+      "generic_name_raw": "",
+      "spec_raw": "10mg*14片",
+      "spec_normalized": "10mg*14片",
+      "shop_name_raw": "健康福利社",
+      "url_raw": "https://detail.tmall.com/item.htm?id=923425060525",
+      "sku_id": "923425060525",
+      "page_title": "[新托妥]瑞舒伐他汀钙片 10mg*14片/盒",
+      "page_sale_price_raw": "¥62.97",
+      "page_sale_price_value": "62.97",
+      "page_shop": null,
+      "history_price": "9.44",
+      "history_single_box_price": "9.44",
+      "history_qty": null,
+      "history_box_count": 1,
+      "sale_box_count": "1",
+      "units_per_box": "14",
+      "min_unit_name_raw": "片",
+      "single_box_price": "62.9700",
+      "single_unit_price": "4.4979",
+      "single_tablet_price": "4.4979",
+      "calculation_basis_source": "历史数据规格字段(归一化); 历史数据盒数字段",
+      "calculation_status": "success",
+      "control_price": "0.80",
+      "control_price_source": "价格标准表.md",
+      "control_price_basis": "per_min_unit",
+      "comparison_price": "4.4979",
+      "break_amount": "0",
+      "result_status": "success",
+      "error_code": null,
+      "error_detail": null,
+      "opencli_cmd": "opencli taobao detail \"923425060525\" -f json --window foreground --site-session persistent",
+      "opencli_success": true,
+      "opencli_attempts": 0,
+      "block_type": null,
+      "block_history": [],
+      "sku_verification_status": true,
+      "opencli_data": [
+        {
+          "field": "商品名称",
+          "value": "[新托妥]瑞舒伐他汀钙片 10mg*14片/盒"
+        },
+        {
+          "field": "价格",
+          "value": "¥62.97"
+        },
+        {
+          "field": "ID",
+          "value": "923425060525"
+        },
+        {
+          "field": "链接",
+          "value": "https://detail.tmall.com/item.htm?id=923425060525"
+        }
+      ],
+      "sku_verification": {
+        "item_id": "923425060525",
+        "brand": "托妥",
+        "spec_requested": "10mg*14片",
+        "command": "opencli taobao add-cart \"923425060525\" --spec \"10mg*14片\" --dry-run -f json --window foreground --site-session persistent",
+        "result": [
+          {
+            "status": "dry-run",
+            "title": "[新托妥]瑞舒伐他汀钙片 10mg*14片/盒",
+            "price": "¥62.97",
+            "selected_spec": "10mg*14片",
+            "item_id": "923425060525"
+          }
+        ],
+        "spec_verified": true,
+        "box_count_returned": false,
+        "captured_at": "2026-07-16T09:36:59.031436",
+        "dry_run_status": "dry-run",
+        "dry_run_price": "¥62.97",
+        "dry_run_selected_spec": "10mg*14片"
+      }
+    }
+  ],
+  "jd_search": [
+    {
+      "platform": "jd",
+      "brand": "依伦平",
+      "query_type": "商品名+通用名",
+      "search_query": "依伦平 厄贝沙坦氢氯噻嗪片",
+      "captured_at": "2026-07-16T09:40:36.719207",
+      "opencli_cmd": "opencli jd search \"依伦平 厄贝沙坦氢氯噻嗪片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 20,
+      "opencli_data": [
+        {
+          "price": "¥200.2",
+          "rank": 1,
+          "shop": "+200+人种草金湖金普大药房官方旗舰店",
+          "sku": "10211117121047",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 7盒装运动员慎用|正品保障|专业药师服务",
+          "url": "https://item.jd.com/10211117121047.html"
+        },
+        {
+          "price": "¥27.8",
+          "rank": 2,
+          "shop": "",
+          "sku": "100006718701",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片依伦平高血压用药热卖榜第1名运动员慎用|正品保障|可商保报销依伦平高血压用药热卖榜第1名",
+          "url": "https://item.jd.com/100006718701.html"
+        },
+        {
+          "price": "¥64.96",
+          "rank": 3,
+          "shop": "人看过100%好评健尔堂大药房旗舰店",
+          "sku": "10148759211892",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装运动员慎用|正品好药|药房发货",
+          "url": "https://item.jd.com/10148759211892.html"
+        },
+        {
+          "price": "¥85.8",
+          "rank": 4,
+          "shop": "1700+人种草金湖金普大药房官方旗舰店",
+          "sku": "10059018363135",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装依伦平高血压用药热卖榜第5名运动员慎用|复方制剂|国药准字依伦平高血压用药热卖榜第5名",
+          "url": "https://item.jd.com/10059018363135.html"
+        },
+        {
+          "price": "¥142.8",
+          "rank": 5,
+          "shop": "条评价100%好评坤香悦大药房旗舰店",
+          "sku": "10111406073583",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10111406073583.html"
+        },
+        {
+          "price": "¥142.8",
+          "rank": 6,
+          "shop": "0+98%好评老百姓广西大药房旗舰店",
+          "sku": "10127948842490",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10127948842490.html"
+        },
+        {
+          "price": "¥28.6",
+          "rank": 7,
+          "shop": "+100+人复购金湖金普大药房官方旗舰店",
+          "sku": "10059018363133",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 1盒装运动员慎用|复方制剂|国药准字",
+          "url": "https://item.jd.com/10059018363133.html"
+        },
+        {
+          "price": "¥130.8",
+          "rank": 8,
+          "shop": "过100%好评世纪桔洲堂大药房旗舰店",
+          "sku": "10215359133736",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|正品保障|专业药师服务",
+          "url": "https://item.jd.com/10215359133736.html"
+        },
+        {
+          "price": "¥171.36",
+          "rank": 9,
+          "shop": "条评价100%好评坤香悦大药房旗舰店",
+          "sku": "10111406073581",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 6盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10111406073581.html"
+        },
+        {
+          "price": "¥256.5",
+          "rank": 10,
+          "shop": "看过100%好评伯仲东兴大药房旗舰店",
+          "sku": "10213406729593",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片 10盒装运动员慎用|保密发货|国药准字",
+          "url": "https://item.jd.com/10213406729593.html"
+        },
+        {
+          "price": "¥118.8",
+          "rank": 11,
+          "shop": "+92%好评润天（江苏）大药房官方旗舰店",
+          "sku": "10225611554092",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*14片 10盒装 29年",
+          "url": "https://item.jd.com/10225611554092.html"
+        },
+        {
+          "price": "¥142.8",
+          "rank": 12,
+          "shop": "万+100+人好评上元堂大药房旗舰店",
+          "sku": "72481863360",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/72481863360.html"
+        },
+        {
+          "price": "¥239",
+          "rank": 13,
+          "shop": "人看过100%好评众达康大药房旗舰店",
+          "sku": "10207983876594",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 10盒装 28年运动员慎用|心脑血管用药|隐私包装",
+          "url": "https://item.jd.com/10207983876594.html"
+        },
+        {
+          "price": "¥109",
+          "rank": 14,
+          "shop": "",
+          "sku": "10200236160664",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10200236160664.html"
+        },
+        {
+          "price": "¥143",
+          "rank": 15,
+          "shop": "0+100%好评金湖金普大药房官方旗舰店",
+          "sku": "10059018363136",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10059018363136.html"
+        },
+        {
+          "price": "¥142.8",
+          "rank": 16,
+          "shop": "00+200+人种草奇冠大药房官方旗舰店",
+          "sku": "67408401719",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装依伦平高血压用药热卖榜第10名运动员慎用|心脑血管用药|专业药师服务依伦平高血压用药热卖榜",
+          "url": "https://item.jd.com/67408401719.html"
+        },
+        {
+          "price": "¥110",
+          "rank": 17,
+          "shop": "300+100%好评百信大药房旗舰店",
+          "sku": "10187854444119",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10187854444119.html"
+        },
+        {
+          "price": "¥75.6",
+          "rank": 18,
+          "shop": "看过100%好评云医惠药大药房旗舰店",
+          "sku": "10217877352630",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装运动员慎用|正品保障|专业药师服务",
+          "url": "https://item.jd.com/10217877352630.html"
+        },
+        {
+          "price": "¥285.6",
+          "rank": 19,
+          "shop": "000+99%好评百信缘大药房官方旗舰店",
+          "sku": "10117527110159",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 10盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10117527110159.html"
+        },
+        {
+          "price": "¥57.12",
+          "rank": 20,
+          "shop": "条评价100%好评坤香悦大药房旗舰店",
+          "sku": "10111406073580",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 2盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10111406073580.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "依伦平",
+      "query_type": "商品名+历史规格",
+      "search_query": "依伦平 0.15g:12.5mg*28片",
+      "captured_at": "2026-07-16T09:41:23.845967",
+      "opencli_cmd": "opencli jd search \"依伦平 0.15g:12.5mg*28片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 20,
+      "opencli_data": [
+        {
+          "price": "¥64.96",
+          "rank": 1,
+          "shop": "人看过100%好评健尔堂大药房旗舰店",
+          "sku": "10148759211892",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装运动员慎用|正品好药|药房发货",
+          "url": "https://item.jd.com/10148759211892.html"
+        },
+        {
+          "price": "¥142.8",
+          "rank": 2,
+          "shop": "0+98%好评老百姓广西大药房旗舰店",
+          "sku": "10127948842490",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10127948842490.html"
+        },
+        {
+          "price": "¥27.8",
+          "rank": 3,
+          "shop": "",
+          "sku": "100006718701",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片依伦平高血压用药热卖榜第1名运动员慎用|正品保障|可商保报销依伦平高血压用药热卖榜第1名",
+          "url": "https://item.jd.com/100006718701.html"
+        },
+        {
+          "price": "¥23.8",
+          "rank": 4,
+          "shop": "飙升5倍京东大药房-天津北医道旗舰店",
+          "sku": "10103464027244",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10103464027244.html"
+        },
+        {
+          "price": "¥28.6",
+          "rank": 5,
+          "shop": "万+600+人复购南京正大天晴京东自营旗舰店",
+          "sku": "100026274736",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片依伦平高血压用药热卖榜第3名运动员慎用|药典标准|可商保报销依伦平高血压用药热卖榜第3名",
+          "url": "https://item.jd.com/100026274736.html"
+        },
+        {
+          "price": "¥85.8",
+          "rank": 6,
+          "shop": "1700+人种草金湖金普大药房官方旗舰店",
+          "sku": "10059018363135",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装依伦平高血压用药热卖榜第5名运动员慎用|复方制剂|国药准字依伦平高血压用药热卖榜第5名",
+          "url": "https://item.jd.com/10059018363135.html"
+        },
+        {
+          "price": "¥85.5",
+          "rank": 7,
+          "shop": "00+100%好评健尔堂大药房官方旗舰店",
+          "sku": "10209534524313",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 4盒装运动员慎用|药师服务|药房发货",
+          "url": "https://item.jd.com/10209534524313.html"
+        },
+        {
+          "price": "¥239",
+          "rank": 8,
+          "shop": "人看过100%好评众达康大药房旗舰店",
+          "sku": "10207983876594",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 10盒装 28年运动员慎用|心脑血管用药|隐私包装",
+          "url": "https://item.jd.com/10207983876594.html"
+        },
+        {
+          "price": "¥22.4",
+          "rank": 9,
+          "shop": "看过100%好评康缘康济大药房旗舰店",
+          "sku": "10211614273021",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 1盒装运动员慎用|正品保障|药师服务",
+          "url": "https://item.jd.com/10211614273021.html"
+        },
+        {
+          "price": "¥106",
+          "rank": 10,
+          "shop": "00+100%好评健尔堂大药房官方旗舰店",
+          "sku": "10104269621874",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|药师服务|药房发货",
+          "url": "https://item.jd.com/10104269621874.html"
+        },
+        {
+          "price": "¥28.6",
+          "rank": 11,
+          "shop": "+100+人复购金湖金普大药房官方旗舰店",
+          "sku": "10059018363133",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 1盒装运动员慎用|复方制剂|国药准字",
+          "url": "https://item.jd.com/10059018363133.html"
+        },
+        {
+          "price": "¥71.4",
+          "rank": 12,
+          "shop": "+人复购京东大药房-天津北医道旗舰店",
+          "sku": "10103464027245",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 3盒装依伦平高血压用药热卖榜第6名运动员慎用|专业药师服务|国药准字依伦平高血压用药热卖榜第",
+          "url": "https://item.jd.com/10103464027245.html"
+        },
+        {
+          "price": "¥65",
+          "rank": 13,
+          "shop": "00+100%好评医悦达大药房旗舰店",
+          "sku": "10158944935820",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10158944935820.html"
+        },
+        {
+          "price": "¥200.2",
+          "rank": 14,
+          "shop": "+200+人种草金湖金普大药房官方旗舰店",
+          "sku": "10211117121047",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 7盒装运动员慎用|正品保障|专业药师服务",
+          "url": "https://item.jd.com/10211117121047.html"
+        },
+        {
+          "price": "¥285.6",
+          "rank": 15,
+          "shop": "看过100%好评淮涟康惠大药房旗舰店",
+          "sku": "10221863507746",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片 10盒装运动员慎用|专业配方|国药准字",
+          "url": "https://item.jd.com/10221863507746.html"
+        },
+        {
+          "price": "¥109",
+          "rank": 16,
+          "shop": "",
+          "sku": "10200236160664",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10200236160664.html"
+        },
+        {
+          "price": "¥285.6",
+          "rank": 17,
+          "shop": "000+99%好评百信缘大药房官方旗舰店",
+          "sku": "10117527110159",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片/盒 10盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10117527110159.html"
+        },
+        {
+          "price": "¥143",
+          "rank": 18,
+          "shop": "0+100%好评金湖金普大药房官方旗舰店",
+          "sku": "10059018363136",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10059018363136.html"
+        },
+        {
+          "price": "¥110",
+          "rank": 19,
+          "shop": "300+100%好评百信大药房旗舰店",
+          "sku": "10187854444119",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 5盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10187854444119.html"
+        },
+        {
+          "price": "¥66",
+          "rank": 20,
+          "shop": "看过100%好评康缘康济大药房旗舰店",
+          "sku": "10211614273023",
+          "title": "[依伦平]厄贝沙坦氢氯噻嗪片 0.15g：12.5mg*28片 3盒装运动员慎用|正品保障|专业药师服务",
+          "url": "https://item.jd.com/10211614273023.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "托妥",
+      "query_type": "商品名+通用名",
+      "search_query": "托妥 瑞舒伐他汀钙片",
+      "captured_at": "2026-07-16T09:42:04.011806",
+      "opencli_cmd": "opencli jd search \"托妥 瑞舒伐他汀钙片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 14,
+      "opencli_data": [
+        {
+          "price": "¥30.88",
+          "rank": 1,
+          "shop": "30天加购飙升5倍南京正大天晴京东自营旗舰店",
+          "sku": "100017757242",
+          "title": "新托妥瑞舒伐他汀钙片10mg*48片/盒新托妥高血脂用药热卖榜第4名药师服务|国药准字|可商保报销新托妥高血脂用药热卖榜第4名",
+          "url": "https://item.jd.com/100017757242.html"
+        },
+        {
+          "price": "¥146.2",
+          "rank": 2,
+          "shop": "过100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753089",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 7盒装药效稳定|剂量精准|正品保障",
+          "url": "https://item.jd.com/10218937753089.html"
+        },
+        {
+          "price": "¥66.9",
+          "rank": 3,
+          "shop": "人看过100%好评译安堂大药房旗舰店",
+          "sku": "10031700786825",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒 3盒装心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10031700786825.html"
+        },
+        {
+          "price": "¥65",
+          "rank": 4,
+          "shop": "3人看过100%好评昌盛大药房旗舰店",
+          "sku": "10028993443775",
+          "title": "[新托妥] 瑞舒伐他汀钙片 10mg*28片/盒 1盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10028993443775.html"
+        },
+        {
+          "price": "¥105.64",
+          "rank": 5,
+          "shop": "过100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753088",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 5盒装",
+          "url": "https://item.jd.com/10218937753088.html"
+        },
+        {
+          "price": "¥26",
+          "rank": 6,
+          "shop": "人看过100%好评译安堂大药房旗舰店",
+          "sku": "10031700786824",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10031700786824.html"
+        },
+        {
+          "price": "¥39.8",
+          "rank": 7,
+          "shop": "假一赔四包邮2人看过五洲大药房旗舰店",
+          "sku": "10025014084204",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10025014084204.html"
+        },
+        {
+          "price": "¥65.17",
+          "rank": 8,
+          "shop": "邮100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753087",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 3盒装",
+          "url": "https://item.jd.com/10218937753087.html"
+        },
+        {
+          "price": "¥20.7",
+          "rank": 9,
+          "shop": "人看过100%好评佐今明大药房旗舰店",
+          "sku": "10021208638932",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10021208638932.html"
+        },
+        {
+          "price": "¥43",
+          "rank": 10,
+          "shop": "2人看过100%好评丁慈大药房旗舰店",
+          "sku": "10083127412184",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10083127412184.html"
+        },
+        {
+          "price": "¥24.51",
+          "rank": 11,
+          "shop": "邮100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753086",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 1盒装",
+          "url": "https://item.jd.com/10218937753086.html"
+        },
+        {
+          "price": "¥108",
+          "rank": 12,
+          "shop": "赔四包邮100%好评丁慈大药房旗舰店",
+          "sku": "10083127412185",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒 3盒装心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10083127412185.html"
+        },
+        {
+          "price": "¥16.9",
+          "rank": 13,
+          "shop": "",
+          "sku": "100179141219",
+          "title": "贝净瑞舒伐他汀钙片10mg*14片*2板/盒正品保障|国药准字|可商保报销",
+          "url": "https://item.jd.com/100179141219.html"
+        },
+        {
+          "price": "¥8",
+          "rank": 14,
+          "shop": "",
+          "sku": "100315841774",
+          "title": "长药制药 瑞舒伐他汀钙片10mg*14片/盒剂量精准|正品保障|心脑血管用药",
+          "url": "https://item.jd.com/100315841774.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "托妥",
+      "query_type": "商品名+历史规格",
+      "search_query": "托妥 10mg*28片",
+      "captured_at": "2026-07-16T09:43:39.538944",
+      "opencli_cmd": "opencli jd search \"托妥 10mg*28片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 13,
+      "opencli_data": [
+        {
+          "price": "¥66.9",
+          "rank": 1,
+          "shop": "人看过100%好评译安堂大药房旗舰店",
+          "sku": "10031700786825",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒 3盒装心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10031700786825.html"
+        },
+        {
+          "price": "¥20.7",
+          "rank": 2,
+          "shop": "人看过100%好评佐今明大药房旗舰店",
+          "sku": "10021208638932",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10021208638932.html"
+        },
+        {
+          "price": "¥146.2",
+          "rank": 3,
+          "shop": "过100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753089",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 7盒装药效稳定|剂量精准|正品保障",
+          "url": "https://item.jd.com/10218937753089.html"
+        },
+        {
+          "price": "¥26",
+          "rank": 4,
+          "shop": "人看过100%好评译安堂大药房旗舰店",
+          "sku": "10031700786824",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10031700786824.html"
+        },
+        {
+          "price": "¥65",
+          "rank": 5,
+          "shop": "3人看过100%好评昌盛大药房旗舰店",
+          "sku": "10028993443775",
+          "title": "[新托妥] 瑞舒伐他汀钙片 10mg*28片/盒 1盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10028993443775.html"
+        },
+        {
+          "price": "¥105.64",
+          "rank": 6,
+          "shop": "过100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753088",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 5盒装",
+          "url": "https://item.jd.com/10218937753088.html"
+        },
+        {
+          "price": "¥108",
+          "rank": 7,
+          "shop": "赔四包邮100%好评丁慈大药房旗舰店",
+          "sku": "10083127412185",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒 3盒装心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10083127412185.html"
+        },
+        {
+          "price": "¥39.8",
+          "rank": 8,
+          "shop": "假一赔四包邮2人看过五洲大药房旗舰店",
+          "sku": "10025014084204",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10025014084204.html"
+        },
+        {
+          "price": "¥65.17",
+          "rank": 9,
+          "shop": "邮100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753087",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 3盒装",
+          "url": "https://item.jd.com/10218937753087.html"
+        },
+        {
+          "price": "¥43",
+          "rank": 10,
+          "shop": "2人看过100%好评丁慈大药房旗舰店",
+          "sku": "10083127412184",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片/盒心脑血管用药|国药准字",
+          "url": "https://item.jd.com/10083127412184.html"
+        },
+        {
+          "price": "¥24.51",
+          "rank": 11,
+          "shop": "邮100%好评华泰宜和堂大药房旗舰店",
+          "sku": "10218937753086",
+          "title": "[新托妥]瑞舒伐他汀钙片 10mg*28片 1盒装",
+          "url": "https://item.jd.com/10218937753086.html"
+        },
+        {
+          "price": "¥170",
+          "rank": 12,
+          "shop": "00+100%好评佑春堂大药房旗舰店",
+          "sku": "10071415456799",
+          "title": "[倍他乐克]琥珀酸美托洛尔缓释片 47.5mg*7片 10盒装运动员慎用|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10071415456799.html"
+        },
+        {
+          "price": "¥25.6",
+          "rank": 13,
+          "shop": "2人看过100%好评芃祯大药房旗舰店",
+          "sku": "10159442525552",
+          "title": "[优力平]阿托伐他汀钙片 20mg*7片 10盒装正品保障|心脑血管用药|专业药师服务",
+          "url": "https://item.jd.com/10159442525552.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "欣速安",
+      "query_type": "商品名+通用名",
+      "search_query": "欣速安 托伐普坦片",
+      "captured_at": "2026-07-16T09:44:22.411483",
+      "opencli_cmd": "opencli jd search \"欣速安 托伐普坦片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 20,
+      "opencli_data": [
+        {
+          "price": "¥227.36",
+          "rank": 1,
+          "shop": "00%好评润禾贰拾肆小时大药房旗舰店",
+          "sku": "10229043800845",
+          "title": "[欣速安]托伐普坦片 15mg*7片 2盒装",
+          "url": "https://item.jd.com/10229043800845.html"
+        },
+        {
+          "price": "¥243.04",
+          "rank": 2,
+          "shop": "300+人种草江苏省医药大药房旗舰店",
+          "sku": "10102314205302",
+          "title": "[欣速安]托伐普坦片 15mg*7片 2盒装运动员慎用|血液系统用药|降低腹水",
+          "url": "https://item.jd.com/10102314205302.html"
+        },
+        {
+          "price": "¥154",
+          "rank": 3,
+          "shop": "",
+          "sku": "100013178099",
+          "title": "欣速安 托伐普坦片15mg*7片/盒欣速安低钠血症用药热卖榜第1名运动员慎用|正品保障|可商保报销欣速安低钠血症用药热卖榜第1名",
+          "url": "https://item.jd.com/100013178099.html"
+        },
+        {
+          "price": "¥114.66",
+          "rank": 4,
+          "shop": "00%好评润禾贰拾肆小时大药房旗舰店",
+          "sku": "10187308523859",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装正品保障|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10187308523859.html"
+        },
+        {
+          "price": "¥117",
+          "rank": 5,
+          "shop": "人看过100%好评资瑞堂大药房旗舰店",
+          "sku": "10227742122591",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装欣速安低钠血症用药热卖榜第5名正品保障|血液系统用药|极速发货欣速安低钠血症用药热卖榜第5名",
+          "url": "https://item.jd.com/10227742122591.html"
+        },
+        {
+          "price": "¥227.36",
+          "rank": 6,
+          "shop": "评润禾贰拾肆小时（河南）大药房旗舰店",
+          "sku": "10229044177351",
+          "title": "[欣速安]托伐普坦片 15mg*7片 2盒装",
+          "url": "https://item.jd.com/10229044177351.html"
+        },
+        {
+          "price": "¥338.1",
+          "rank": 7,
+          "shop": "00%好评润禾贰拾肆小时大药房旗舰店",
+          "sku": "10229043800846",
+          "title": "[欣速安]托伐普坦片 15mg*7片 3盒装",
+          "url": "https://item.jd.com/10229043800846.html"
+        },
+        {
+          "price": "¥122.5",
+          "rank": 8,
+          "shop": "+100+人复购恒泰人民大药房官方旗舰店",
+          "sku": "10056334939110",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装欣速安低钠血症用药热卖榜第8名正品保障|血液系统用药|专业药师服务欣速安低钠血症用药热卖榜第8名",
+          "url": "https://item.jd.com/10056334939110.html"
+        },
+        {
+          "price": "¥338.1",
+          "rank": 9,
+          "shop": "评润禾贰拾肆小时（河南）大药房旗舰店",
+          "sku": "10229044177352",
+          "title": "[欣速安]托伐普坦片 15mg*7片 3盒装",
+          "url": "https://item.jd.com/10229044177352.html"
+        },
+        {
+          "price": "¥129",
+          "rank": 10,
+          "shop": "00+100%好评百欣堂大药房旗舰店",
+          "sku": "10103277857180",
+          "title": "[欣速安]托伐普坦片 15mg*7片/盒运动员慎用|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10103277857180.html"
+        },
+        {
+          "price": "¥607.6",
+          "rank": 11,
+          "shop": "600+人种草江苏省医药大药房旗舰店",
+          "sku": "10094465768712",
+          "title": "[欣速安]托伐普坦片 15mg*7片 5盒装欣速安低钠血症用药热卖榜第3名运动员慎用|国药准字欣速安低钠血症用药热卖榜第3名",
+          "url": "https://item.jd.com/10094465768712.html"
+        },
+        {
+          "price": "¥114.66",
+          "rank": 12,
+          "shop": "评润禾贰拾肆小时（河南）大药房旗舰店",
+          "sku": "10187308873673",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装正品保障|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10187308873673.html"
+        },
+        {
+          "price": "¥250",
+          "rank": 13,
+          "shop": "+200+人种草汇华强盛大药房旗舰店",
+          "sku": "10105122578270",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装运动员慎用|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10105122578270.html"
+        },
+        {
+          "price": "¥1000",
+          "rank": 14,
+          "shop": "",
+          "sku": "100209640071",
+          "title": "8盒装欣速安 托伐普坦片15mg*7片/盒运动员慎用|国药准字|可商保报销",
+          "url": "https://item.jd.com/100209640071.html"
+        },
+        {
+          "price": "¥139",
+          "rank": 15,
+          "shop": "00+100%好评健尔堂大药房官方旗舰店",
+          "sku": "10154100489300",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装运动员慎用|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10154100489300.html"
+        },
+        {
+          "price": "¥2500",
+          "rank": 16,
+          "shop": "00+99%好评汇华强盛大药房旗舰店",
+          "sku": "10125516353827",
+          "title": "[欣速安]托伐普坦片 15mg*7片 10盒装欣速安低钠血症用药热卖榜第10名运动员慎用|专业药师服务|国药准字欣速安低钠血症用药热卖榜第10名",
+          "url": "https://item.jd.com/10125516353827.html"
+        },
+        {
+          "price": "¥500",
+          "rank": 17,
+          "shop": "",
+          "sku": "100086261950",
+          "title": "欣速安 托伐普坦片 15mg*7片 4盒装运动员慎用|药师服务|可商保报销",
+          "url": "https://item.jd.com/100086261950.html"
+        },
+        {
+          "price": "¥135",
+          "rank": 18,
+          "shop": "人看过100%好评济康堂大药房旗舰店",
+          "sku": "10229266800477",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装",
+          "url": "https://item.jd.com/10229266800477.html"
+        },
+        {
+          "price": "¥1163.26",
+          "rank": 19,
+          "shop": "人看过100%好评资瑞堂大药房旗舰店",
+          "sku": "10229396970945",
+          "title": "[欣速安]托伐普坦片 15mg*7片 10盒装",
+          "url": "https://item.jd.com/10229396970945.html"
+        },
+        {
+          "price": "¥211.89",
+          "rank": 20,
+          "shop": "万+100+人复购南京正大天晴京东自营旗舰店",
+          "sku": "100024904640",
+          "title": "[欣速安] 托伐普坦片 15mg*7片欣速安低钠血症用药热卖榜第6名运动员慎用|药典标准|可商保报销欣速安低钠血症用药热卖榜第6名",
+          "url": "https://item.jd.com/100024904640.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "欣速安",
+      "query_type": "商品名+历史规格",
+      "search_query": "欣速安 15mg*7片",
+      "captured_at": "2026-07-16T09:44:58.444104",
+      "opencli_cmd": "opencli jd search \"欣速安 15mg*7片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 20,
+      "opencli_data": [
+        {
+          "price": "¥227.36",
+          "rank": 1,
+          "shop": "00%好评润禾贰拾肆小时大药房旗舰店",
+          "sku": "10229043800845",
+          "title": "[欣速安]托伐普坦片 15mg*7片 2盒装",
+          "url": "https://item.jd.com/10229043800845.html"
+        },
+        {
+          "price": "¥243.04",
+          "rank": 2,
+          "shop": "300+人种草江苏省医药大药房旗舰店",
+          "sku": "10102314205302",
+          "title": "[欣速安]托伐普坦片 15mg*7片 2盒装运动员慎用|血液系统用药|降低腹水",
+          "url": "https://item.jd.com/10102314205302.html"
+        },
+        {
+          "price": "¥117",
+          "rank": 3,
+          "shop": "人看过100%好评资瑞堂大药房旗舰店",
+          "sku": "10227742122591",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装欣速安低钠血症用药热卖榜第5名正品保障|血液系统用药|极速发货欣速安低钠血症用药热卖榜第5名",
+          "url": "https://item.jd.com/10227742122591.html"
+        },
+        {
+          "price": "¥114.66",
+          "rank": 4,
+          "shop": "00%好评润禾贰拾肆小时大药房旗舰店",
+          "sku": "10187308523859",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装正品保障|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10187308523859.html"
+        },
+        {
+          "price": "¥607.6",
+          "rank": 5,
+          "shop": "600+人种草江苏省医药大药房旗舰店",
+          "sku": "10094465768712",
+          "title": "[欣速安]托伐普坦片 15mg*7片 5盒装欣速安低钠血症用药热卖榜第3名运动员慎用|国药准字欣速安低钠血症用药热卖榜第3名",
+          "url": "https://item.jd.com/10094465768712.html"
+        },
+        {
+          "price": "¥349.86",
+          "rank": 6,
+          "shop": "人看过100%好评资瑞堂大药房旗舰店",
+          "sku": "10227742122592",
+          "title": "[欣速安]托伐普坦片 15mg*7片 3盒装",
+          "url": "https://item.jd.com/10227742122592.html"
+        },
+        {
+          "price": "¥338.1",
+          "rank": 7,
+          "shop": "00%好评润禾贰拾肆小时大药房旗舰店",
+          "sku": "10229043800846",
+          "title": "[欣速安]托伐普坦片 15mg*7片 3盒装",
+          "url": "https://item.jd.com/10229043800846.html"
+        },
+        {
+          "price": "¥122.5",
+          "rank": 8,
+          "shop": "+100+人复购恒泰人民大药房官方旗舰店",
+          "sku": "10056334939110",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装欣速安低钠血症用药热卖榜第8名正品保障|血液系统用药|专业药师服务欣速安低钠血症用药热卖榜第8名",
+          "url": "https://item.jd.com/10056334939110.html"
+        },
+        {
+          "price": "¥227.36",
+          "rank": 9,
+          "shop": "评润禾贰拾肆小时（河南）大药房旗舰店",
+          "sku": "10229044177351",
+          "title": "[欣速安]托伐普坦片 15mg*7片 2盒装",
+          "url": "https://item.jd.com/10229044177351.html"
+        },
+        {
+          "price": "¥500",
+          "rank": 10,
+          "shop": "",
+          "sku": "100086261950",
+          "title": "欣速安 托伐普坦片 15mg*7片 4盒装运动员慎用|药师服务|可商保报销",
+          "url": "https://item.jd.com/100086261950.html"
+        },
+        {
+          "price": "¥2500",
+          "rank": 11,
+          "shop": "00+99%好评汇华强盛大药房旗舰店",
+          "sku": "10125516353827",
+          "title": "[欣速安]托伐普坦片 15mg*7片 10盒装欣速安低钠血症用药热卖榜第10名运动员慎用|专业药师服务|国药准字欣速安低钠血症用药热卖榜第10名",
+          "url": "https://item.jd.com/10125516353827.html"
+        },
+        {
+          "price": "¥114.66",
+          "rank": 12,
+          "shop": "评润禾贰拾肆小时（河南）大药房旗舰店",
+          "sku": "10187308873673",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装正品保障|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10187308873673.html"
+        },
+        {
+          "price": "¥252",
+          "rank": 13,
+          "shop": "",
+          "sku": "100081291337",
+          "title": "欣速安 托伐普坦片 15mg*7片 2盒装运动员慎用|正品好药|可商保报销",
+          "url": "https://item.jd.com/100081291337.html"
+        },
+        {
+          "price": "¥135",
+          "rank": 14,
+          "shop": "人看过100%好评济康堂大药房旗舰店",
+          "sku": "10229266800477",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装",
+          "url": "https://item.jd.com/10229266800477.html"
+        },
+        {
+          "price": "¥338.1",
+          "rank": 15,
+          "shop": "评润禾贰拾肆小时（河南）大药房旗舰店",
+          "sku": "10229044177352",
+          "title": "[欣速安]托伐普坦片 15mg*7片 3盒装",
+          "url": "https://item.jd.com/10229044177352.html"
+        },
+        {
+          "price": "¥211.89",
+          "rank": 16,
+          "shop": "万+100+人复购南京正大天晴京东自营旗舰店",
+          "sku": "100024904640",
+          "title": "[欣速安] 托伐普坦片 15mg*7片欣速安低钠血症用药热卖榜第6名运动员慎用|药典标准|可商保报销欣速安低钠血症用药热卖榜第6名",
+          "url": "https://item.jd.com/100024904640.html"
+        },
+        {
+          "price": "¥129",
+          "rank": 17,
+          "shop": "00+100%好评百欣堂大药房旗舰店",
+          "sku": "10103277857180",
+          "title": "[欣速安]托伐普坦片 15mg*7片/盒运动员慎用|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10103277857180.html"
+        },
+        {
+          "price": "¥583.1",
+          "rank": 18,
+          "shop": "人看过100%好评资瑞堂大药房旗舰店",
+          "sku": "10227742122593",
+          "title": "[欣速安]托伐普坦片 15mg*7片 5盒装",
+          "url": "https://item.jd.com/10227742122593.html"
+        },
+        {
+          "price": "¥250",
+          "rank": 19,
+          "shop": "+200+人种草汇华强盛大药房旗舰店",
+          "sku": "10105122578270",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装运动员慎用|血液系统用药|专业药师服务",
+          "url": "https://item.jd.com/10105122578270.html"
+        },
+        {
+          "price": "¥122.5",
+          "rank": 20,
+          "shop": "9人看过100%好评心芝大药房旗舰店",
+          "sku": "10227742408296",
+          "title": "[欣速安]托伐普坦片 15mg*7片 1盒装",
+          "url": "https://item.jd.com/10227742408296.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "葛泰",
+      "query_type": "商品名+通用名",
+      "search_query": "葛泰 地奥司明片",
+      "captured_at": "2026-07-16T09:46:52.084091",
+      "opencli_cmd": "opencli jd search \"葛泰 地奥司明片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 20,
+      "opencli_data": [
+        {
+          "price": "¥36",
+          "rank": 1,
+          "shop": "",
+          "sku": "100275988850",
+          "title": "【2盒装】葛泰 地奥司明片 24片 正品保障|消化系统用药|可商保报销",
+          "url": "https://item.jd.com/100275988850.html"
+        },
+        {
+          "price": "¥18",
+          "rank": 2,
+          "shop": "00+500+人种草东明大药房旗舰店",
+          "sku": "10217492903848",
+          "title": "[葛泰]地奥司明片 0.45g*24片 1盒装药师服务|国药准字|专业配方",
+          "url": "https://item.jd.com/10217492903848.html"
+        },
+        {
+          "price": "¥310",
+          "rank": 3,
+          "shop": "200+100%好评立佳大药房旗舰店",
+          "sku": "10213391721553",
+          "title": "[葛泰]地奥司明片 0.45g*48片 10盒装 29年5月过期",
+          "url": "https://item.jd.com/10213391721553.html"
+        },
+        {
+          "price": "¥22.8",
+          "rank": 4,
+          "shop": "",
+          "sku": "5483494",
+          "title": "葛泰 地奥司明片 0.45g*24片痔疮用药回购榜第2名可商保报销|药师服务|药典标准痔疮用药回购榜第2名",
+          "url": "https://item.jd.com/5483494.html"
+        },
+        {
+          "price": "¥150",
+          "rank": 5,
+          "shop": "00+200+人种草东明大药房旗舰店",
+          "sku": "10217492903852",
+          "title": "[葛泰]地奥司明片 0.45g*24片 10盒装药师服务|国药准字|专业配方",
+          "url": "https://item.jd.com/10217492903852.html"
+        },
+        {
+          "price": "¥21",
+          "rank": 6,
+          "shop": "30天加购飙升5倍南京正大天晴京东自营旗舰店",
+          "sku": "4791258",
+          "title": "[葛泰]地奥司明片 0.45g*20片/盒药师服务|药典标准|可商保报销",
+          "url": "https://item.jd.com/4791258.html"
+        },
+        {
+          "price": "¥93",
+          "rank": 7,
+          "shop": "0+100+人种草新九洲大药房旗舰店",
+          "sku": "10199778232581",
+          "title": "[葛泰]地奥司明片 0.45g*48片 3盒装 29年6月过期正品保障|消化系统用药|专业药师服务",
+          "url": "https://item.jd.com/10199778232581.html"
+        },
+        {
+          "price": "¥75",
+          "rank": 8,
+          "shop": "00+500+人种草东明大药房旗舰店",
+          "sku": "10217492903851",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装药师服务|国药准字|专业配方",
+          "url": "https://item.jd.com/10217492903851.html"
+        },
+        {
+          "price": "¥24",
+          "rank": 9,
+          "shop": "30天种草飙升5倍南京正大天晴京东自营旗舰店",
+          "sku": "100017320488",
+          "title": "[葛泰]地奥司明片 0.45g*24片/盒药师服务|药典标准|可商保报销",
+          "url": "https://item.jd.com/100017320488.html"
+        },
+        {
+          "price": "¥32.5",
+          "rank": 10,
+          "shop": "0+500+人种草新九洲大药房旗舰店",
+          "sku": "10199778232579",
+          "title": "[葛泰]地奥司明片 0.45g*48片 1盒装 29年6月过期",
+          "url": "https://item.jd.com/10199778232579.html"
+        },
+        {
+          "price": "¥49.8",
+          "rank": 11,
+          "shop": "00+100+人种草东明大药房旗舰店",
+          "sku": "10217492903850",
+          "title": "[葛泰]地奥司明片 0.45g*24片 3盒装药师服务|国药准字|专业配方",
+          "url": "https://item.jd.com/10217492903850.html"
+        },
+        {
+          "price": "¥32.5",
+          "rank": 12,
+          "shop": "00+300+人种草立佳大药房旗舰店",
+          "sku": "10213391721549",
+          "title": "[葛泰]地奥司明片 0.45g*48片 1盒装 29年5月过期",
+          "url": "https://item.jd.com/10213391721549.html"
+        },
+        {
+          "price": "¥276",
+          "rank": 13,
+          "shop": "0+100%好评圆心新特大药房旗舰店",
+          "sku": "10224357727635",
+          "title": "[葛泰]地奥司明片 0.45g*48片 5盒装",
+          "url": "https://item.jd.com/10224357727635.html"
+        },
+        {
+          "price": "¥45",
+          "rank": 14,
+          "shop": "",
+          "sku": "100009631527",
+          "title": "[葛泰]地奥司明片 0.45g*48片/盒痔疮用药回购榜第4名药师服务|药典标准|可商保报销痔疮用药回购榜第4名",
+          "url": "https://item.jd.com/100009631527.html"
+        },
+        {
+          "price": "¥17.21",
+          "rank": 15,
+          "shop": "2人看过100%好评丽景大药房旗舰店",
+          "sku": "10177613268304",
+          "title": "[葛泰]地奥司明片 0.45g*24片 1盒装",
+          "url": "https://item.jd.com/10177613268304.html"
+        },
+        {
+          "price": "¥68",
+          "rank": 16,
+          "shop": "",
+          "sku": "100317577066",
+          "title": "葛泰地奥司明片 0.45g*24片*2盒+肛泰栓 1g*12粒*1盒 治痔疮内服外用 用于内置外痔混合痔药师服务|国药准字|可商保报销",
+          "url": "https://item.jd.com/100317577066.html"
+        },
+        {
+          "price": "¥31.5",
+          "rank": 17,
+          "shop": "0+300+人种草燕师兄大药房旗舰店",
+          "sku": "10210268894143",
+          "title": "[葛泰]地奥司明片 0.45g*48片 1盒装 29年9月过期",
+          "url": "https://item.jd.com/10210268894143.html"
+        },
+        {
+          "price": "¥155",
+          "rank": 18,
+          "shop": "200+100%好评立佳大药房旗舰店",
+          "sku": "10213391721552",
+          "title": "[葛泰]地奥司明片 0.45g*48片 5盒装 29年5月过期正品保障|消化系统用药|专业药师服务",
+          "url": "https://item.jd.com/10213391721552.html"
+        },
+        {
+          "price": "¥552",
+          "rank": 19,
+          "shop": "0+100%好评圆心新特大药房旗舰店",
+          "sku": "10224357727636",
+          "title": "[葛泰]地奥司明片 0.45g*48片 10盒装",
+          "url": "https://item.jd.com/10224357727636.html"
+        },
+        {
+          "price": "¥43.5",
+          "rank": 20,
+          "shop": "",
+          "sku": "10223503093682",
+          "title": "[葛泰]地奥司明片 0.45g*24片 2盒装",
+          "url": "https://item.jd.com/10223503093682.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "葛泰",
+      "query_type": "商品名+历史规格",
+      "search_query": "葛泰 0.45g*24片",
+      "captured_at": "2026-07-16T09:47:23.618515",
+      "opencli_cmd": "opencli jd search \"葛泰 0.45g*24片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 20,
+      "opencli_data": [
+        {
+          "price": "¥17.21",
+          "rank": 1,
+          "shop": "2人看过100%好评丽景大药房旗舰店",
+          "sku": "10177613268304",
+          "title": "[葛泰]地奥司明片 0.45g*24片 1盒装",
+          "url": "https://item.jd.com/10177613268304.html"
+        },
+        {
+          "price": "¥87",
+          "rank": 2,
+          "shop": "看过100%好评名裕龙行大药房官方旗舰店",
+          "sku": "10228196462545",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装 29年3月过期",
+          "url": "https://item.jd.com/10228196462545.html"
+        },
+        {
+          "price": "¥18",
+          "rank": 3,
+          "shop": "人看过100%好评友善堂大药房旗舰店",
+          "sku": "10112587936295",
+          "title": "[葛泰]地奥司明片 0.45g*24片/盒",
+          "url": "https://item.jd.com/10112587936295.html"
+        },
+        {
+          "price": "¥233.7",
+          "rank": 4,
+          "shop": "人看过100%好评八星堂大药房旗舰店",
+          "sku": "10225704344732",
+          "title": "[葛泰]地奥司明片 0.45g*24片 10盒装 国药准字顺丰包邮|连锁店铺|正品保障",
+          "url": "https://item.jd.com/10225704344732.html"
+        },
+        {
+          "price": "¥115",
+          "rank": 5,
+          "shop": "0%好评国大药房（扬州）大药房旗舰店",
+          "sku": "10210963069489",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装",
+          "url": "https://item.jd.com/10210963069489.html"
+        },
+        {
+          "price": "¥219",
+          "rank": 6,
+          "shop": "1人看过100%好评欣舟大药房旗舰店",
+          "sku": "10222435537519",
+          "title": "[葛泰]地奥司明片 0.45g*24片 10盒装",
+          "url": "https://item.jd.com/10222435537519.html"
+        },
+        {
+          "price": "¥115.6",
+          "rank": 7,
+          "shop": "人看过100%好评八星堂大药房旗舰店",
+          "sku": "10225704344731",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装 正品保证顺丰包邮|连锁店铺|正品保障",
+          "url": "https://item.jd.com/10225704344731.html"
+        },
+        {
+          "price": "¥115",
+          "rank": 8,
+          "shop": "四包邮100%好评利康堂大药房旗舰店",
+          "sku": "10081136265882",
+          "title": "[葛泰]地奥司明片 0.45g*24片/盒 5盒装药师服务|国药准字",
+          "url": "https://item.jd.com/10081136265882.html"
+        },
+        {
+          "price": "¥109.8",
+          "rank": 9,
+          "shop": "折包邮100%好评众药师大药房旗舰店",
+          "sku": "10229476052366",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装",
+          "url": "https://item.jd.com/10229476052366.html"
+        },
+        {
+          "price": "¥36",
+          "rank": 10,
+          "shop": "",
+          "sku": "100275988850",
+          "title": "【2盒装】葛泰 地奥司明片 24片 正品保障|消化系统用药|可商保报销",
+          "url": "https://item.jd.com/100275988850.html"
+        },
+        {
+          "price": "¥200",
+          "rank": 11,
+          "shop": "过100%好评金如镱广州大药房旗舰店",
+          "sku": "10208779239017",
+          "title": "[葛泰]地奥司明片 0.45g*24片 8盒装",
+          "url": "https://item.jd.com/10208779239017.html"
+        },
+        {
+          "price": "¥52.5",
+          "rank": 12,
+          "shop": "看过100%好评名裕龙行大药房官方旗舰店",
+          "sku": "10228196462544",
+          "title": "[葛泰]地奥司明片 0.45g*24片 3盒装 29年3月过期",
+          "url": "https://item.jd.com/10228196462544.html"
+        },
+        {
+          "price": "¥150",
+          "rank": 13,
+          "shop": "00+200+人种草东明大药房旗舰店",
+          "sku": "10217492903852",
+          "title": "[葛泰]地奥司明片 0.45g*24片 10盒装药师服务|国药准字|专业配方",
+          "url": "https://item.jd.com/10217492903852.html"
+        },
+        {
+          "price": "¥276",
+          "rank": 14,
+          "shop": "假一赔四包邮100%好评康药师旗舰店",
+          "sku": "10212028797460",
+          "title": "[葛泰]地奥司明片 0.45g*24片 10盒装",
+          "url": "https://item.jd.com/10212028797460.html"
+        },
+        {
+          "price": "¥32",
+          "rank": 15,
+          "shop": "人看过100%好评嘉信行大药房旗舰店",
+          "sku": "10121883410906",
+          "title": "[葛泰]地奥司明片 0.45g*24片/盒",
+          "url": "https://item.jd.com/10121883410906.html"
+        },
+        {
+          "price": "¥105",
+          "rank": 16,
+          "shop": "四包邮100%好评惠万家大药房旗舰店",
+          "sku": "10195042066269",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装",
+          "url": "https://item.jd.com/10195042066269.html"
+        },
+        {
+          "price": "¥102.5",
+          "rank": 17,
+          "shop": "过100%好评新国瑞浦城大药房旗舰店",
+          "sku": "10197388473805",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装",
+          "url": "https://item.jd.com/10197388473805.html"
+        },
+        {
+          "price": "¥113",
+          "rank": 18,
+          "shop": "邮100%好评健寿堂广东大药房旗舰店",
+          "sku": "10176916421015",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装",
+          "url": "https://item.jd.com/10176916421015.html"
+        },
+        {
+          "price": "¥226",
+          "rank": 19,
+          "shop": "26包邮100%好评疊䩦大药房旗舰店",
+          "sku": "10229499818332",
+          "title": "[葛泰]地奥司明片 0.45g*24片 10盒装",
+          "url": "https://item.jd.com/10229499818332.html"
+        },
+        {
+          "price": "¥105",
+          "rank": 20,
+          "shop": "00+100%好评好万家大药房旗舰店",
+          "sku": "10108410522767",
+          "title": "[葛泰]地奥司明片 0.45g*24片 5盒装正品好药|专业药师服务|国药准字",
+          "url": "https://item.jd.com/10108410522767.html"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "天舒平",
+      "query_type": "商品名+通用名",
+      "search_query": "天舒平 奥美沙坦酯氨氯地平片",
+      "captured_at": "2026-07-16T09:48:16.057061",
+      "opencli_cmd": "opencli jd search \"天舒平 奥美沙坦酯氨氯地平片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 0,
+      "opencli_data": [],
+      "result_status": "success"
+    },
+    {
+      "platform": "jd",
+      "brand": "天舒平",
+      "query_type": "商品名+历史规格",
+      "search_query": "天舒平 20mg:5mg*7片",
+      "captured_at": "2026-07-16T09:51:07.019326",
+      "opencli_cmd": "opencli jd search \"天舒平 20mg:5mg*7片\" -f json --limit 20 --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 0,
+      "opencli_data": [],
+      "result_status": "success"
+    }
+  ],
+  "tmall_search": [
+    {
+      "platform": "taobao",
+      "brand": "依伦平",
+      "query_type": "商品名+通用名",
+      "search_query": "依伦平 厄贝沙坦氢氯噻嗪片",
+      "captured_at": "2026-07-16T09:51:45.706571",
+      "opencli_cmd": "opencli taobao search \"依伦平 厄贝沙坦氢氯噻嗪片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 8,
+      "opencli_data": [
+        {
+          "item_id": "616813986176",
+          "location": "江苏苏州",
+          "price": "¥26",
+          "rank": 1,
+          "sales": "8000+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片/盒",
+          "url": "https://item.taobao.com/item.htm?id=616813986176"
+        },
+        {
+          "item_id": "1052480144621",
+          "location": "江苏无锡",
+          "price": "¥35.5",
+          "rank": 2,
+          "sales": "0人付款",
+          "shop": "汇华强盛大药房旗舰店",
+          "title": "金依伦平 厄贝沙坦氢氯噻嗪片 150mg:12.5mg*30片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1052480144621"
+        },
+        {
+          "item_id": "1063739830287",
+          "location": "江苏南京",
+          "price": "¥3.9",
+          "rank": 3,
+          "sales": "0人付款",
+          "shop": "YIFENG PHARMACY大药房旗舰店",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1063739830287"
+        },
+        {
+          "item_id": "1017059267861",
+          "location": "湖南张家界",
+          "price": "¥39.9",
+          "rank": 4,
+          "sales": "0人付款",
+          "shop": "东门大药房旗舰店",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 150mg:12.5mg*30片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1017059267861"
+        },
+        {
+          "item_id": "1066624017420",
+          "location": "安徽阜阳",
+          "price": "¥14",
+          "rank": 5,
+          "sales": "0人付款",
+          "shop": "阜盛延生大药房旗舰店",
+          "title": "依伦平 150mg:12.5mg*14片/盒 厄贝沙坦氢氯噻嗪片",
+          "url": "https://item.taobao.com/item.htm?id=1066624017420"
+        },
+        {
+          "item_id": "1056110574082",
+          "location": "江苏南京",
+          "price": "¥9.8",
+          "rank": 6,
+          "sales": "22人付款",
+          "shop": "奇冠大药房旗舰店",
+          "title": "海安瑞 150mg:12.5mg*28片/盒 厄贝沙坦氢氯噻嗪片",
+          "url": "https://item.taobao.com/item.htm?id=1056110574082"
+        },
+        {
+          "item_id": "1056914451318",
+          "location": "浙江杭州",
+          "price": "¥14",
+          "rank": 7,
+          "sales": "0人付款",
+          "shop": "邻家贴心大药房旗舰店",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*14片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1056914451318"
+        },
+        {
+          "item_id": "756549072233",
+          "location": "上海",
+          "price": "¥15.8",
+          "rank": 8,
+          "sales": "9人付款",
+          "shop": "三松寿长大药房旗舰店",
+          "title": "欣宝维乐 厄贝沙坦氢氯噻嗪片 14片/盒",
+          "url": "https://item.taobao.com/item.htm?id=756549072233"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "依伦平",
+      "query_type": "商品名+历史规格",
+      "search_query": "依伦平 0.15g:12.5mg*28片",
+      "captured_at": "2026-07-16T09:52:24.885262",
+      "opencli_cmd": "opencli taobao search \"依伦平 0.15g:12.5mg*28片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 1,
+      "opencli_data": [
+        {
+          "item_id": "616813986176",
+          "location": "江苏苏州",
+          "price": "¥26",
+          "rank": 1,
+          "sales": "8000+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "依伦平 厄贝沙坦氢氯噻嗪片 0.15g:12.5mg*28片/盒",
+          "url": "https://item.taobao.com/item.htm?id=616813986176"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "托妥",
+      "query_type": "商品名+通用名",
+      "search_query": "托妥 瑞舒伐他汀钙片",
+      "captured_at": "2026-07-16T09:53:14.663243",
+      "opencli_cmd": "opencli taobao search \"托妥 瑞舒伐他汀钙片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 6,
+      "opencli_data": [
+        {
+          "item_id": "648878452873",
+          "location": "江苏苏州",
+          "price": "¥20.93",
+          "rank": 1,
+          "sales": "1万+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "新托妥 10mg*28片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=648878452873"
+        },
+        {
+          "item_id": "618203002365",
+          "location": "江苏苏州",
+          "price": "¥10.9",
+          "rank": 2,
+          "sales": "400+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "新托妥 10mg*14片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=618203002365"
+        },
+        {
+          "item_id": "639887136049",
+          "location": "江苏连云港",
+          "price": "¥22.4",
+          "rank": 3,
+          "sales": "4人付款",
+          "shop": "舒健大药房旗舰店",
+          "title": "正大天晴 10mg*28片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=639887136049"
+        },
+        {
+          "item_id": "1058122945342",
+          "location": "河南郑州",
+          "price": "¥16.34",
+          "rank": 4,
+          "sales": "0人付款",
+          "shop": "雷尼曼药品专营店",
+          "title": "新托妥 10mg*24片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=1058122945342"
+        },
+        {
+          "item_id": "1055496763372",
+          "location": "广东深圳",
+          "price": "¥17.8",
+          "rank": 5,
+          "sales": "0人付款",
+          "shop": "穗仁堂医药专营店",
+          "title": "美达信 阿托伐他汀钙片 20mg*42片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1055496763372"
+        },
+        {
+          "item_id": "1041999552752",
+          "location": "广东广州",
+          "price": "¥28",
+          "rank": 6,
+          "sales": "7人付款",
+          "shop": "健客方舟大药房旗舰店",
+          "title": "新托妥 10mg*48片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=1041999552752"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "托妥",
+      "query_type": "商品名+历史规格",
+      "search_query": "托妥 10mg*28片",
+      "captured_at": "2026-07-16T09:53:54.915109",
+      "opencli_cmd": "opencli taobao search \"托妥 10mg*28片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 6,
+      "opencli_data": [
+        {
+          "item_id": "648878452873",
+          "location": "江苏苏州",
+          "price": "¥20.93",
+          "rank": 1,
+          "sales": "1万+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "新托妥 10mg*28片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=648878452873"
+        },
+        {
+          "item_id": "1066927313868",
+          "location": "广东深圳",
+          "price": "¥54",
+          "rank": 2,
+          "sales": "0人付款",
+          "shop": "润美林大药房旗舰店",
+          "title": "立普妥 立普妥 阿托伐他汀钙片 20mg*7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1066927313868"
+        },
+        {
+          "item_id": "1065916466032",
+          "location": "广东深圳",
+          "price": "¥31.5",
+          "rank": 3,
+          "sales": "0人付款",
+          "shop": "润美林大药房旗舰店",
+          "title": "立普妥 10mg*7片/盒 立普妥 阿托伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=1065916466032"
+        },
+        {
+          "item_id": "639887136049",
+          "location": "江苏连云港",
+          "price": "¥22.4",
+          "rank": 4,
+          "sales": "4人付款",
+          "shop": "舒健大药房旗舰店",
+          "title": "正大天晴 10mg*28片/盒 瑞舒伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=639887136049"
+        },
+        {
+          "item_id": "1062610143408",
+          "location": "北京",
+          "price": "¥84.5",
+          "rank": 5,
+          "sales": "100+人付款",
+          "shop": "百姓阳光大药房旗舰",
+          "title": "立普妥 立普妥 阿托伐他汀钙片 10mg*28片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1062610143408"
+        },
+        {
+          "item_id": "1056319182497",
+          "location": "广东深圳",
+          "price": "¥12.5",
+          "rank": 6,
+          "sales": "9人付款",
+          "shop": "齐关心医药专营店",
+          "title": "美达信 20mg*28片/盒 阿托伐他汀钙片",
+          "url": "https://item.taobao.com/item.htm?id=1056319182497"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "欣速安",
+      "query_type": "商品名+通用名",
+      "search_query": "欣速安 托伐普坦片",
+      "captured_at": "2026-07-16T09:54:27.101051",
+      "opencli_cmd": "opencli taobao search \"欣速安 托伐普坦片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 4,
+      "opencli_data": [
+        {
+          "item_id": "1067972308103",
+          "location": "河南郑州",
+          "price": "¥211",
+          "rank": 1,
+          "sales": "0人付款",
+          "shop": "百事康健大药房旗舰店",
+          "title": "欣速安 15mg*7片/盒 托伐普坦片",
+          "url": "https://item.taobao.com/item.htm?id=1067972308103"
+        },
+        {
+          "item_id": "1052986397915",
+          "location": "江苏宿迁",
+          "price": "¥75",
+          "rank": 2,
+          "sales": "3人付款",
+          "shop": "昌颐堂大药房旗舰店",
+          "title": "轻水悦 托伐普坦片 15mg*7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1052986397915"
+        },
+        {
+          "item_id": "1059915127619",
+          "location": "广东深圳",
+          "price": "¥86.2",
+          "rank": 3,
+          "sales": "0人付款",
+          "shop": "穗仁堂医药专营店",
+          "title": "海苏纳 托伐普坦片 15mg*7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1059915127619"
+        },
+        {
+          "item_id": "682271433175",
+          "location": "江苏南京",
+          "price": "¥440",
+          "rank": 4,
+          "sales": "200+人付款",
+          "shop": "润天好大药房旗舰店",
+          "title": "苏麦卡 苏麦卡 托伐普坦片 15mg*5片/盒",
+          "url": "https://item.taobao.com/item.htm?id=682271433175"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "欣速安",
+      "query_type": "商品名+历史规格",
+      "search_query": "欣速安 15mg*7片",
+      "captured_at": "2026-07-16T09:57:00.065297",
+      "opencli_cmd": "opencli taobao search \"欣速安 15mg*7片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 3,
+      "opencli_data": [
+        {
+          "item_id": "677057226257",
+          "location": "河南新乡",
+          "price": "¥117",
+          "rank": 1,
+          "sales": "0人付款",
+          "shop": "润禾贰拾肆小时大药房旗舰",
+          "title": "欣速安 15mg*7片/盒 托伐普坦片",
+          "url": "https://item.taobao.com/item.htm?id=677057226257"
+        },
+        {
+          "item_id": "1062650704478",
+          "location": "广东深圳",
+          "price": "¥100",
+          "rank": 2,
+          "sales": "0人付款",
+          "shop": "医华安医药专营店",
+          "title": "海苏纳 托伐普坦片 15mg*7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1062650704478"
+        },
+        {
+          "item_id": "1052986397915",
+          "location": "江苏宿迁",
+          "price": "¥75",
+          "rank": 3,
+          "sales": "3人付款",
+          "shop": "昌颐堂大药房旗舰店",
+          "title": "轻水悦 托伐普坦片 15mg*7片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1052986397915"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "葛泰",
+      "query_type": "商品名+通用名",
+      "search_query": "葛泰 地奥司明片",
+      "captured_at": "2026-07-16T09:57:32.717504",
+      "opencli_cmd": "opencli taobao search \"葛泰 地奥司明片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 5,
+      "opencli_data": [
+        {
+          "item_id": "610185190310",
+          "location": "江苏苏州",
+          "price": "¥20",
+          "rank": 1,
+          "sales": "9000+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "葛泰 地奥司明片 0.45g*24片/盒",
+          "url": "https://item.taobao.com/item.htm?id=610185190310"
+        },
+        {
+          "item_id": "628028139099",
+          "location": "江苏苏州",
+          "price": "¥40.6",
+          "rank": 2,
+          "sales": "1万+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "葛泰 0.45g*48片/盒 地奥司明片",
+          "url": "https://item.taobao.com/item.htm?id=628028139099"
+        },
+        {
+          "item_id": "1062702307646",
+          "location": "辽宁沈阳",
+          "price": "¥15.9",
+          "rank": 3,
+          "sales": "3人付款",
+          "shop": "安馨堂医药专营店",
+          "title": "葛泰 地奥司明片 0.45g*20片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1062702307646"
+        },
+        {
+          "item_id": "1056137782138",
+          "location": "江西赣州",
+          "price": "¥16.8",
+          "rank": 4,
+          "sales": "1人付款",
+          "shop": "济民仁大药房旗舰店",
+          "title": "马应龙 地奥司明片 0.45g*24片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1056137782138"
+        },
+        {
+          "item_id": "986705831300",
+          "location": "浙江杭州",
+          "price": "¥30",
+          "rank": 5,
+          "sales": "300+人付款",
+          "shop": "奈卫氏大药房旗舰店",
+          "title": "马应龙 地奥司明片 0.5g*24片/盒",
+          "url": "https://item.taobao.com/item.htm?id=986705831300"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "葛泰",
+      "query_type": "商品名+历史规格",
+      "search_query": "葛泰 0.45g*24片",
+      "captured_at": "2026-07-16T09:58:17.547847",
+      "opencli_cmd": "opencli taobao search \"葛泰 0.45g*24片\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 3,
+      "opencli_data": [
+        {
+          "item_id": "1054514852337",
+          "location": "江苏淮安",
+          "price": "¥13.8",
+          "rank": 1,
+          "sales": "200+人付款",
+          "shop": "医医药专营店",
+          "title": "葛泰 地奥司明片 0.45g*24片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1054514852337"
+        },
+        {
+          "item_id": "1056137782138",
+          "location": "江西赣州",
+          "price": "¥16.8",
+          "rank": 2,
+          "sales": "1人付款",
+          "shop": "济民仁大药房旗舰店",
+          "title": "马应龙 地奥司明片 0.45g*24片/盒",
+          "url": "https://item.taobao.com/item.htm?id=1056137782138"
+        },
+        {
+          "item_id": "618111035926",
+          "location": "江苏南京",
+          "price": "¥22.77",
+          "rank": 3,
+          "sales": "61人付款",
+          "shop": "百信大药房旗舰店",
+          "title": "葛泰 地奥司明片 0.45g*20片/盒",
+          "url": "https://item.taobao.com/item.htm?id=618111035926"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "畅凡",
+      "query_type": "商品名+通用名",
+      "search_query": "畅凡 芦比前列酮软胶囊",
+      "captured_at": "2026-07-16T09:58:58.382840",
+      "opencli_cmd": "opencli taobao search \"畅凡 芦比前列酮软胶囊\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 4,
+      "opencli_data": [
+        {
+          "item_id": "946490166359",
+          "location": "湖北十堰",
+          "price": "¥26",
+          "rank": 1,
+          "sales": "100+人付款",
+          "shop": "用心人大药房旗舰店",
+          "title": "畅凡 芦比前列酮软胶囊 24μg*10粒*1瓶/盒",
+          "url": "https://item.taobao.com/item.htm?id=946490166359"
+        },
+        {
+          "item_id": "852074038799",
+          "location": "江苏苏州",
+          "price": "¥80.7",
+          "rank": 2,
+          "sales": "1000+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "畅凡 芦比前列酮软胶囊 24μg*16粒*1瓶/盒",
+          "url": "https://item.taobao.com/item.htm?id=852074038799"
+        },
+        {
+          "item_id": "1065205708239",
+          "location": "河南洛阳",
+          "price": "¥51.8",
+          "rank": 3,
+          "sales": "1人付款",
+          "shop": "颐春医药专营店",
+          "title": "畅凡 芦比前列酮软胶囊 24μg*14粒*1瓶/盒",
+          "url": "https://item.taobao.com/item.htm?id=1065205708239"
+        },
+        {
+          "item_id": "789831109325",
+          "location": "江苏苏州",
+          "price": "¥140",
+          "rank": 4,
+          "sales": "700+人付款",
+          "shop": "买过的店阿里健康大药房",
+          "title": "畅凡 芦比前列酮软胶囊 24μg*28粒*1瓶/盒",
+          "url": "https://item.taobao.com/item.htm?id=789831109325"
+        }
+      ],
+      "result_status": "success"
+    },
+    {
+      "platform": "taobao",
+      "brand": "畅凡",
+      "query_type": "商品名+历史规格",
+      "search_query": "畅凡 24μg*10粒",
+      "captured_at": "2026-07-16T09:59:44.994865",
+      "opencli_cmd": "opencli taobao search \"畅凡 24μg*10粒\" -f json --limit 20 --sort default --window foreground --site-session persistent",
+      "opencli_success": true,
+      "is_formal_price": false,
+      "price_usage": "candidate_only",
+      "note": "Search列表价格为搜索起售价，不能作为正式SKU价格。",
+      "result_count": 3,
+      "opencli_data": [
+        {
+          "item_id": "946490166359",
+          "location": "湖北十堰",
+          "price": "¥26",
+          "rank": 1,
+          "sales": "100+人付款",
+          "shop": "用心人大药房旗舰店",
+          "title": "畅凡 芦比前列酮软胶囊 24μg*10粒*1瓶/盒",
+          "url": "https://item.taobao.com/item.htm?id=946490166359"
+        },
+        {
+          "item_id": "1044314501920",
+          "location": "河南漯河",
+          "price": "¥15.9",
+          "rank": 2,
+          "sales": "7人付款",
+          "shop": "全凡医药专营店",
+          "title": "金舒通胶囊24粒/盒改善胃肠道功能润肠通便顺畅包邮大药房旗舰店",
+          "url": "https://item.taobao.com/item.htm?id=1044314501920"
+        },
+        {
+          "item_id": "910387235111",
+          "location": "江苏南通",
+          "price": "¥130",
+          "rank": 3,
+          "sales": "300+人付款",
+          "shop": "康付甄选大药房旗舰店",
+          "title": "畅凡 芦比前列酮软胶囊 24μg*28粒*1瓶/盒",
+          "url": "https://item.taobao.com/item.htm?id=910387235111"
+        }
+      ],
+      "result_status": "success"
+    }
+  ],
+  "summary": {
+    "jd_smoke": "7/10 success, 2 break_price, 1 blocked",
+    "tmall_smoke": "10/10 success, 0 box_count_uncertain, 0 blocked",
+    "jd_search": "10/10 success",
+    "tmall_search": "10/10 success"
+  }
+}

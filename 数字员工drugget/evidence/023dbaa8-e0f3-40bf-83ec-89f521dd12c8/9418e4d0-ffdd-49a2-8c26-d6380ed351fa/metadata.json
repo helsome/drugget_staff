@@ -1,0 +1,62 @@
+{
+  "task": {
+    "task_id": "9418e4d0-ffdd-49a2-8c26-d6380ed351fa",
+    "run_id": "023dbaa8-e0f3-40bf-83ec-89f521dd12c8",
+    "platform": "yaoshibang",
+    "task_type": "store_search",
+    "session_alias": "yaoshibang-p0",
+    "target_id": null,
+    "drug_name": "托妥",
+    "generic_name": "瑞舒伐他汀钙片",
+    "spec": null,
+    "shop_name": "敬一堂",
+    "product_id": null,
+    "url": null,
+    "query": "托妥",
+    "fixed_tier": null,
+    "priority": 10,
+    "metadata": {
+      "drug_id": "1e5b4814-f3bf-45dd-8da1-19b19f6a1ca9",
+      "target_brand": "托妥",
+      "target_spec": null,
+      "route": "provider_profile",
+      "shop_home_url": null,
+      "provider_id": "9023",
+      "fixture_seed_key": "STORE_SEARCH|yaoshibang|W06410|托妥"
+    }
+  },
+  "result": {
+    "collection_status": "success",
+    "calculation_status": "not_applicable",
+    "price_status": "not_evaluated",
+    "page_title": null,
+    "final_url": null,
+    "page_shop": null,
+    "selected_spec": null,
+    "page_price_raw": null,
+    "page_price_value": null,
+    "sale_box_count": null,
+    "units_per_box": null,
+    "min_unit": null,
+    "single_box_price": null,
+    "single_unit_price": null,
+    "control_price": null,
+    "comparison_price": null,
+    "break_amount": null,
+    "error_code": null,
+    "error_detail": null
+  },
+  "evidence": {
+    "final_url": null,
+    "page_title": null,
+    "raw_fields": {
+      "query": "托妥",
+      "provider_resolution": null,
+      "hits": []
+    },
+    "collector_version": "opencli-1.8.6",
+    "login_status": null,
+    "parser_version": null,
+    "captured_at": "2026-07-20T09:43:15.443542"
+  }
+}

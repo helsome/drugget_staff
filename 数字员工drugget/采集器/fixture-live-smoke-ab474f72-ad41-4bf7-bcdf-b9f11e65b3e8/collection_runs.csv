@@ -1,0 +1,2 @@
+﻿id,status,fixed_status,search_status,started_at,finished_at,summary
+023dbaa8-e0f3-40bf-83ec-89f521dd12c8,human_required,pending,pending,,,"{""task_status_counts"": {""human_required"": 3, ""succeeded"": 13}, ""recovery_note"": ""final summary repaired after SQLAlchemy result-materialization error; no tasks rerun""}"

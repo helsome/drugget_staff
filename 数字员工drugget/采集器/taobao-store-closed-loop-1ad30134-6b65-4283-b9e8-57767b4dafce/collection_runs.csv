@@ -1,0 +1,2 @@
+﻿记录ID,状态,固定任务状态,搜索任务状态,批次开始时间,批次结束时间,批次摘要
+1ad30134-6b65-4283-b9e8-57767b4dafce,completed,pending,pending,,,"{""task_status_counts"": {""failed"": 1}, ""platform_outcomes"": {""taobao"": {""platform"": ""taobao"", ""completed"": 1, ""paused"": 0, ""reason"": ""queue_empty""}}}"
