@@ -10,26 +10,24 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from queue import Queue
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .catalog import DRUG_MAP
+from .cancellation import CancellationToken, CancelledError
 from .collector import OpenCLIComputerUseCollector
 from .config import Settings
 from .database import configured_database, init_database
-from .enums import TaskType
+from .enums import StoreSelectionMode, TaskType
 from .evidence import EvidenceStore
-from .models import DrugProduct, StoreResponsibility
 from .orchestrator import BatchOrchestrator, DEFAULT_RATE_POLICIES, RatePolicy
 from .schemas import CollectionTaskSpec
-from .services import TaskQueueService
+from .services import DrugSelection, StoreTaskPlanner, TaskQueueService
 
 
 @dataclass
 class TestRunConfig:
     """Configuration for a single test run, submitted from the GUI."""
 
-    drugs: list[str] = field(default_factory=list)
+    drugs: list[DrugSelection] = field(default_factory=list)
     platforms: list[str] = field(default_factory=list)
     search_modes: list[str] = field(default_factory=lambda: ["global_search", "store_search"])
     search_limit: int = 5
@@ -38,6 +36,8 @@ class TestRunConfig:
     rate_policy_overrides: dict[str, dict] = field(default_factory=dict)
     use_test_db: bool = True
     output_root: str | None = None
+    store_selection_mode: StoreSelectionMode = StoreSelectionMode.RESPONSIBILITY_ONLY
+    selected_store_ids: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -93,6 +93,7 @@ class TestWorker:
         self.root = root
         self.queue: Queue[ProgressUpdate] = Queue()
         self._cancel_flag = threading.Event()
+        self.cancellation_token = CancellationToken()
         self._start_time = 0.0
 
     def start(self) -> None:
@@ -102,6 +103,7 @@ class TestWorker:
 
     def cancel(self) -> None:
         self._cancel_flag.set()
+        self.cancellation_token.cancel()
 
     def _elapsed(self) -> float:
         return time.time() - self._start_time
@@ -125,9 +127,24 @@ class TestWorker:
 
     async def _async_run(self) -> None:
         cfg = self.config
-        settings = Settings.from_env(self.root, test_mode=cfg.use_test_db)
+        settings = Settings.load(self.root, mode="test" if cfg.use_test_db else "prod")
+        # Safety: validate runtime mode before connecting to the database
+        if cfg.use_test_db:
+            settings.validate_runtime_mode("test")
+        else:
+            settings.validate_runtime_mode("prod")
         engine, factory = configured_database(settings)
         init_database(engine)
+
+        # Sanitize fake provider_ids before any task generation
+        with factory() as db:
+            cleaned = StoreTaskPlanner.sanitize_fake_provider_ids(db)
+            if cleaned:
+                self._put(_progress(
+                    phase="init", status="running", platform="",
+                    run_id="",
+                    message=f"已清理 {cleaned} 个历史假 provider_id",
+                ))
 
         # Build session map
         sessions: dict[str, str] = {}
@@ -139,10 +156,48 @@ class TestWorker:
             run = queue.create_run()
             run_id = run.id
 
+            # Count planned tasks for preview
+            global_search_count = 0
+            store_search_count = 0
+            skipped_store_count = 0
+            need_resolution_count = 0
+            total_drugs = len(cfg.drugs)
+
+            for selection in cfg.drugs:
+                drug = selection.resolve(db)
+                if drug is None:
+                    continue
+                if "global_search" in cfg.search_modes:
+                    global_search_count += 1
+                if "store_search" in cfg.search_modes:
+                    planner = StoreTaskPlanner(db)
+                    for platform in cfg.platforms:
+                        store_results = planner.eligible_stores(
+                            platform=platform,
+                            drug=drug,
+                            selection=cfg.store_selection_mode,
+                            manual_store_ids=cfg.selected_store_ids,
+                        )
+                        for r in store_results:
+                            if r.eligible:
+                                store_search_count += 1
+                            else:
+                                skipped_store_count += 1
+                                if r.need_identity_resolution:
+                                    need_resolution_count += 1
+
             self._put(_progress(
                 phase="init", status="running", platform="", run_id=run_id,
-                message=f"创建运行: {run_id[:8]}... 药品 {len(cfg.drugs)} 个, 平台 {len(cfg.platforms)} 个",
-                detail=f"搜索模式: {', '.join(cfg.search_modes)} | 搜索条数: {cfg.search_limit}",
+                message=f"创建运行: {run_id[:8]}... 药品 {total_drugs} 个, 平台 {len(cfg.platforms)} 个",
+                detail=(
+                    f"搜索模式: {', '.join(cfg.search_modes)} | "
+                    f"搜索条数: {cfg.search_limit} | "
+                    f"店铺模式: {cfg.store_selection_mode.value} | "
+                    f"全局搜索: {global_search_count} | "
+                    f"店铺搜索: {store_search_count} | "
+                    f"跳过店铺: {skipped_store_count} | "
+                    f"需解析: {need_resolution_count}"
+                ),
             ))
 
             # Enqueue tasks per platform
@@ -178,8 +233,21 @@ class TestWorker:
                 session=db, collector=collector,
                 evidence_store=evidence_store, run_id=run_id,
                 rate_policies=rate_policies,
+                cancellation_token=self.cancellation_token,
             )
             outcomes = await orchestrator.execute_all(sessions)
+
+            if self.cancellation_token.is_cancelled:
+                # Cancel pending tasks and mark run as cancelled
+                queue.cancel_pending_tasks(run_id)
+                queue.mark_run_cancelled(run_id)
+                db.commit()
+                self._put(_progress(
+                    phase="done", status="cancelled", platform="", run_id=run_id,
+                    message="采集已取消",
+                    detail=str(outcomes),
+                ))
+                return  # Skip export and success updates
 
             self._put(_progress(
                 phase="done", status="success", platform="", run_id=run_id,
@@ -187,15 +255,30 @@ class TestWorker:
                 detail=str(outcomes),
             ))
 
-            # Export results
-            from export_fixture_run_csv import export_run
+            # Export results — only run outputs, not fixture inputs
+            from export_fixture_run_csv import export_run_outputs, export_run_manifest
 
             csv_dir = (
                 Path(cfg.output_root) / run_id
                 if cfg.output_root
                 else self.root / "artifacts" / "runs" / "current" / run_id
             )
-            export_run(run_id, csv_dir, test_mode=cfg.use_test_db)
+            csv_dir.mkdir(parents=True, exist_ok=True)
+            export_run_outputs(run_id, db, csv_dir)
+            export_run_manifest(
+                run_id, db, csv_dir,
+                run=run,
+                selected_drugs=[d.generic_name or d.brand_name for d in cfg.drugs],
+                selected_platforms=cfg.platforms,
+                selected_search_modes=cfg.search_modes,
+                effective_parameters={
+                    "search_limit": cfg.search_limit,
+                    "max_candidates": cfg.max_candidates,
+                    "inspect_limit": cfg.inspect_limit,
+                },
+                source_type="test_workbench",
+                runtime_mode="test" if cfg.use_test_db else "production",
+            )
             self._put(_progress(
                 phase="export", status="success", platform="", run_id=run_id,
                 message=f"CSV 已导出: {csv_dir}",
@@ -210,31 +293,32 @@ class TestWorker:
         platform: str,
         cfg: TestRunConfig,
     ) -> None:
-        """Enqueue tasks for one platform based on the selected drugs and search modes."""
-        for generic_name in cfg.drugs:
-            brand_name = DRUG_MAP.get(generic_name, "")
-            if not brand_name:
+        """Enqueue tasks for one platform based on the selected drugs and search modes.
+
+        Store search tasks are generated through ``StoreTaskPlanner`` to
+        prevent the unbounded Cartesian product of ``all drugs x all stores``.
+        """
+        planner = StoreTaskPlanner(db)
+
+        for selection in cfg.drugs:
+            drug = selection.resolve(db)
+            if drug is None:
                 self._put(_progress(
                     phase="init", status="skipped", platform=platform,
-                    drug_name=generic_name, run_id=run_id,
-                    message=f"跳过: 药品 {generic_name} 未在目录中找到",
+                    drug_name=selection.generic_name or selection.brand_name, run_id=run_id,
+                    message=f"跳过: 药品 {selection.generic_name or selection.brand_name} 未在目录中找到",
                 ))
                 continue
 
-            drug = db.scalar(select(DrugProduct).where(DrugProduct.brand_name == brand_name))
-            if drug is None:
-                drug = DrugProduct(brand_name=brand_name, generic_name=generic_name)
-                db.add(drug)
-                db.flush()
             common_metadata = {
                 "drug_id": drug.id,
-                "target_brand": brand_name,
+                "target_brand": drug.brand_name,
                 "search_limit": cfg.search_limit,
                 "candidate_limit": cfg.max_candidates,
                 "inspect_limit": cfg.inspect_limit,
                 "source": "test_workbench",
             }
-            query = f"{brand_name} {generic_name}"
+            query = f"{drug.brand_name} {drug.generic_name}"
 
             # GLOBAL_SEARCH
             if "global_search" in cfg.search_modes:
@@ -244,8 +328,8 @@ class TestWorker:
                     platform=platform,
                     task_type=TaskType.SEARCH,
                     session_alias=f"{platform}-p0",
-                    drug_name=brand_name,
-                    generic_name=generic_name,
+                    drug_name=drug.brand_name,
+                    generic_name=drug.generic_name,
                     query=query,
                     metadata={
                         **common_metadata,
@@ -255,40 +339,91 @@ class TestWorker:
                 queue.enqueue(spec)
                 self._put(_progress(
                     phase="init", status="success", platform=platform,
-                    task_type="GLOBAL_SEARCH", drug_name=generic_name,
+                    task_type="GLOBAL_SEARCH", drug_name=drug.generic_name,
                     query=query, run_id=run_id,
-                    message=f"已入队: 全局搜索 {generic_name}",
+                    message=f"已入队: 全局搜索 {drug.generic_name}",
                 ))
 
-            # STORE_SEARCH — enqueue for each known store on this platform
+            # STORE_SEARCH — use StoreTaskPlanner to avoid Cartesian product
             if "store_search" in cfg.search_modes:
-                stores = db.execute(
-                    select(StoreResponsibility).where(
-                        StoreResponsibility.platform == platform,
-                    )
-                ).scalars().all()
-                for store in stores:
+                store_results = planner.eligible_stores(
+                    platform=platform,
+                    drug=drug,
+                    selection=cfg.store_selection_mode,
+                    manual_store_ids=cfg.selected_store_ids,
+                )
+
+                eligible_stores = [r for r in store_results if r.eligible]
+                skipped_stores = [r for r in store_results if not r.eligible]
+
+                # Report skipped stores
+                for r in skipped_stores:
+                    reason_map = {
+                        "missing_shop_home_url": "缺少 shop_home_url",
+                        "missing_provider_id": "缺少可信 provider_id",
+                        "no_responsibility": "与药品无责任关系",
+                        "not_executable": "不可执行的身份状态",
+                        "not_selected": "未手工选择",
+                    }
+                    shop_name = r.store.shop_name if r.store else "未知"
+                    reason_text = reason_map.get(r.reason, r.reason)
+                    self._put(_progress(
+                        phase="init", status="skipped", platform=platform,
+                        task_type="STORE_SEARCH", drug_name=drug.generic_name,
+                        shop_name=shop_name, run_id=run_id,
+                        message=f"跳过店铺: {shop_name} — {reason_text}",
+                        detail=f"原因: {r.reason}"
+                        + (", 需要身份解析" if r.need_identity_resolution else ""),
+                    ))
+
+                if not eligible_stores:
+                    self._put(_progress(
+                        phase="init", status="skipped", platform=platform,
+                        task_type="STORE_SEARCH", drug_name=drug.generic_name,
+                        run_id=run_id,
+                        message=f"无可用店铺: {drug.generic_name} @ {platform}",
+                        detail=f"店铺模式: {cfg.store_selection_mode.value}, "
+                               f"跳过 {len(skipped_stores)} 个店铺",
+                    ))
+                    continue
+
+                for r in eligible_stores:
+                    store = r.store
+                    if store is None:
+                        continue
+
+                    # Platform-specific metadata
+                    route = "shop_home"
+                    shop_home_url = None
+                    provider_id = None
+                    if platform == "taobao":
+                        route = "shop_home"
+                        shop_home_url = store.shop_home_url
+                    elif platform == "yaoshibang":
+                        route = "provider_profile"
+                        provider_id = store.platform_store_key
+
                     spec = CollectionTaskSpec(
                         task_id=str(uuid.uuid4()),
                         run_id=run_id,
                         platform=platform,
                         task_type=TaskType.STORE_SEARCH,
                         session_alias=f"{platform}-p0",
-                        drug_name=brand_name,
-                        generic_name=generic_name,
+                        drug_name=drug.brand_name,
+                        generic_name=drug.generic_name,
                         shop_name=store.shop_name,
                         query=query,
                         metadata={
                             **common_metadata,
-                            "route": "provider_profile" if platform == "yaoshibang" else "shop_home",
-                            "provider_id": store.platform_store_key if platform == "yaoshibang" else None,
-                            "shop_home_url": store.shop_home_url if platform == "taobao" else None,
+                            "route": route,
+                            "provider_id": provider_id,
+                            "shop_home_url": shop_home_url,
                         },
                     )
                     queue.enqueue(spec)
                     self._put(_progress(
                         phase="init", status="success", platform=platform,
-                        task_type="STORE_SEARCH", drug_name=generic_name,
+                        task_type="STORE_SEARCH", drug_name=drug.generic_name,
                         shop_name=store.shop_name, run_id=run_id,
-                        message=f"已入队: 店铺搜索 {generic_name} @ {store.shop_name}",
+                        message=f"已入队: 店铺搜索 {drug.generic_name} @ {store.shop_name}",
                     ))

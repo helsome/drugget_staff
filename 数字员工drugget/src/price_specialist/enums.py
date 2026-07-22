@@ -77,3 +77,27 @@ class TaskStatus(StrEnum):
     HUMAN_REQUIRED = "human_required"
     DEFERRED = "deferred"
     CANCELLED = "cancelled"
+
+
+class StoreSelectionMode(StrEnum):
+    """Store selection scope for store search task generation.
+
+    RESPONSIBILITY_ONLY (default, most conservative):
+        Only stores with a drug responsibility relationship AND executable
+        platform identity.  Checks both MonitorTarget links and identity status.
+
+    EXECUTABLE_ONLY:
+        Only stores with executable platform identity (verified provider_id
+        for yaoshibang, shop_home_url for taobao).  No drug relationship
+        check — wider than RESPONSIBILITY_ONLY.
+
+    MANUAL:
+        Only stores explicitly selected by the user via internal_store_id.
+
+    ALL_DANGER:
+        All stores on the platform (requires confirmation dialog).
+    """
+    RESPONSIBILITY_ONLY = "responsibility_only"
+    EXECUTABLE_ONLY = "executable_only"
+    MANUAL = "manual"
+    ALL_DANGER = "all_danger"

@@ -13,7 +13,9 @@ from typing import Any, Awaitable, Callable
 from sqlalchemy.orm import Session
 from sqlalchemy import func, select
 
+from .database import configured_database, init_database
 from .alerts import AlertDryRunService
+from .cancellation import CancellationToken, CancelledError
 from .collector import ComputerUseCollector
 from .enums import CollectionStatus, TaskStatus, TaskType
 from .evidence import EvidenceStore
@@ -21,6 +23,7 @@ from .errors import CollectorAccessError
 from .incidents import IncidentService
 from .models import CollectionRun, CollectionTask, Incident, SearchCandidate, StoreResponsibility
 from .pricing import evaluate_price
+from .run_logger import RunEvent, RunEventSink
 from .schemas import BrowserSession, ClassifiedCandidate, CollectionResult, CollectionTaskSpec, SearchHit
 from .search import SearchClassifier, deduplicate_hits
 from .services import SearchCandidateService, TaskQueueService, evaluate_fixed_result
@@ -223,6 +226,8 @@ class BatchOrchestrator:
         rate_policies: dict[str, RatePolicy] | None = None,
         run_id: str | None = None,
         logger: Any | None = None,
+        event_sink: Any | None = None,
+        cancellation_token: CancellationToken | None = None,
     ):
         self.session = session
         self.collector = collector
@@ -235,6 +240,16 @@ class BatchOrchestrator:
         self.alerts = AlertDryRunService()
         self.run_id = run_id
         self.logger = logger
+        self.event_sink = event_sink
+        self.cancellation_token = cancellation_token
+
+    def _is_cancelled(self) -> bool:
+        return self.cancellation_token is not None and self.cancellation_token.is_cancelled
+
+    def _emit(self, event: RunEvent) -> None:
+        """Emit a structured event if the event_sink is configured."""
+        if self.event_sink is not None:
+            self.event_sink.emit(event)
 
     async def _execute(self, spec: CollectionTaskSpec, browser: BrowserSession) -> CollectionResult:
         if spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH}:
@@ -328,26 +343,65 @@ class BatchOrchestrator:
             .limit(1)
         )
         if blocking:
-            return {"platform": platform, "completed": 0, "paused": 1, "reason": "unresolved_incident"}
+            self._emit(RunEvent(
+                run_id=self.run_id or "", event_type="task_blocked", phase="execute",
+                status="blocked", platform=platform,
+                message=f"平台 {platform} 被阻塞: 未解决的事故",
+            ))
+            return {"platform": platform, "completed": 0, "paused": 1, "reason": "unresolved_incident",
+                "execution_status": "blocked", "business_status": "blocked"}
         browser = BrowserSession(platform=platform, alias=session_alias)
         if not skip_health_check:
+            self._emit(RunEvent(
+                run_id=self.run_id or "", event_type="platform_health_started",
+                phase="health", status="running", platform=platform,
+                message=f"检查 {platform} 平台健康状态",
+            ))
             health = await self.collector.health_check(browser)
             if health.collection_status != CollectionStatus.SUCCESS:
-                return {"platform": platform, "completed": 0, "paused": 1, "reason": health.collection_status.value}
+                self._emit(RunEvent(
+                    run_id=self.run_id or "", event_type="platform_health_failed",
+                    phase="health", status="failed", platform=platform,
+                    message=f"平台 {platform} 健康检查失败: {health.collection_status.value}",
+                    collection_status=health.collection_status.value,
+                ))
+                return {"platform": platform, "completed": 0, "paused": 1, "reason": health.collection_status.value,
+                    "execution_status": "blocked", "business_status": "blocked"}
+            self._emit(RunEvent(
+                run_id=self.run_id or "", event_type="platform_health_success",
+                phase="health", status="success", platform=platform,
+                message=f"平台 {platform} 健康检查通过",
+            ))
 
         completed = 0
         batch_count = 0
-        while (max_tasks is None or completed < max_tasks) and (
-            task := self.queue.lease(
+        while (max_tasks is None or completed < max_tasks):
+            if self._is_cancelled():
+                break
+            task = self.queue.lease(
                 platform=platform,
                 session_alias=session_alias,
                 run_id=self.run_id,
                 task_types=task_types,
             )
-        ):
+            if task is None:
+                break
             spec = CollectionTaskSpec.model_validate(task.payload)
             task.status = TaskStatus.RUNNING.value
             self.session.commit()
+
+            # Emit task_started
+            self._emit(RunEvent(
+                run_id=self.run_id or "", event_type="task_started",
+                phase="execute", status="running", platform=platform,
+                task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                brand_name=spec.drug_name, generic_name=spec.generic_name,
+                shop_name=spec.shop_name, query=spec.query,
+                message=f"开始 {spec.task_type.value} {spec.drug_name or ''} {spec.shop_name or ''}",
+                details={"drug_id": str(spec.metadata.get("drug_id", "")),
+                         "search_mode": spec.task_type.value if spec.task_type else ""},
+            ))
+
             result = await self._execute(spec, browser)
             # Store-resolution may enrich metadata (for example a verified
             # 药师帮 provider_id). Persist it with the queued task for audit and
@@ -399,6 +453,27 @@ class BatchOrchestrator:
             if spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH} and result.collection_status == CollectionStatus.SUCCESS:
                 hits = [SearchHit.model_validate(item) for item in result.evidence.raw_fields.get("hits", [])]
                 candidates = self.candidates.classify_and_save(task=task, spec=spec, hits=hits)
+
+                # Emit search events
+                if hits:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="search_hits_received",
+                        phase="search", status="success", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        query=spec.query, candidate_count=len(hits),
+                        message=f"搜索到 {len(hits)} 个候选",
+                    ))
+                else:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="search_no_hits",
+                        phase="search", status="partial", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        query=spec.query, candidate_count=0,
+                        message="搜索无结果",
+                    ))
+
                 configured_inspection_limit = int(spec.metadata.get("inspect_limit", 1) or 1)
                 inspection_limit = 0 if configured_inspection_limit < 0 else max(1, configured_inspection_limit)
                 inspections_enqueued = 0
@@ -428,10 +503,99 @@ class BatchOrchestrator:
                         query=spec.query, metadata=metadata,
                     ))
                     inspections_enqueued += 1
+                for candidate in candidates:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="candidate_saved",
+                        phase="search", status="success", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=candidate.shop_name, product_id=candidate.product_id,
+                        query=spec.query, candidate_count=1,
+                        message=f"保存候选: {candidate.shop_name or ''} {candidate.product_id or ''}",
+                    ))
             observation = self.queue.record_result(task, result, str(evidence_path))
             observation.evidence_sha256 = digest
             observation.collector_version = result.evidence.collector_version
             observation.raw_evidence = result.evidence.raw_fields
+
+            # Emit detail / search / fixed task result events
+            if spec.task_type == TaskType.INSPECT_CANDIDATE:
+                if result.collection_status == CollectionStatus.SUCCESS:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="detail_succeeded",
+                        phase="inspect", status="success", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, product_id=spec.product_id,
+                        collection_status=result.collection_status.value,
+                        message=f"详情成功: {spec.drug_name or ''} {spec.shop_name or ''}",
+                    ))
+                else:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="detail_failed",
+                        phase="inspect", status="failed", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, product_id=spec.product_id,
+                        collection_status=result.collection_status.value,
+                        error_code=result.error_code, error_detail=result.error_detail,
+                        message=f"详情失败: {result.collection_status.value}",
+                    ))
+            elif spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH}:
+                if result.collection_status == CollectionStatus.SUCCESS:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="task_succeeded",
+                        phase="search", status="success", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, query=spec.query,
+                        collection_status=result.collection_status.value,
+                        message=f"搜索完成: {spec.drug_name or ''}",
+                    ))
+                elif result.collection_status == CollectionStatus.NOT_FOUND:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="task_not_found",
+                        phase="search", status="partial", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, query=spec.query,
+                        collection_status=result.collection_status.value,
+                        error_code=result.error_code, error_detail=result.error_detail,
+                        message="搜索未找到结果",
+                    ))
+                else:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="task_failed",
+                        phase="search", status="failed", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, query=spec.query,
+                        collection_status=result.collection_status.value,
+                        error_code=result.error_code, error_detail=result.error_detail,
+                        message=f"搜索失败: {result.collection_status.value}",
+                    ))
+            else:
+                # Fixed tasks
+                if result.collection_status == CollectionStatus.SUCCESS:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="task_succeeded",
+                        phase="fixed", status="success", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        collection_status=result.collection_status.value,
+                        message=f"固定任务完成: {spec.drug_name or ''}",
+                    ))
+                else:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="task_failed",
+                        phase="fixed", status="failed", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        collection_status=result.collection_status.value,
+                        error_code=result.error_code, error_detail=result.error_detail,
+                        message=f"固定任务失败: {result.collection_status.value}",
+                    ))
+
             if spec.task_type == TaskType.INSPECT_CANDIDATE and result.collection_status == CollectionStatus.SUCCESS:
                 candidate = self.session.scalar(
                     select(SearchCandidate).where(
@@ -444,6 +608,15 @@ class BatchOrchestrator:
                 if candidate:
                     candidate.is_formal_price = True
                     candidate.sku_verification_status = "verified_detail"
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="formal_price_confirmed",
+                        phase="inspect", status="success", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, product_id=spec.product_id or candidate.product_id,
+                        formal_price_count=1,
+                        message=f"正式价格确认: {spec.drug_name or ''} {spec.shop_name or ''}",
+                    ))
             elif (
                 spec.task_type == TaskType.INSPECT_CANDIDATE
                 and result.collection_status == CollectionStatus.PARSE_ERROR
@@ -462,7 +635,9 @@ class BatchOrchestrator:
                 batch_count = 0
             else:
                 await self.sleep(policy.delay_for(spec.task_type, batch_complete=False))
-        return {"platform": platform, "completed": completed, "paused": 0, "reason": "queue_empty"}
+        return {"platform": platform, "completed": completed, "paused": 0, "reason": "queue_empty",
+                "execution_status": "finished" if not self._is_cancelled() else "cancelled",
+                "business_status": "success" if not self._is_cancelled() else "cancelled"}
 
     def _enqueue_detail_fallback(self, spec: CollectionTaskSpec) -> CollectionTask | None:
         """Try the next persisted candidate after a detail parse failure.
@@ -545,7 +720,8 @@ class BatchOrchestrator:
         # Global stage order: every healthy platform completes fixed work before
         # any Search work begins. A challenge removes only that platform.
         summary = {
-            platform: {"platform": platform, "completed": 0, "paused": 0, "reason": "queue_empty"}
+            platform: {"platform": platform, "completed": 0, "paused": 0, "reason": "queue_empty",
+                       "execution_status": "finished", "business_status": "success"}
             for platform in sessions
         }
         paused: set[str] = set()
@@ -567,6 +743,8 @@ class BatchOrchestrator:
             {TaskType.INSPECT_CANDIDATE.value},
         ]
         for task_types in stages:
+            if self._is_cancelled():
+                break
             for platform, alias in sessions.items():
                 if platform in paused:
                     continue
@@ -587,13 +765,27 @@ class BatchOrchestrator:
                 summary[platform]["completed"] = int(summary[platform]["completed"]) + int(outcome["completed"])
                 summary[platform]["paused"] = outcome["paused"]
                 summary[platform]["reason"] = outcome["reason"]
+                summary[platform]["execution_status"] = outcome.get("execution_status", "finished")
+                summary[platform]["business_status"] = outcome.get("business_status", "success")
                 if outcome["paused"]:
                     paused.add(platform)
 
         if self.run_id:
-            run = self.session.get(CollectionRun, self.run_id)
-            if run:
-                counts = dict(
+            if self._is_cancelled():
+                self.queue.cancel_pending_tasks(self.run_id)
+                self.queue.mark_run_cancelled(self.run_id)
+                self._emit(RunEvent(
+                    run_id=self.run_id, event_type="run_cancelled",
+                    phase="done", status="cancelled",
+                    message="运行已取消",
+                ))
+                for s in summary.values():
+                    s["execution_status"] = "cancelled"
+                    s["business_status"] = "cancelled"
+            else:
+                run = self.session.get(CollectionRun, self.run_id)
+                if run:
+                    counts = dict(
                     self.session.execute(
                         select(CollectionTask.status, func.count())
                         .where(CollectionTask.run_id == self.run_id)

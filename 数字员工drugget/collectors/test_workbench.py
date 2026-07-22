@@ -18,6 +18,15 @@ sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(_PROJECT_ROOT / "collectors"))
 
 from price_specialist.catalog import DRUG_MAP
+from price_specialist.run_logger import (
+    DrugRunStatus,
+    DrugStatusTracker,
+    RunEvent,
+    build_run_event_system,
+    write_run_status_snapshot,
+    write_drug_status_csv,
+    write_task_status_csv,
+)
 from price_specialist.test_runner import TestRunConfig, TestWorker, _progress
 
 
@@ -26,9 +35,21 @@ BG = "#f4f6fa"
 FG = "#182235"
 ACCENT = "#2563eb"
 SUCCESS = "#16a34a"
+WARNING = "#ca8a04"
 FAILURE = "#dc2626"
 INFO = "#2563eb"
 MUTED = "#65738b"
+CANCELLED = "#6b7280"
+
+# Status colour mapping
+STATUS_COLORS = {
+    "success": SUCCESS,
+    "partial": WARNING,
+    "failed": FAILURE,
+    "running": INFO,
+    "cancelled": CANCELLED,
+    "pending": MUTED,
+}
 
 # ── Drug selector (searchable checkbox list) ────────────────────────────────
 class DrugSelector(ttk.LabelFrame):
@@ -272,60 +293,188 @@ class LogPanel(ttk.LabelFrame):
         self.text.configure(state="disabled")
 
 
-# ── Result panel (per-platform progress) ───────────────────────────────────
-class ResultPanel(ttk.LabelFrame):
+# ── Drug results table (scrollable, filterable) ──────────────────────────
+class DrugResultsPanel(ttk.LabelFrame):
+    """Scrollable, filterable drug-level results table with aggregate stats."""
+
     def __init__(self, parent, **kwargs):
-        super().__init__(parent, text="结果摘要", padding=8, **kwargs)
+        super().__init__(parent, text="药品采集结果", padding=4, **kwargs)
+        self._drugs: list[DrugRunStatus] = []
+        self._filter_status: str = "all"
+        self._filter_platform: str = "all"
         self._build()
 
     def _build(self):
-        self.info_var = tk.StringVar(value="等待开始...")
-        ttk.Label(self, textvariable=self.info_var, font=("", 10)).pack(anchor="w")
+        # ── Overall stats bar ──
+        stats_frame = ttk.Frame(self)
+        stats_frame.pack(fill="x", pady=(0, 4))
+        self.stats_var = tk.StringVar(value="等待运行...")
+        ttk.Label(stats_frame, textvariable=self.stats_var, font=("", 10, "bold")).pack(side="left")
 
-        self.platform_frames: dict[str, ttk.Frame] = {}
-        self.platform_bars: dict[str, ttk.Progressbar] = {}
-        self.platform_labels: dict[str, tk.StringVar] = {}
-        self.drug_labels: dict[str, tk.StringVar] = {}
+        # ── Filter bar ──
+        filter_frame = ttk.Frame(self)
+        filter_frame.pack(fill="x", pady=(0, 4))
 
+        ttk.Label(filter_frame, text="状态筛选:", foreground=FG).pack(side="left", padx=(0, 4))
+        self.status_filter_var = tk.StringVar(value="all")
+        status_filter = ttk.Combobox(
+            filter_frame, textvariable=self.status_filter_var,
+            values=["all", "success", "partial", "failed", "running", "cancelled", "pending"],
+            width=10, state="readonly",
+        )
+        status_filter.pack(side="left", padx=(0, 12))
+        status_filter.bind("<<ComboboxSelected>>", self._on_filter_change)
+
+        ttk.Label(filter_frame, text="平台筛选:", foreground=FG).pack(side="left", padx=(0, 4))
+        self.platform_filter_var = tk.StringVar(value="all")
+        platform_filter = ttk.Combobox(
+            filter_frame, textvariable=self.platform_filter_var,
+            values=["all", "yaoshibang", "taobao", "jd"],
+            width=10, state="readonly",
+        )
+        platform_filter.pack(side="left", padx=(0, 12))
+        platform_filter.bind("<<ComboboxSelected>>", self._on_filter_change)
+
+        # Quick filter buttons
+        self.fail_only_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(filter_frame, variable=self.fail_only_var, text="只看失败",
+                        command=self._on_filter_change).pack(side="left", padx=(0, 4))
+        self.no_capture_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(filter_frame, variable=self.no_capture_var, text="只看未抓取",
+                        command=self._on_filter_change).pack(side="left", padx=(0, 4))
+        self.captured_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(filter_frame, variable=self.captured_var, text="只看已抓取",
+                        command=self._on_filter_change).pack(side="left", padx=(0, 4))
+
+        # ── Scrollable table ──
+        table_frame = ttk.Frame(self)
+        table_frame.pack(fill="both", expand=True)
+
+        # Column headers
+        headers = ["药品", "品牌", "平台", "搜索模式", "阶段", "状态", "候选数",
+                    "详情成功", "正式价格", "错误数", "最后原因"]
+        widths = [100, 100, 80, 80, 80, 70, 60, 70, 70, 60, 150]
+
+        header_row = ttk.Frame(table_frame)
+        header_row.pack(fill="x")
+        for col, (header, width) in enumerate(zip(headers, widths)):
+            ttk.Label(header_row, text=header, font=("", 9, "bold"),
+                      width=width // 7, anchor="w").pack(side="left", padx=(2, 0))
+
+        # Canvas + scrollbar for table body
+        canvas = tk.Canvas(table_frame, height=180, bg=BG, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=canvas.yview)
+        self.table_body = ttk.Frame(canvas)
+        self.table_body.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=self.table_body, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        def _on_mousewheel(event):
+            canvas.yview_scroll(-1 * (event.delta // 120), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        # ── Bottom progress bar (total tasks) ──
+        self.progress_frame = ttk.Frame(self)
+        self.progress_frame.pack(fill="x", pady=(4, 0))
+        self.progress_label_var = tk.StringVar(value="进度: 0/0")
+        ttk.Label(self.progress_frame, textvariable=self.progress_label_var,
+                  font=("", 9)).pack(side="left", padx=(0, 8))
+        self.progress_bar = ttk.Progressbar(self.progress_frame, length=300, maximum=100)
+        self.progress_bar.pack(side="left", padx=8)
+        self.progress_detail_var = tk.StringVar(value="成功: 0  失败: 0  总任务: 0")
+        ttk.Label(self.progress_frame, textvariable=self.progress_detail_var,
+                  foreground=MUTED, font=("", 9)).pack(side="left", padx=(8, 0))
+
+        # CSV button
         self.btn_frame = ttk.Frame(self)
-        self.btn_frame.pack(fill="x", pady=(4, 0))
-        self.open_csv_btn = ttk.Button(self.btn_frame, text="打开 CSV 目录", command=self._open_csv, state="disabled")
+        self.btn_frame.pack(fill="x", pady=(2, 0))
+        self.open_csv_btn = ttk.Button(self.btn_frame, text="打开 CSV 目录",
+                                       command=self._open_csv, state="disabled")
         self.open_csv_btn.pack(side="left", padx=(0, 8))
         self.csv_path: str | None = None
 
-    def add_platform(self, platform: str, total: int):
-        if platform in self.platform_frames:
-            return
-        frame = ttk.Frame(self)
-        frame.pack(fill="x", pady=2)
-        self.platform_frames[platform] = frame
+    def _on_filter_change(self, *_):
+        self._render_table()
 
-        label_var = tk.StringVar(value=f"{platform}: 0/{total}")
-        ttk.Label(frame, textvariable=label_var, width=30, anchor="w").pack(side="left")
-        self.platform_labels[platform] = label_var
+    def _render_table(self):
+        for w in self.table_body.winfo_children():
+            w.destroy()
 
-        bar = ttk.Progressbar(frame, length=200, maximum=total)
-        bar.pack(side="left", padx=8)
-        self.platform_bars[platform] = bar
+        # Apply filters
+        filtered = self._drugs
+        sf = self.status_filter_var.get()
+        if sf != "all":
+            filtered = [d for d in filtered if d.status == sf]
+        pf = self.platform_filter_var.get()
+        if pf != "all":
+            filtered = [d for d in filtered if d.platform == pf]
+        if self.fail_only_var.get():
+            filtered = [d for d in filtered if d.status in ("failed", "partial")]
+        if self.no_capture_var.get():
+            filtered = [d for d in filtered if d.status == "pending"]
+        if self.captured_var.get():
+            filtered = [d for d in filtered if d.status in ("success",)]
 
-        self.drug_labels[platform] = tk.StringVar(value="")
-        ttk.Label(frame, textvariable=self.drug_labels[platform], foreground=MUTED,
-                  font=("", 9)).pack(side="left")
+        for ds in filtered:
+            color = STATUS_COLORS.get(ds.status, MUTED)
+            row = ttk.Frame(self.table_body)
+            row.pack(fill="x", padx=2, pady=1)
 
-    def update_platform(self, platform: str, completed: int, failed: int, total: int,
-                        drug_name: str = "", detail: str = ""):
-        if platform not in self.platform_frames:
-            self.add_platform(platform, total)
-        self.platform_labels[platform].set(f"{platform}: {completed}/{total}  [✓{completed} ✗{failed}]")
-        if total > 0:
-            self.platform_bars[platform]["maximum"] = total
-            self.platform_bars[platform]["value"] = completed
-        if drug_name:
-            self.drug_labels[platform].set(f"{drug_name} {detail}")
+            def _make_label(text, w=14):
+                return ttk.Label(row, text=text, width=w, anchor="w",
+                                 font=("", 9))
+
+            _make_label(ds.generic_name, 14).pack(side="left", padx=(2, 0))
+            _make_label(ds.brand_name, 14).pack(side="left", padx=(2, 0))
+            _make_label(ds.platform, 10).pack(side="left", padx=(2, 0))
+            _make_label(ds.search_mode, 10).pack(side="left", padx=(2, 0))
+            _make_label(ds.current_phase, 10).pack(side="left", padx=(2, 0))
+
+            status_lbl = ttk.Label(row, text=ds.status, width=8, anchor="w",
+                                   foreground=color, font=("", 9, "bold"))
+            status_lbl.pack(side="left", padx=(2, 0))
+
+            _make_label(str(ds.candidate_count), 7).pack(side="left", padx=(2, 0))
+            _make_label(str(ds.detail_success_count), 8).pack(side="left", padx=(2, 0))
+            _make_label(str(ds.formal_price_count), 8).pack(side="left", padx=(2, 0))
+            _make_label(str(ds.error_count), 7).pack(side="left", padx=(2, 0))
+            _make_label(ds.last_reason[:20], 20).pack(side="left", padx=(2, 0))
+
+    def update_from_drugs(self, drugs: list[DrugRunStatus],
+                          total_tasks: int, completed_tasks: int, failed_tasks: int):
+        self._drugs = drugs
+        self._render_table()
+
+        # Update stats bar with counts
+        counts = {}
+        for ds in drugs:
+            counts[ds.status] = counts.get(ds.status, 0) + 1
+        total = len(drugs)
+        parts = [f"药品: {total}"]
+        for status in ("success", "partial", "failed", "running", "cancelled", "pending"):
+            c = counts.get(status, 0)
+            if c > 0:
+                color = STATUS_COLORS.get(status, MUTED)
+                parts.append(f"{status}: {c}")
+        self.stats_var.set("  |  ".join(parts))
+
+        # Update progress bar
+        max_val = max(total_tasks, 1)
+        self.progress_bar["maximum"] = max_val
+        self.progress_bar["value"] = completed_tasks + failed_tasks
+        self.progress_label_var.set(f"进度: {completed_tasks + failed_tasks}/{total_tasks}")
+        success_color = SUCCESS
+        fail_color = FAILURE
+        self.progress_detail_var.set(
+            f"成功: {completed_tasks}  失败: {failed_tasks}  总任务: {total_tasks}"
+        )
 
     def set_status(self, run_id: str, status: str, elapsed: float = 0):
         elapsed_str = f" 耗时: {elapsed:.0f}s" if elapsed else ""
-        self.info_var.set(f"▸ 运行ID: {run_id[:8] if run_id else '—'}...  {elapsed_str}  状态: {status}")
+        current = self.stats_var.get()
+        self.stats_var.set(f"▸ 运行ID: {run_id[:8] if run_id else '—'}...  {elapsed_str}")
 
     def set_csv_path(self, path: str):
         self.csv_path = path
@@ -336,13 +485,13 @@ class ResultPanel(ttk.LabelFrame):
             subprocess.run(["open", self.csv_path], check=False)
 
     def reset(self):
-        self.info_var.set("等待开始...")
-        for platform in list(self.platform_frames.keys()):
-            self.platform_frames[platform].destroy()
-            del self.platform_frames[platform]
-            del self.platform_bars[platform]
-            del self.platform_labels[platform]
-            del self.drug_labels[platform]
+        self._drugs = []
+        self.stats_var.set("等待运行...")
+        for w in self.table_body.winfo_children():
+            w.destroy()
+        self.progress_label_var.set("进度: 0/0")
+        self.progress_bar["value"] = 0
+        self.progress_detail_var.set("成功: 0  失败: 0  总任务: 0")
         self.csv_path = None
         self.open_csv_btn.configure(state="disabled")
 
@@ -352,12 +501,16 @@ class TestWorkbench(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("价格专员 · 测试采集工作台")
-        self.geometry("900x680+100+100")
+        self.geometry("1100x780+100+100")
         self.configure(bg=BG)
         self.resizable(True, True)
 
         self.project_root = _PROJECT_ROOT
         self.worker: TestWorker | None = None
+        self._tracker = DrugStatusTracker()
+        self._total_tasks = 0
+        self._completed_tasks = 0
+        self._failed_tasks = 0
         self._build()
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -387,13 +540,13 @@ class TestWorkbench(tk.Tk):
         self.status_label = ttk.Label(ctrl, text="就绪", foreground=MUTED)
         self.status_label.pack(side="left", padx=(8, 0))
 
+        # ── Drug results panel (table, stats, filters, progress) ──
+        self.drug_results = DrugResultsPanel(self)
+        self.drug_results.pack(fill="x", padx=8, pady=4)
+
         # ── Log panel ──
         self.log_panel = LogPanel(self)
         self.log_panel.pack(fill="both", expand=True, padx=8, pady=4)
-
-        # ── Result panel ──
-        self.result_panel = ResultPanel(self)
-        self.result_panel.pack(fill="x", padx=8, pady=(0, 8))
 
         # ── Poll timer ──
         self._poll_id = None
@@ -420,7 +573,11 @@ class TestWorkbench(tk.Tk):
 
         # Reset UI
         self.log_panel.clear()
-        self.result_panel.reset()
+        self.drug_results.reset()
+        self._tracker = DrugStatusTracker()
+        self._total_tasks = 0
+        self._completed_tasks = 0
+        self._failed_tasks = 0
         self.start_btn.configure(state="disabled")
         self.stop_btn.configure(state="normal")
         self.status_label.configure(text="启动中...", foreground=INFO)
@@ -448,6 +605,14 @@ class TestWorkbench(tk.Tk):
             self._cleanup_after_run()
             return
         try:
+            # Process RunEvents from the structured event system
+            while True:
+                event = self.worker.event_queue.get_nowait()
+                self._handle_event(event)
+        except queue.Empty:
+            pass
+        try:
+            # Process ProgressUpdate from the legacy queue
             while True:
                 update = self.worker.queue.get_nowait()
                 self._handle_update(update)
@@ -458,6 +623,28 @@ class TestWorkbench(tk.Tk):
             self._poll_id = self.after(200, self._poll_progress)
         else:
             self._cleanup_after_run()
+
+    def _handle_event(self, event: RunEvent):
+        """Process a structured RunEvent to update the drug results table."""
+        self._tracker.ingest(event)
+
+        # Track task counts
+        if event.event_type in ("task_enqueued",):
+            self._total_tasks += 1
+        elif event.event_type in ("task_succeeded", "formal_price_confirmed"):
+            self._completed_tasks += 1
+        elif event.event_type in ("task_failed", "task_not_found", "task_blocked", "task_cancelled"):
+            self._failed_tasks += 1
+
+        # Update drug results table
+        drugs = self._tracker.snapshot()
+        self.drug_results.update_from_drugs(
+            drugs, self._total_tasks, self._completed_tasks, self._failed_tasks,
+        )
+
+        # Update status bar
+        if event.run_id:
+            self.drug_results.set_status(event.run_id, event.status, 0)
 
     def _handle_update(self, update):
         # Log
@@ -475,17 +662,11 @@ class TestWorkbench(tk.Tk):
         elif update.status == "success":
             self.status_label.configure(text=update.message, foreground=SUCCESS)
 
-        # Result panel
-        if update.platform:
-            self.result_panel.add_platform(update.platform, update.platform_total)
-            self.result_panel.update_platform(
-                update.platform, update.platform_completed, update.platform_failed,
-                update.platform_total, update.drug_name or "", update.detail or "",
-            )
+        # Drug results panel
         if update.run_id:
-            self.result_panel.set_status(update.run_id, update.status, update.elapsed_seconds)
+            self.drug_results.set_status(update.run_id, update.status, update.elapsed_seconds)
         if update.phase == "export" and update.status == "success":
-            self.result_panel.set_csv_path(update.output_path or "")
+            self.drug_results.set_csv_path(update.output_path or "")
 
     def _cleanup_after_run(self):
         self.start_btn.configure(state="normal")

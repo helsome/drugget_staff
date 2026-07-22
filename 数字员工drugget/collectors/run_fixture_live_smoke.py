@@ -24,8 +24,8 @@ from price_specialist.models import CollectionRun, CollectionTask, DrugProduct, 
 from price_specialist.orchestrator import BatchOrchestrator
 from price_specialist.run_logger import BatchLogger
 from price_specialist.schemas import CollectionTaskSpec
-from price_specialist.services import TaskQueueService
-from export_fixture_run_csv import export_run
+from price_specialist.services import StoreTaskPlanner, TaskQueueService
+from export_fixture_run_csv import export_run_outputs, export_run_manifest
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -94,7 +94,7 @@ def validate_provider_store_search(store_search: PriceObservation | None) -> Non
 
 async def run_yaoshibang_seed(*, seed: dict[str, str], max_candidates: int, output_root: Path | None) -> dict[str, object]:
     """One bounded global-discovery → detail → same-provider store-search loop."""
-    settings = Settings.from_env(PROJECT_ROOT)
+    settings = Settings.load(PROJECT_ROOT, mode="prod")
     engine, factory = configured_database(settings)
     init_database(engine)
     with factory() as db:
@@ -166,7 +166,9 @@ async def run_yaoshibang_seed(*, seed: dict[str, str], max_candidates: int, outp
                        "spec": detail.selected_spec, "sale_box_count": str(detail.sale_box_count)}
         db.commit()
         destination = (output_root or (PROJECT_ROOT / "artifacts/runs/current" / datetime.now().strftime("%Y-%m-%d"))) / run.id
-        export_run(run.id, destination)
+        destination.mkdir(parents=True, exist_ok=True)
+        export_run_outputs(run.id, db, destination)
+        export_run_manifest(run.id, db, destination, run=run, source_type="fixture_smoke")
         return {"run_id": run.id, "seed_key": seed["seed_key"], "provider_id": provider_id,
                 "shop_name": detail.page_shop, "price": str(detail.page_price_value),
                 "spec": detail.selected_spec, "sale_box_count": str(detail.sale_box_count), "output": str(destination)}
@@ -218,12 +220,8 @@ def seed_smoke_tasks(queue: TaskQueueService, run_id: str, db, *, only_store_id:
     # 历史手填的 yaoshibang provider_id（W00010=5201, W00019=21288, W06410=9023）
     # 从未在任何真实搜索/观测中出现，是假值；清空后强制 collector 走 resolve-provider
     # 发现真实 provider_id，并由 orchestrator 回填到 StoreResponsibility。
-    db.execute(
-        update(StoreResponsibility)
-        .where(StoreResponsibility.platform == "yaoshibang")
-        .where(StoreResponsibility.internal_store_id.in_(("W00010", "W00019", "W06410")))
-        .values(platform_store_key=None)
-    )
+    # 使用公共 StoreTaskPlanner.sanitize_fake_provider_ids 服务。
+    StoreTaskPlanner.sanitize_fake_provider_ids(db)
     db.flush()
     for row in rows:
         drug = db.scalar(select(DrugProduct).where(DrugProduct.brand_name == row["brand"]))
@@ -275,7 +273,7 @@ async def main(*, only_store_id: str | None = None, seed_key: str | None = None,
                platform: str | None = None, max_candidates: int = 1,
                output_root: Path | None = None, max_tasks: int | None = None,
                resume_run_id: str | None = None) -> None:
-    settings = Settings.from_env(PROJECT_ROOT)
+    settings = Settings.load(PROJECT_ROOT, mode="prod")
     engine, factory = configured_database(settings)
     init_database(engine)
 
@@ -333,7 +331,8 @@ async def main(*, only_store_id: str | None = None, seed_key: str | None = None,
         logger.close()
 
         # Auto-export CSV artifacts
-        export_run(run_id, output_dir)
+        export_run_outputs(run_id, db, output_dir)
+        export_run_manifest(run_id, db, output_dir, run=run, source_type="fixture_smoke")
         print({"run_id": run_id, "outcome": outcome, "output": str(output_dir)})
         print(f"CSV导出目录: {output_dir}")
         print(f"JSONL日志: {logger.log_path}")

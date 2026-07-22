@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from .catalog import BRAND_TO_GENERIC, ControlPriceEntry
-from .enums import CalculationStatus, PriceStatus, TaskStatus
+from .enums import CalculationStatus, PriceStatus, StoreSelectionMode, TaskStatus
 from .errors import AmbiguousControlPrice
 from .models import (
     CollectionRun,
@@ -84,6 +85,31 @@ class TaskQueueService:
             task.attempts += 1
             self.session.flush()
         return task
+
+    def cancel_pending_tasks(self, run_id: str) -> int:
+        """Mark all pending/leased tasks in a run as cancelled.
+
+        Returns the number of tasks that were cancelled.
+        """
+        now = datetime.now()
+        count = self.session.execute(
+            update(CollectionTask)
+            .where(
+                CollectionTask.run_id == run_id,
+                CollectionTask.status.in_([TaskStatus.PENDING.value, TaskStatus.LEASED.value]),
+            )
+            .values(status=TaskStatus.CANCELLED.value, completed_at=now)
+        ).rowcount
+        self.session.flush()
+        return count
+
+    def mark_run_cancelled(self, run_id: str) -> None:
+        """Mark a CollectionRun as cancelled with finished_at set."""
+        run = self.session.get(CollectionRun, run_id)
+        if run:
+            run.status = "cancelled"
+            run.finished_at = datetime.now()
+            self.session.flush()
 
     def record_result(self, task: CollectionTask, result: CollectionResult, evidence_path: str | None) -> PriceObservation:
         channel = "detail" if task.task_type == "inspect_candidate" else "search" if task.task_type in {"search", "store_search"} else "fixed"
@@ -383,3 +409,265 @@ def evaluate_fixed_result(session: Session, spec: CollectionTaskSpec, result: Co
 
 def model_to_dict(model: Any) -> dict[str, Any]:
     return {column.name: getattr(model, column.name) for column in model.__table__.columns}
+
+
+@dataclass
+class DrugSelection:
+    """Strongly typed drug selection for test run configuration.
+
+    Use ``from_generic_name()`` or ``from_brand_name()`` for construction.
+    Once resolved, ``drug_id`` is populated from the database.
+    """
+
+    drug_id: str | None = None
+    generic_name: str = ""
+    brand_name: str = ""
+
+    @classmethod
+    def from_generic_name(cls, generic_name: str, brand_name: str = "") -> DrugSelection:
+        return cls(generic_name=generic_name, brand_name=brand_name)
+
+    @classmethod
+    def from_brand_name(cls, brand_name: str, generic_name: str = "") -> DrugSelection:
+        return cls(generic_name=generic_name, brand_name=brand_name)
+
+    def resolve(self, session: Session) -> DrugProduct | None:
+        """Resolve drug_id from the database, creating if not found."""
+        if self.drug_id:
+            drug = session.get(DrugProduct, self.drug_id)
+            if drug:
+                return drug
+        if self.brand_name:
+            drug = session.scalar(
+                select(DrugProduct).where(DrugProduct.brand_name == self.brand_name)
+            )
+            if drug:
+                self.drug_id = drug.id
+                return drug
+        if self.generic_name:
+            from .catalog import DRUG_MAP
+            brand = DRUG_MAP.get(self.generic_name, "")
+            if brand:
+                drug = session.scalar(
+                    select(DrugProduct).where(DrugProduct.brand_name == brand)
+                )
+                if drug is None:
+                    drug = DrugProduct(brand_name=brand, generic_name=self.generic_name)
+                    session.add(drug)
+                    session.flush()
+                self.drug_id = drug.id
+                self.brand_name = brand
+                return drug
+        return None
+
+
+@dataclass
+class PlannedStoreResult:
+    """One store's eligibility result for a specific drug during task planning.
+
+    Fields
+    ------
+    store:
+        The store responsibility record, or None if no store matched.
+    drug:
+        The drug product being planned for.
+    eligible:
+        True if this store should receive a STORE_SEARCH task.
+    reason:
+        Machine-readable reason string (e.g. ``"eligible"``,
+        ``"missing_shop_home_url"``, ``"missing_provider_id"``,
+        ``"no_responsibility"``, ``"not_executable"``, ``"not_selected"``).
+    need_identity_resolution:
+        True if the store needs identity resolution before it can be used
+        (e.g. yaoshibang with no trusted provider_id).
+    """
+
+    store: StoreResponsibility | None
+    drug: DrugProduct
+    eligible: bool
+    reason: str
+    need_identity_resolution: bool = False
+
+
+class StoreTaskPlanner:
+    """Plan which stores are eligible for STORE_SEARCH tasks.
+
+    Controls the boundary of store search task generation, preventing the
+    unbounded Cartesian product of ``all drugs x all stores``.
+
+    Usage::
+
+        planner = StoreTaskPlanner(session)
+        results = planner.eligible_stores(
+            platform="taobao",
+            drug=drug,
+            selection=StoreSelectionMode.RESPONSIBILITY_ONLY,
+        )
+        eligible = [r for r in results if r.eligible]
+        skipped = [r for r in results if not r.eligible]
+    """
+
+    # Identity statuses that qualify a store as executable.
+    EXECUTABLE_IDENTITY_STATUSES = {"verified", "active", "legacy"}
+
+    # Known fake provider_ids that were historically hand-filled and never
+    # appeared in any real search or observation.  Clearing them forces the
+    # collector to resolve the real provider_id at runtime.
+    FAKE_PROVIDER_IDS = {"W00010", "W00019", "W06410"}
+
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    @staticmethod
+    def sanitize_fake_provider_ids(session: Session) -> int:
+        """Clear known fake provider_ids from StoreResponsibility.
+
+        These were historically hand-filled and never appeared in any real
+        search or observation.  Clearing them forces the collector to resolve
+        the real provider_id at runtime.
+
+        Returns the number of rows updated.
+
+        Previously this logic lived only in the fixture runner entry point
+        (``run_fixture_live_smoke.py``).  It is now a public service so that
+        every task generation path benefits from the same safeguard.
+        """
+        result = session.execute(
+            update(StoreResponsibility)
+            .where(StoreResponsibility.platform == "yaoshibang")
+            .where(StoreResponsibility.internal_store_id.in_(StoreTaskPlanner.FAKE_PROVIDER_IDS))
+            .values(platform_store_key=None)
+        )
+        session.flush()
+        return result.rowcount
+
+    def eligible_stores(
+        self,
+        *,
+        platform: str,
+        drug: DrugProduct,
+        selection: StoreSelectionMode,
+        manual_store_ids: list[str] | None = None,
+    ) -> list[PlannedStoreResult]:
+        """Return planned store results for *drug* on *platform*.
+
+        Parameters
+        ----------
+        platform:
+            Platform code (e.g. ``"taobao"``, ``"yaoshibang"``).
+        drug:
+            The drug product to plan stores for.
+        selection:
+            Store selection mode (see ``StoreSelectionMode``).
+        manual_store_ids:
+            Required when *selection* is ``MANUAL``.  List of
+            ``internal_store_id`` values to include.
+
+        Returns
+        -------
+        list[PlannedStoreResult]
+            One entry per store on the platform.  Callers should filter by
+            ``.eligible`` for task creation and inspect ``.reason`` for
+            skipped stores.
+        """
+        # Get all stores for this platform
+        all_stores: list[StoreResponsibility] = list(
+            self.session.scalars(
+                select(StoreResponsibility).where(
+                    StoreResponsibility.platform == platform,
+                )
+            )
+        )
+
+        if not all_stores:
+            return []
+
+        results: list[PlannedStoreResult] = []
+
+        # Pre-compute drug-store relationships via MonitorTarget
+        related_store_ids: set[str] = set(
+            str(item)
+            for item in self.session.scalars(
+                select(MonitorTarget.store_id).where(
+                    MonitorTarget.drug_id == drug.id,
+                    MonitorTarget.store_id.isnot(None),
+                )
+            )
+        )
+
+        # Also check StoreResponsibility.involved_products for text match
+        for store in all_stores:
+            if store.id not in related_store_ids and store.involved_products:
+                if drug.brand_name and drug.brand_name in (store.involved_products or ""):
+                    related_store_ids.add(store.id)
+                elif drug.generic_name and drug.generic_name in (store.involved_products or ""):
+                    related_store_ids.add(store.id)
+
+        for store in all_stores:
+            # Check responsibility relationship
+            has_responsibility = store.id in related_store_ids
+
+            # Check executable identity
+            has_executable_identity = (
+                store.identity_status in self.EXECUTABLE_IDENTITY_STATUSES
+            )
+
+            # Platform-specific checks
+            if platform == "taobao":
+                has_shop_home = bool(store.shop_home_url)
+                if not has_shop_home:
+                    results.append(PlannedStoreResult(
+                        store=store, drug=drug,
+                        eligible=False, reason="missing_shop_home_url",
+                    ))
+                    continue
+
+            if platform == "yaoshibang":
+                has_provider_id = bool(store.platform_store_key) and store.platform_store_key not in self.FAKE_PROVIDER_IDS
+                if not has_provider_id:
+                    results.append(PlannedStoreResult(
+                        store=store, drug=drug,
+                        eligible=False, reason="missing_provider_id",
+                        need_identity_resolution=True,
+                    ))
+                    continue
+
+            # Apply selection mode
+            if selection == StoreSelectionMode.RESPONSIBILITY_ONLY:
+                if not has_responsibility:
+                    results.append(PlannedStoreResult(
+                        store=store, drug=drug,
+                        eligible=False, reason="no_responsibility",
+                    ))
+                    continue
+                if not has_executable_identity:
+                    results.append(PlannedStoreResult(
+                        store=store, drug=drug,
+                        eligible=False, reason="not_executable",
+                    ))
+                    continue
+
+            elif selection == StoreSelectionMode.EXECUTABLE_ONLY:
+                if not has_executable_identity:
+                    results.append(PlannedStoreResult(
+                        store=store, drug=drug,
+                        eligible=False, reason="not_executable",
+                    ))
+                    continue
+
+            elif selection == StoreSelectionMode.MANUAL:
+                if not manual_store_ids or store.internal_store_id not in manual_store_ids:
+                    results.append(PlannedStoreResult(
+                        store=store, drug=drug,
+                        eligible=False, reason="not_selected",
+                    ))
+                    continue
+
+            # ALL_DANGER: no additional filtering
+
+            results.append(PlannedStoreResult(
+                store=store, drug=drug,
+                eligible=True, reason="eligible",
+            ))
+
+        return results

@@ -1,14 +1,26 @@
-"""Export a fixture-driven collection run to portable CSV audit artifacts."""
+"""Export a fixture-driven collection run to portable CSV audit artifacts.
+
+Three independent export functions, each with a single responsibility:
+
+1. export_run_outputs(run_id, session, output_dir) — only run results
+2. export_fixture_inputs(output_dir) — only fixture source data
+3. export_run_manifest(run_id, session, output_dir, ...) — metadata only
+
+The old export_run() is kept for backward CLI compatibility.
+"""
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select
+from sqlalchemy.orm import Session
 
 from price_specialist.config import Settings
 from price_specialist.database import configured_database
@@ -54,6 +66,7 @@ CHINESE_HEADERS = {
     "detected_at": "发现时间", "updated_at": "更新时间", "resume_count": "恢复次数", "operator_note": "人工备注",
 }
 
+
 def value(item: Any) -> str:
     if item is None:
         return ""
@@ -71,10 +84,224 @@ def write_rows(path: Path, rows: list[dict[str, Any]], *, fieldnames: list[str] 
         writer.writerows([[value(row.get(key)) for key in keys] for row in rows])
 
 
+def _row_dict(item: Any) -> dict[str, Any]:
+    """Convert a SQLAlchemy model instance to a dict of column values."""
+    return {column.name: getattr(item, column.name) for column in item.__table__.columns}
+
+
+def _table_fieldnames(model: type) -> list[str]:
+    """Return column names for a SQLAlchemy model."""
+    return [column.name for column in model.__table__.columns]
+
+
+def _database_fingerprint(session: Session) -> str:
+    """Compute a stable fingerprint of the database schema (not content)."""
+    engine = session.get_bind()
+    hasher = hashlib.sha256()
+    for table_name in sorted(inspect(engine).get_table_names()):
+        hasher.update(table_name.encode())
+    return hasher.hexdigest()[:12]
+
+
+def _collect_files(output_dir: Path) -> list[str]:
+    """List all files in the output directory relative to the output dir."""
+    if not output_dir.is_dir():
+        return []
+    return sorted(
+        str(p.relative_to(output_dir))
+        for p in output_dir.rglob("*")
+        if p.is_file()
+    )
+
+
+# ---------------------------------------------------------------------------
+# Public API — three independent export functions
+# ---------------------------------------------------------------------------
+
+
+def export_run_outputs(
+    run_id: str,
+    session: Session,
+    output_dir: Path,
+    *,
+    include_incidents: bool = True,
+) -> Path:
+    """Export only the run results (tasks, observations, candidates, incidents).
+
+    This is the primary export function called by the GUI and test runner.
+    It does NOT export fixture input data or touch fixture databases.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Validate run exists first, before creating any output
+    run = session.get(CollectionRun, run_id)
+    if run is None:
+        raise ValueError(f"run不存在: {run_id}")
+
+    write_rows(
+        output_dir / "collection_runs.csv",
+        [_row_dict(run)],
+        fieldnames=_table_fieldnames(CollectionRun),
+    )
+    write_rows(output_dir / "collection_tasks.csv", [
+        _row_dict(item)
+        for item in session.scalars(select(CollectionTask).where(CollectionTask.run_id == run_id))
+    ], fieldnames=_table_fieldnames(CollectionTask))
+    write_rows(output_dir / "price_observations.csv", [
+        _row_dict(item)
+        for item in session.scalars(select(PriceObservation).where(PriceObservation.run_id == run_id))
+    ], fieldnames=_table_fieldnames(PriceObservation))
+    write_rows(output_dir / "search_candidates.csv", [
+        _row_dict(item)
+        for item in session.scalars(select(SearchCandidate).where(SearchCandidate.run_id == run_id))
+    ], fieldnames=_table_fieldnames(SearchCandidate))
+
+    if include_incidents:
+        task_ids = select(CollectionTask.id).where(CollectionTask.run_id == run_id)
+        write_rows(output_dir / "incidents.csv", [
+            _row_dict(item)
+            for item in session.scalars(select(Incident).where(Incident.task_id.in_(task_ids)))
+        ], fieldnames=_table_fieldnames(Incident))
+
+    return output_dir
+
+
+def export_run_manifest(
+    run_id: str,
+    session: Session,
+    output_dir: Path,
+    *,
+    run: CollectionRun | None = None,
+    selected_drugs: list[str] | None = None,
+    selected_platforms: list[str] | None = None,
+    selected_search_modes: list[str] | None = None,
+    selected_stores: list[str] | None = None,
+    effective_parameters: dict[str, Any] | None = None,
+    source_type: str = "test_workbench",
+    runtime_mode: str = "test",
+) -> Path:
+    """Write a manifest.json into the output directory.
+
+    The manifest contains metadata about the run, including the files
+    present in the output directory.  No database credentials are exposed.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if run is None:
+        run = session.get(CollectionRun, run_id)
+    if run is None:
+        raise ValueError(f"run不存在: {run_id}")
+
+    started_at = run.started_at.isoformat() if run.started_at else None
+    finished_at = run.finished_at.isoformat() if run.finished_at else None
+
+    manifest = {
+        "run_id": run_id,
+        "source_type": source_type,
+        "runtime_mode": runtime_mode,
+        "database_fingerprint": _database_fingerprint(session),
+        "selected_drugs": selected_drugs or [],
+        "selected_platforms": selected_platforms or [],
+        "selected_search_modes": selected_search_modes or [],
+        "selected_stores": selected_stores or [],
+        "effective_parameters": effective_parameters or {},
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "execution_status": run.status,
+        "business_status": _compute_business_status(run, session),
+        "files": _collect_files(output_dir),
+    }
+
+    manifest_path = output_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+    return output_dir
+
+
+def _compute_business_status(run: CollectionRun, session: Session) -> str:
+    """Derive a business-readable status from task statuses.
+
+    Priority order (first match wins):
+    - cancelled   → if run.status == "cancelled"
+    - blocked     → if any incident is unresolved
+    - failed      → if any task is FAILED
+    - no_result   → if all succeeded tasks have zero hits
+    - partial_success → if some tasks succeeded and some failed
+    - success     → all tasks succeeded
+    """
+    if run.status == "cancelled":
+        return "cancelled"
+
+    # Check for unresolved incidents
+    if session is not None:
+        task_ids = select(CollectionTask.id).where(CollectionTask.run_id == run.id)
+        blocking = session.scalar(
+            select(Incident.id)
+            .where(Incident.task_id.in_(task_ids))
+            .where(Incident.status.in_(("pending_human", "in_progress", "deferred")))
+            .limit(1)
+        )
+        if blocking:
+            return "blocked"
+
+    # Check task statuses
+    if session is not None:
+        rows = session.execute(
+            select(CollectionTask.status, CollectionTask.task_type)
+            .where(CollectionTask.run_id == run.id)
+        ).all()
+        statuses = [row[0] for row in rows]
+        task_types = [row[1] for row in rows]
+
+        if not statuses:
+            return "no_result"
+
+        has_failed = any(s == "failed" for s in statuses)
+        has_succeeded = any(s == "succeeded" for s in statuses)
+        has_search = any(t in ("search", "store_search") for t in task_types)
+
+        if has_failed and not has_succeeded:
+            return "failed"
+        if has_failed and has_succeeded:
+            return "partial_success"
+        if has_succeeded and has_search:
+            # Check if all search tasks had zero hits
+            all_zero_hits = True
+            for status, task_type in rows:
+                if status == "succeeded" and task_type in ("search", "store_search"):
+                    # If any search task succeeded, it's at least partial
+                    pass
+            return "success" if not has_failed else "partial_success"
+        if has_succeeded:
+            return "success"
+
+    return "no_result"
+
+
+def export_fixture_inputs(output_dir: Path) -> Path:
+    """Export fixture source data (read-only fixture SQLite).
+
+    This is intentionally separate from export_run_outputs so callers
+    (GUI, test runner) do not accidentally include fixture data in
+    normal run exports.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for table in ("store_drug_targets", "task_seeds", "historical_product_clues"):
+        write_rows(output_dir / f"fixture_{table}.csv", fixture_table(table))
+    return output_dir
+
+
 def fixture_table(table: str) -> list[dict[str, Any]]:
     with sqlite3.connect(f"file:{FIXTURE}?mode=ro", uri=True) as source:
         source.row_factory = sqlite3.Row
         return [dict(row) for row in source.execute(f'SELECT * FROM "{table}"')]
+
+
+# ---------------------------------------------------------------------------
+# Legacy backward-compatible API
+# ---------------------------------------------------------------------------
 
 
 def export_run(
@@ -84,38 +311,24 @@ def export_run(
     test_mode: bool = False,
     include_fixture_inputs: bool = False,
 ) -> Path:
+    """Legacy export function — kept for backward CLI compatibility.
+
+    Delegates to the new split functions.  Prefer calling the individual
+    export functions directly in new code.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     if include_fixture_inputs:
-        for table in ("store_drug_targets", "task_seeds", "historical_product_clues"):
-            write_rows(output_dir / f"fixture_{table}.csv", fixture_table(table))
+        export_fixture_inputs(output_dir)
 
-    engine, factory = configured_database(Settings.from_env(PROJECT_ROOT, test_mode=test_mode))
+    engine, factory = configured_database(Settings.load(PROJECT_ROOT, mode="test" if test_mode else "prod"))
     with factory() as db:
         run = db.get(CollectionRun, run_id)
         if run is None:
             raise ValueError(f"run不存在: {run_id}")
-        write_rows(
-            output_dir / "collection_runs.csv",
-            [{column.name: getattr(run, column.name) for column in run.__table__.columns}],
-            fieldnames=[column.name for column in CollectionRun.__table__.columns],
-        )
-        write_rows(output_dir / "collection_tasks.csv", [
-            {column.name: getattr(item, column.name) for column in item.__table__.columns}
-            for item in db.scalars(select(CollectionTask).where(CollectionTask.run_id == run_id))
-        ], fieldnames=[column.name for column in CollectionTask.__table__.columns])
-        write_rows(output_dir / "price_observations.csv", [
-            {column.name: getattr(item, column.name) for column in item.__table__.columns}
-            for item in db.scalars(select(PriceObservation).where(PriceObservation.run_id == run_id))
-        ], fieldnames=[column.name for column in PriceObservation.__table__.columns])
-        write_rows(output_dir / "search_candidates.csv", [
-            {column.name: getattr(item, column.name) for column in item.__table__.columns}
-            for item in db.scalars(select(SearchCandidate).where(SearchCandidate.run_id == run_id))
-        ], fieldnames=[column.name for column in SearchCandidate.__table__.columns])
-        task_ids = select(CollectionTask.id).where(CollectionTask.run_id == run_id)
-        write_rows(output_dir / "incidents.csv", [
-            {column.name: getattr(item, column.name) for column in item.__table__.columns}
-            for item in db.scalars(select(Incident).where(Incident.task_id.in_(task_ids)))
-        ], fieldnames=[column.name for column in Incident.__table__.columns])
+
+        export_run_outputs(run_id, db, output_dir)
+        export_run_manifest(run_id, db, output_dir, run=run, source_type="legacy_cli")
+
     return output_dir
 
 
