@@ -20,6 +20,7 @@ from .enums import StoreSelectionMode, TaskType
 from .evidence import EvidenceStore
 from .orchestrator import BatchOrchestrator, DEFAULT_RATE_POLICIES, RatePolicy
 from .schemas import CollectionTaskSpec
+from .run_logger import RunEvent
 from .services import DrugSelection, StoreTaskPlanner, TaskQueueService
 
 
@@ -94,6 +95,8 @@ class TestWorker:
         self.queue: Queue[ProgressUpdate] = Queue()
         self._cancel_flag = threading.Event()
         self.cancellation_token = CancellationToken()
+        self.event_queue: Queue[RunEvent] = Queue()
+        self._run_id: str = ""
         self._start_time = 0.0
 
     def start(self) -> None:
