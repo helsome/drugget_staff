@@ -1,0 +1,57 @@
+# macOS
+.DS_Store
+
+# IDE / Editor personal config
+.claude/
+.obsidian/
+.zcode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node.js
+node_modules/
+
+# Database files (generated / test data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+
+# Environment files
+.env
+.env.*
+
+# Generated experiment outputs
+数字员工drugget/outputs/
+
+# Test artifacts (screenshots, evidence, run history)
+数字员工drugget/artifacts/evidence/
+数字员工drugget/artifacts/evidence-test/
+数字员工drugget/artifacts/runs/
+
+# Raw business data (xlsx, etc.)
+数字员工drugget/data/raw/
+
+# Local config data
+数字员工drugget/data/config/
+
+# Session / temp files
+omp-session-*.html
+未命名*.base
+
+# Personal meeting notes
+会议/
+
+# Handoff documents
+HANDOFF.md
+
+# Third-party API interface docs
+数字员工drugget/淘宝京东官方接口/
