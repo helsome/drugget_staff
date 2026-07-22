@@ -49,7 +49,9 @@
     "browser": true,
     "args": [
       { "name": "wholesale_id", "positional": true, "required": true, "help": "商品批发ID" },
-      { "name": "provider_id", "required": true, "help": "供应商ID" }
+      { "name": "provider_id", "required": true, "help": "供应商ID" },
+      { "name": "purchase_activity_id", "required": false, "help": "采购活动ID（来自搜索结果）" },
+      { "name": "search_query", "required": false, "help": "原始搜索词；用于从搜索结果上下文核验商品" }
     ],
     "columns": ["商品名称", "价格", "规格", "商品ID", "供应商ID", "供应商名称", "生产厂家", "单位", "库存", "起购数量", "有效期", "链接"],
     "type": "js",
@@ -94,6 +96,28 @@
     "type": "js",
     "modulePath": "yaoshibang/resolve-provider.js",
     "sourceFile": "yaoshibang/resolve-provider.js",
+    "navigateBefore": false,
+    "siteSession": "persistent",
+    "defaultWindowMode": "foreground"
+  },
+  {
+    "site": "yaoshibang",
+    "name": "provider-search",
+    "description": "药师帮供应商内搜索 - 在全局搜索结果中按 provider_id 过滤",
+    "access": "read",
+    "domain": "dian.ysbang.cn",
+    "strategy": "cookie",
+    "browser": true,
+    "args": [
+      { "name": "query", "positional": true, "required": true, "help": "搜索关键词（品牌+通用名）" },
+      { "name": "provider_id", "required": true, "help": "目标供应商ID" },
+      { "name": "limit", "type": "int", "default": 60, "help": "全局搜索抓取条数（过滤前，max 60）" },
+      { "name": "page", "type": "int", "default": 1, "help": "页码" }
+    ],
+    "columns": ["rank", "title", "price", "spec", "shop", "wholesale_id", "provider_id", "purchase_activity_id", "manufacturer", "unit", "stock", "url"],
+    "type": "js",
+    "modulePath": "yaoshibang/provider-search.js",
+    "sourceFile": "yaoshibang/provider-search.js",
     "navigateBefore": false,
     "siteSession": "persistent",
     "defaultWindowMode": "foreground"

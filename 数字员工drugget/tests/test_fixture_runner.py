@@ -6,10 +6,13 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from sqlalchemy import select
 
+from price_specialist.database import create_db_engine, init_database, make_session_factory
 from price_specialist.enums import TaskType
-from price_specialist.models import CollectionTask, PriceObservation
+from price_specialist.models import CollectionRun, CollectionTask, PriceObservation, StoreResponsibility
 from price_specialist.schemas import CollectionTaskSpec
+from price_specialist.services import TaskQueueService
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -106,3 +109,64 @@ def test_provider_store_search_requires_filtered_hit(runner_module) -> None:
     runner_module.validate_provider_store_search(search)
     with pytest.raises(RuntimeError, match="供应商内搜索"):
         runner_module.validate_provider_store_search(detail_observation(channel="search", raw_evidence={"hits": []}))
+
+
+@pytest.fixture
+def memory_db():
+    engine = create_db_engine("sqlite:///:memory:")
+    init_database(engine)
+    factory = make_session_factory(engine)
+    return engine, factory
+
+
+def test_seed_smoke_tasks_clears_stale_yaoshibang_provider_ids(runner_module, memory_db) -> None:
+    """seed_smoke_tasks 应清空 W00010/W00019/W06410 的假 provider_id。
+
+    这三个 store 的 platform_store_key（5201/21288/9023）是历史手填的假值，
+    从未在真实搜索中出现。清空后 collector 会走 resolve-provider 发现真实 ID。
+    """
+    engine, factory = memory_db
+    with factory() as db:
+        # 预置 3 个带假 provider_id 的店铺
+        for store_id, fake_pid in (("W00010", "5201"), ("W00019", "21288"), ("W06410", "9023")):
+            db.add(StoreResponsibility(
+                internal_store_id=store_id, platform="yaoshibang",
+                shop_name=f"店铺{store_id}", platform_store_key=fake_pid,
+                shop_status="正常", fixed_tier="observation_only",
+            ))
+        # 额外一个非目标店铺，provider_id 应保留
+        db.add(StoreResponsibility(
+            internal_store_id="ysb-provider-18650", platform="yaoshibang",
+            shop_name="药实在", platform_store_key="18650",
+            shop_status="正常", fixed_tier="observation_only",
+        ))
+        db.flush()
+        run = CollectionRun(id="test-seed-clear")
+        db.add(run)
+        db.flush()
+        queue = TaskQueueService(db)
+        # seed_smoke_tasks 会清空 W00010/W00019/W06410 的 platform_store_key
+        # 即使 fixture 里没有匹配的 drug（这些是 yaoshibang store），清空逻辑也应在
+        # 循环前无条件执行。
+        try:
+            runner_module.seed_smoke_tasks(queue, run.id, db)
+        except Exception:
+            # fixture 数据读取可能因环境差异抛错，但清空逻辑应在循环前已完成
+            pass
+        db.commit()
+
+        # 三个目标店铺的 provider_id 应被清空
+        for store_id in ("W00010", "W00019", "W06410"):
+            store = db.scalar(select(StoreResponsibility).where(
+                StoreResponsibility.internal_store_id == store_id
+            ))
+            assert store is not None, f"店铺 {store_id} 应存在"
+            assert store.platform_store_key is None, \
+                f"店铺 {store_id} 的假 provider_id 应被清空，实际 {store.platform_store_key}"
+        # 非目标店铺的 provider_id 应保留
+        preserved = db.scalar(select(StoreResponsibility).where(
+            StoreResponsibility.internal_store_id == "ysb-provider-18650"
+        ))
+        assert preserved is not None
+        assert preserved.platform_store_key == "18650", \
+            "非目标店铺的 provider_id 不应被清空"

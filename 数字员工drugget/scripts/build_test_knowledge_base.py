@@ -15,9 +15,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCE = ROOT / "data/knowledge-base"
 DEFAULT_OUTPUT = ROOT / "data/fixtures" / "业务知识库测试集"
+DEFAULT_CONFIG = ROOT / "data/config" / "test_fixture_targets.json"
 PLATFORMS = ("taobao", "yaoshibang")
 
-TARGETS = {
+# Hardcoded fallback targets (used when config file is missing)
+_HARDCODED_TARGETS: dict[tuple[str, str], tuple[str, ...]] = {
     ("taobao", "W00001"): ("依伦平", "优立维"),
     ("taobao", "W00038"): ("托妥",),
     ("yaoshibang", "W00010"): ("葛泰",),
@@ -25,15 +27,49 @@ TARGETS = {
     ("yaoshibang", "W06410"): ("依伦平", "托妥"),
 }
 
-# This fixture proves the Taobao technical closed loop only.  It is deliberately
-# separate from TARGETS, which remains the business-facing monitoring scope.
-TECHNICAL_CLOSED_LOOP_TARGETS = (
+_HARDCODED_GLOBAL_SEARCH_BRANDS = ("依伦平", "优立维", "托妥")
+
+_HARDCODED_TECHNICAL_CLOSED_LOOP = (
     {
         "platform_code": "taobao", "store_id": "W00001", "brand": "托妥",
         "shop_home": "https://shop163215406.taobao.com/",
         "selection_reason": "technical_closed_loop_fixture",
     },
 )
+
+
+def _load_targets(
+    config_path: Path,
+    *,
+    drug_override: str | None = None,
+    store_ids_override: str | None = None,
+) -> tuple[dict[tuple[str, str], tuple[str, ...]], tuple[str, ...], tuple[dict[str, str], ...]]:
+    """Load targets from JSON config, with optional CLI overrides.
+
+    Returns (TARGETS, global_search_brands, TECHNICAL_CLOSED_LOOP_TARGETS).
+    """
+    if config_path.is_file():
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        store_targets = config.get("store_drug_targets", {})
+        targets: dict[tuple[str, str], tuple[str, ...]] = {}
+        for platform, stores in store_targets.items():
+            for store_id, brands in stores.items():
+                targets[(platform, store_id)] = tuple(brands)
+        global_brands = tuple(config.get("global_search_brands", _HARDCODED_GLOBAL_SEARCH_BRANDS))
+        tech_loop = tuple(config.get("technical_closed_loop", _HARDCODED_TECHNICAL_CLOSED_LOOP))
+    else:
+        targets = dict(_HARDCODED_TARGETS)
+        global_brands = _HARDCODED_GLOBAL_SEARCH_BRANDS
+        tech_loop = _HARDCODED_TECHNICAL_CLOSED_LOOP
+
+    # Apply CLI overrides
+    if drug_override:
+        global_brands = tuple(b.strip() for b in drug_override.split(",") if b.strip())
+    if store_ids_override:
+        overridden_store_ids = set(s.strip() for s in store_ids_override.split(",") if s.strip())
+        targets = {k: v for k, v in targets.items() if k[1] in overridden_store_ids}
+
+    return targets, global_brands, tech_loop
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
@@ -66,7 +102,16 @@ def create_text_table(
         )
 
 
-def select_fixture(source: Path) -> dict[str, list[dict[str, str]]]:
+def select_fixture(
+    source: Path,
+    *,
+    targets: dict[tuple[str, str], tuple[str, ...]] | None = None,
+    global_search_brands: tuple[str, ...] | None = None,
+    technical_closed_loop_targets: tuple[dict[str, str], ...] | None = None,
+) -> dict[str, list[dict[str, str]]]:
+    _targets = targets if targets is not None else _HARDCODED_TARGETS
+    _global_search_brands = global_search_brands if global_search_brands is not None else _HARDCODED_GLOBAL_SEARCH_BRANDS
+    _tech_loop = technical_closed_loop_targets if technical_closed_loop_targets is not None else _HARDCODED_TECHNICAL_CLOSED_LOOP
     stores = read_csv(source / "store_master.csv")
     drugs = read_csv(source / "drug_master.csv")
     packages = read_csv(source / "drug_package_master.csv")
@@ -76,13 +121,13 @@ def select_fixture(source: Path) -> dict[str, list[dict[str, str]]]:
     issues = read_csv(source / "data_quality_issues.csv")
 
     store_by_id = {row["store_id"]: row for row in stores}
-    target_brands = {brand for brands in TARGETS.values() for brand in brands}
-    selected_store_ids = {store_id for _, store_id in TARGETS}
+    target_brands = {brand for brands in _targets.values() for brand in brands}
+    selected_store_ids = {store_id for _, store_id in _targets}
 
     selected_stores = []
     for store in stores:
         key = (store["platform_code"], store["store_id"])
-        if key not in TARGETS:
+        if key not in _targets:
             continue
         enriched = dict(store)
         enriched["aliases"] = ",".join(
@@ -101,7 +146,7 @@ def select_fixture(source: Path) -> dict[str, list[dict[str, str]]]:
         selected_stores.append(enriched)
 
     store_drug_targets = []
-    for (platform, store_id), brands in TARGETS.items():
+    for (platform, store_id), brands in _targets.items():
         store = store_by_id[store_id]
         for brand in brands:
             drug = next(row for row in drugs if row["brand"] == brand)
@@ -116,7 +161,7 @@ def select_fixture(source: Path) -> dict[str, list[dict[str, str]]]:
                 "selection_reason": "store_driven_test_target",
                 "shop_home": "",
             })
-    for fixture_target in TECHNICAL_CLOSED_LOOP_TARGETS:
+    for fixture_target in _tech_loop:
         store = store_by_id[fixture_target["store_id"]]
         drug = next(row for row in drugs if row["brand"] == fixture_target["brand"])
         store_drug_targets.append({
@@ -146,7 +191,7 @@ def select_fixture(source: Path) -> dict[str, list[dict[str, str]]]:
     for package in packages:
         if package["brand"] in target_brands:
             packages_by_brand[package["brand"]].append(package)
-    global_search_brands = ("依伦平", "优立维", "托妥")
+    global_search_brands = _global_search_brands
     search_drugs = [row for row in drugs if row["brand"] in global_search_brands]
     task_seeds = []
     for target in store_drug_targets:
@@ -231,11 +276,23 @@ def validate_source(source: Path) -> None:
         raise FileNotFoundError("测试库来源不完整: " + ", ".join(str(path) for path in missing))
 
 
-def build_database(source: Path, output: Path) -> dict[str, object]:
+def build_database(
+    source: Path,
+    output: Path,
+    *,
+    targets: dict[tuple[str, str], tuple[str, ...]] | None = None,
+    global_search_brands: tuple[str, ...] | None = None,
+    technical_closed_loop_targets: tuple[dict[str, str], ...] | None = None,
+) -> dict[str, object]:
     """Build a fixture snapshot in an isolated output directory."""
     validate_source(source)
     manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
-    fixture = select_fixture(source)
+    fixture = select_fixture(
+        source,
+        targets=targets,
+        global_search_brands=global_search_brands,
+        technical_closed_loop_targets=technical_closed_loop_targets,
+    )
     output.mkdir(parents=True, exist_ok=True)
     database = output / "price_specialist_test.sqlite3"
     for suffix in ("", "-wal", "-shm"):
@@ -345,12 +402,19 @@ def rebuild_source_snapshot(raw_source: Path, destination: Path) -> Path:
     return destination
 
 
-def build_atomically(source: Path, output: Path) -> dict[str, object]:
+def build_atomically(
+    source: Path,
+    output: Path,
+    *,
+    targets: dict[tuple[str, str], tuple[str, ...]] | None = None,
+    global_search_brands: tuple[str, ...] | None = None,
+    technical_closed_loop_targets: tuple[dict[str, str], ...] | None = None,
+) -> dict[str, object]:
     output = output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="fixture-", dir=output.parent) as temp:
         staged = Path(temp) / "fixture"
-        summary = build_database(source, staged)
+        summary = build_database(source, staged, targets=targets, global_search_brands=global_search_brands, technical_closed_loop_targets=technical_closed_loop_targets)
         validate_fixture(staged)
         output.mkdir(parents=True, exist_ok=True)
         for path in staged.iterdir():
@@ -362,6 +426,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="从正式业务知识库生成店铺驱动测试库")
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG,
+                        help="测试目标配置文件路径（JSON）")
+    parser.add_argument("--drugs", type=str, default=None,
+                        help="覆盖全局搜索药品列表（逗号分隔）")
+    parser.add_argument("--store-ids", type=str, default=None,
+                        help="覆盖店铺 ID 列表（逗号分隔）")
     parser.add_argument(
         "--rebuild-source", action="store_true",
         help="当来源缺少 price_observations_clean.csv 时，在临时目录重建完整来源快照",
@@ -371,15 +441,24 @@ def main() -> None:
         help="--rebuild-source 使用的原始数据目录",
     )
     args = parser.parse_args()
+    targets, global_brands, tech_loop = _load_targets(
+        args.config, drug_override=args.drugs, store_ids_override=args.store_ids,
+    )
     source = args.source.resolve()
     if not (source / "price_observations_clean.csv").is_file() and not args.rebuild_source:
         parser.error("来源缺少 price_observations_clean.csv；如需临时恢复，请显式传入 --rebuild-source")
     if args.rebuild_source and not (source / "price_observations_clean.csv").is_file():
         with tempfile.TemporaryDirectory(prefix="fixture-source-", dir=args.output.resolve().parent) as temp:
             source = rebuild_source_snapshot(args.raw_source, Path(temp) / "knowledge-base")
-            summary = build_atomically(source, args.output)
+            summary = build_atomically(
+                source, args.output,
+                targets=targets, global_search_brands=global_brands, technical_closed_loop_targets=tech_loop,
+            )
     else:
-        summary = build_atomically(source, args.output)
+        summary = build_atomically(
+            source, args.output,
+            targets=targets, global_search_brands=global_brands, technical_closed_loop_targets=tech_loop,
+        )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
 

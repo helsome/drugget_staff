@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import random
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 from typing import Any, Awaitable, Callable
 
 from sqlalchemy.orm import Session
@@ -171,12 +174,40 @@ class RatePolicy:
         return max(0, base + random.uniform(-self.interval_jitter_seconds, self.interval_jitter_seconds))
 
 
-DEFAULT_RATE_POLICIES = {
+def _resolve_config_dir() -> Path:
+    return Path(__file__).resolve().parents[2] / "data" / "config"
+
+
+def _load_rate_policies() -> dict[str, RatePolicy]:
+    """Load rate policies from JSON config, falling back to hardcoded defaults."""
+    path = _resolve_config_dir() / "rate_policies.json"
+    if not path.is_file():
+        return _HARDCODED_RATE_POLICIES
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        return {
+            platform: RatePolicy(
+                detail_interval_seconds=cfg.get("detail_interval_seconds", 30),
+                search_interval_seconds=cfg.get("search_interval_seconds", 45),
+                batch_size=cfg.get("batch_size", 3),
+                batch_cooldown_seconds=cfg.get("batch_cooldown_seconds", 300),
+                interval_jitter_seconds=cfg.get("interval_jitter_seconds", 0),
+                cooldown_jitter_seconds=cfg.get("cooldown_jitter_seconds", 0),
+            )
+            for platform, cfg in raw.items()
+            if isinstance(cfg, dict)
+        }
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return _HARDCODED_RATE_POLICIES
+
+
+_HARDCODED_RATE_POLICIES: dict[str, RatePolicy] = {
     "jd": RatePolicy(30, 45, 3, 300),
     "taobao": RatePolicy(25, 35, 5, 180),
-    # B2B 药师帮使用更保守的节奏：单会话、前台操作、小批次及冷却。
     "yaoshibang": RatePolicy(32, 45, 4, 240, interval_jitter_seconds=8, cooldown_jitter_seconds=45),
 }
+
+DEFAULT_RATE_POLICIES = _load_rate_policies()
 
 
 class BatchOrchestrator:
@@ -191,6 +222,7 @@ class BatchOrchestrator:
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
         rate_policies: dict[str, RatePolicy] | None = None,
         run_id: str | None = None,
+        logger: Any | None = None,
     ):
         self.session = session
         self.collector = collector
@@ -202,6 +234,7 @@ class BatchOrchestrator:
         self.candidates = SearchCandidateService(session)
         self.alerts = AlertDryRunService()
         self.run_id = run_id
+        self.logger = logger
 
     async def _execute(self, spec: CollectionTaskSpec, browser: BrowserSession) -> CollectionResult:
         if spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH}:
@@ -219,7 +252,7 @@ class BatchOrchestrator:
                     await (
                         self.collector.search_store(spec, browser)
                         if spec.task_type == TaskType.STORE_SEARCH
-                        else self.collector.search(spec.query or "", browser)
+                        else self.collector.search(spec.query or "", browser, limit=int(spec.metadata.get("search_limit", 20)))
                     )
                 )
             except CollectorAccessError as exc:
@@ -249,7 +282,9 @@ class BatchOrchestrator:
             search_evidence = self.collector.last_search_evidence(browser)
             search_evidence.raw_fields["hits"] = [hit.model_dump(mode="json") for hit in hits]
             return CollectionResult(
-                collection_status=CollectionStatus.SUCCESS,
+                collection_status=CollectionStatus.SUCCESS if hits else CollectionStatus.NOT_FOUND,
+                error_code=None if hits else "no_valid_candidate",
+                error_detail=None if hits else "搜索未返回有效候选商品",
                 evidence=search_evidence,
             )
 
@@ -271,6 +306,7 @@ class BatchOrchestrator:
         *,
         max_tasks: int | None = None,
         task_types: set[str] | None = None,
+        skip_health_check: bool = False,
     ) -> dict[str, int | str]:
         blocking_filters = [
             Incident.platform == platform,
@@ -294,9 +330,10 @@ class BatchOrchestrator:
         if blocking:
             return {"platform": platform, "completed": 0, "paused": 1, "reason": "unresolved_incident"}
         browser = BrowserSession(platform=platform, alias=session_alias)
-        health = await self.collector.health_check(browser)
-        if health.collection_status != CollectionStatus.SUCCESS:
-            return {"platform": platform, "completed": 0, "paused": 1, "reason": health.collection_status.value}
+        if not skip_health_check:
+            health = await self.collector.health_check(browser)
+            if health.collection_status != CollectionStatus.SUCCESS:
+                return {"platform": platform, "completed": 0, "paused": 1, "reason": health.collection_status.value}
 
         completed = 0
         batch_count = 0
@@ -362,14 +399,13 @@ class BatchOrchestrator:
             if spec.task_type in {TaskType.SEARCH, TaskType.STORE_SEARCH} and result.collection_status == CollectionStatus.SUCCESS:
                 hits = [SearchHit.model_validate(item) for item in result.evidence.raw_fields.get("hits", [])]
                 candidates = self.candidates.classify_and_save(task=task, spec=spec, hits=hits)
-                inspection_limit = int(spec.metadata.get("inspect_limit", 0) or 0)
+                configured_inspection_limit = int(spec.metadata.get("inspect_limit", 1) or 1)
+                inspection_limit = 0 if configured_inspection_limit < 0 else max(1, configured_inspection_limit)
                 inspections_enqueued = 0
                 for candidate in candidates:
-                    if inspection_limit < 0:
-                        break
                     if candidate.candidate_type.value not in SearchCandidateService.VALID_TYPES:
                         continue
-                    if inspection_limit and inspections_enqueued >= inspection_limit:
+                    if inspections_enqueued >= inspection_limit:
                         break
                     metadata = {
                         **spec.metadata,
@@ -408,6 +444,11 @@ class BatchOrchestrator:
                 if candidate:
                     candidate.is_formal_price = True
                     candidate.sku_verification_status = "verified_detail"
+            elif (
+                spec.task_type == TaskType.INSPECT_CANDIDATE
+                and result.collection_status == CollectionStatus.PARSE_ERROR
+            ):
+                self._enqueue_detail_fallback(spec)
             self.alerts.record_event(self.session, observation=observation)
             if result.collection_status in {CollectionStatus.PAGE_CHANGED, CollectionStatus.STORE_UNVERIFIED}:
                 task.status = TaskStatus.HUMAN_REQUIRED.value
@@ -423,12 +464,84 @@ class BatchOrchestrator:
                 await self.sleep(policy.delay_for(spec.task_type, batch_complete=False))
         return {"platform": platform, "completed": completed, "paused": 0, "reason": "queue_empty"}
 
+    def _enqueue_detail_fallback(self, spec: CollectionTaskSpec) -> CollectionTask | None:
+        """Try the next persisted candidate after a detail parse failure.
+
+        A single search chain gets at most two fallbacks (three detail attempts
+        including the initial candidate), and already-enqueued products are
+        never scheduled twice.
+        """
+        fallback_attempt = int(spec.metadata.get("fallback_attempt", 0) or 0)
+        if fallback_attempt >= 2:
+            return None
+        existing_product_ids = {
+            str((item.payload.get("metadata") or {}).get("candidate_product_id") or item.payload.get("product_id") or "")
+            for item in self.session.scalars(
+                select(CollectionTask).where(
+                    CollectionTask.run_id == spec.run_id,
+                    CollectionTask.platform == spec.platform,
+                    CollectionTask.task_type == TaskType.INSPECT_CANDIDATE.value,
+                )
+            )
+        }
+        candidates = self.session.scalars(
+            select(SearchCandidate)
+            .where(
+                SearchCandidate.run_id == spec.run_id,
+                SearchCandidate.platform == spec.platform,
+                SearchCandidate.drug_id == str(spec.metadata.get("drug_id") or ""),
+                SearchCandidate.candidate_type.in_(SearchCandidateService.VALID_TYPES),
+            )
+            .order_by(SearchCandidate.search_rank, SearchCandidate.id)
+        )
+        candidate = next(
+            (item for item in candidates if str(item.product_id or "") not in existing_product_ids),
+            None,
+        )
+        if candidate is None:
+            return None
+        metadata = {
+            **spec.metadata,
+            "candidate_type": candidate.candidate_type,
+            "candidate_product_id": candidate.product_id,
+            "fallback_attempt": fallback_attempt + 1,
+        }
+        if spec.platform == "yaoshibang":
+            provider_id = str((candidate.raw or {}).get("provider_id") or "")
+            if not provider_id:
+                return None
+            metadata["provider_id"] = provider_id
+        return self.queue.enqueue(CollectionTaskSpec(
+            task_id=str(uuid.uuid4()), run_id=spec.run_id, platform=spec.platform,
+            task_type=TaskType.INSPECT_CANDIDATE, session_alias=spec.session_alias,
+            priority=spec.priority + 1, drug_name=spec.drug_name,
+            generic_name=spec.generic_name, spec=spec.spec,
+            shop_name=candidate.shop_name, product_id=candidate.product_id,
+            url=candidate.url, query=spec.query, metadata=metadata,
+        ))
+
     async def execute_all(
         self,
         sessions: dict[str, str],
         *,
         max_tasks_per_platform: int | None = None,
     ) -> list[dict[str, int | str]]:
+        if self.run_id:
+            run = self.session.get(CollectionRun, self.run_id)
+            if run:
+                run.status = "running"
+                run.started_at = run.started_at or datetime.now()
+                task_types = set(
+                    self.session.scalars(
+                        select(CollectionTask.task_type).where(CollectionTask.run_id == self.run_id)
+                    )
+                )
+                if task_types & {TaskType.SEARCH.value, TaskType.STORE_SEARCH.value, TaskType.INSPECT_CANDIDATE.value}:
+                    run.search_status = "running"
+                if task_types & {TaskType.FIXED_CORE.value, TaskType.FIXED_OBSERVATION.value}:
+                    run.fixed_status = "running"
+                self.session.commit()
+
         # Global stage order: every healthy platform completes fixed work before
         # any Search work begins. A challenge removes only that platform.
         summary = {
@@ -436,6 +549,17 @@ class BatchOrchestrator:
             for platform in sessions
         }
         paused: set[str] = set()
+        for platform, alias in sessions.items():
+            health = await self.collector.health_check(BrowserSession(platform=platform, alias=alias))
+            if self.logger:
+                self.logger.platform_check(
+                    platform,
+                    status="ok" if health.collection_status == CollectionStatus.SUCCESS else health.collection_status.value,
+                    reason=None if health.collection_status == CollectionStatus.SUCCESS else health.collection_status.value,
+                )
+            if health.collection_status != CollectionStatus.SUCCESS:
+                summary[platform].update(paused=1, reason=health.collection_status.value)
+                paused.add(platform)
         stages = [
             {TaskType.FIXED_CORE.value, TaskType.FIXED_OBSERVATION.value},
             {TaskType.STORE_SEARCH.value},
@@ -458,6 +582,7 @@ class BatchOrchestrator:
                     alias,
                     max_tasks=remaining,
                     task_types=task_types,
+                    skip_health_check=True,
                 )
                 summary[platform]["completed"] = int(summary[platform]["completed"]) + int(outcome["completed"])
                 summary[platform]["paused"] = outcome["paused"]
@@ -484,5 +609,29 @@ class BatchOrchestrator:
                     if paused or counts.get(TaskStatus.HUMAN_REQUIRED.value, 0)
                     else "pending"
                 )
+                task_status_rows = self.session.execute(
+                    select(CollectionTask.task_type, CollectionTask.status)
+                    .where(CollectionTask.run_id == self.run_id)
+                ).all()
+                fixed_statuses = [
+                    status for task_type, status in task_status_rows
+                    if task_type in {TaskType.FIXED_CORE.value, TaskType.FIXED_OBSERVATION.value}
+                ]
+                search_statuses = [
+                    status for task_type, status in task_status_rows
+                    if task_type in {TaskType.SEARCH.value, TaskType.STORE_SEARCH.value, TaskType.INSPECT_CANDIDATE.value}
+                ]
+                unfinished_statuses = {
+                    TaskStatus.PENDING.value,
+                    TaskStatus.LEASED.value,
+                    TaskStatus.RUNNING.value,
+                    TaskStatus.HUMAN_REQUIRED.value,
+                }
+                if fixed_statuses:
+                    run.fixed_status = "completed" if not unfinished_statuses.intersection(fixed_statuses) else "pending"
+                if search_statuses:
+                    run.search_status = "completed" if not unfinished_statuses.intersection(search_statuses) else "pending"
+                if run.status == "completed":
+                    run.finished_at = datetime.now()
                 self.session.commit()
         return list(summary.values())

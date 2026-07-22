@@ -27,9 +27,18 @@ def init_database(engine: Engine) -> None:
     # here as well so an existing developer database can persist storefronts.
     if engine.dialect.name == "sqlite" and "store_responsibilities" in inspect(engine).get_table_names():
         columns = {item["name"] for item in inspect(engine).get_columns("store_responsibilities")}
-        if "shop_home_url" not in columns:
-            with engine.begin() as connection:
-                connection.execute(text("ALTER TABLE store_responsibilities ADD COLUMN shop_home_url TEXT"))
+        additive_columns = {
+            "shop_home_url": "TEXT",
+            "identity_status": "VARCHAR(40) NOT NULL DEFAULT 'legacy'",
+            "first_discovered_at": "DATETIME",
+            "last_seen_at": "DATETIME",
+            "discovery_count": "INTEGER NOT NULL DEFAULT 0",
+            "identity_evidence": "JSON",
+        }
+        with engine.begin() as connection:
+            for name, ddl in additive_columns.items():
+                if name not in columns:
+                    connection.execute(text(f"ALTER TABLE store_responsibilities ADD COLUMN {name} {ddl}"))
         event_columns = {item["name"] for item in inspect(engine).get_columns("price_break_events")}
         if "comparison_id" not in event_columns:
             with engine.begin() as connection:

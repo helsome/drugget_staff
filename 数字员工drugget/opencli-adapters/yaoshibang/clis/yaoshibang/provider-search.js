@@ -2,11 +2,14 @@ import { cli, Strategy } from '@jackwener/opencli/registry';
 import { ArgumentError } from '@jackwener/opencli/errors';
 
 /**
- * 药师帮 药品搜索
+ * 药师帮 供应商内搜索
  *
- * 搜索关键词（品牌+通用名），返回商品列表。
- * 药师帮使用 Vue SPA，商品数据存储在 Vuex store 中。
- * 价格数据在 DOM 层被字体混淆，但 priceToken（protobuf）包含明文价格。
+ * 在全局搜索结果中按 provider_id 过滤，专门用于 STORE_SEARCH 路线。
+ * 相比 collector 端的"全局 search + 客户端按 provider_id 过滤"做法，这里把
+ * pagesize 提升到 60（默认 search 的 3 倍），显著降低目标供应商因排名靠后
+ * 而被截断的概率。
+ *
+ * 输出列与 search.js 完全一致，collector 的 SearchHit 构建逻辑无需改动。
  */
 
 function parsePriceFromToken(priceToken) {
@@ -21,15 +24,18 @@ function parsePriceFromToken(priceToken) {
   return null;
 }
 
-function extractSearchResults(drugList, limit) {
+function extractSearchResults(drugList, limit, providerId) {
   if (!Array.isArray(drugList)) return [];
   const results = [];
   for (let i = 0; i < drugList.length && results.length < limit; i++) {
     const item = drugList[i];
     if (!item) continue;
+    const itemProviderId = String(item.providerId || item.provider_id || '');
+    // 严格按 provider_id 过滤：这是 provider-search 的核心语义。
+    if (providerId && itemProviderId !== providerId) continue;
     const price = parsePriceFromToken(item.priceToken);
     const joinCar = item.joinCarMap || {};
-    const purchaseActivityId = String(item.purchaseActivityId || item.purchase_activity_id || item.activityId || item.activity_id || joinCar.purchaseActivityId || joinCar.purchase_activity_id || '');
+    // 保留原始全局 rank（在完整结果中的位置）便于审计。
     results.push({
       rank: i + 1,
       title: item.drugname || item.cn_name || '',
@@ -37,12 +43,11 @@ function extractSearchResults(drugList, limit) {
       spec: item.specification || '',
       shop: item.provider_name || '',
       wholesale_id: String(item.wholesaleid || ''),
-      provider_id: String(item.providerId || ''),
-      purchase_activity_id: purchaseActivityId,
+      provider_id: itemProviderId,
       manufacturer: item.manufacturer || '',
       unit: item.unit || joinCar.unit || '',
       stock: joinCar.stockDisplay || joinCar.stockStatus || '',
-      url: `https://dian.ysbang.cn/#/druginfo?wholesaleId=${item.wholesaleid}&providerId=${item.providerId}`,
+      url: `https://dian.ysbang.cn/#/druginfo?wholesaleId=${item.wholesaleid}&providerId=${itemProviderId}`,
     });
   }
   return results;
@@ -50,27 +55,33 @@ function extractSearchResults(drugList, limit) {
 
 cli({
     site: 'yaoshibang',
-    name: 'search',
+    name: 'provider-search',
     access: 'read',
-    description: '药师帮药品搜索',
+    description: '药师帮供应商内搜索 - 在全局搜索结果中按 provider_id 过滤',
     domain: 'dian.ysbang.cn',
     strategy: Strategy.COOKIE,
     args: [
         { name: 'query', positional: true, required: true, help: '搜索关键词（品牌+通用名）' },
-        { name: 'limit', type: 'int', default: 10, help: '返回结果数量 (max 60)' },
+        { name: 'provider_id', required: true, help: '目标供应商ID' },
+        { name: 'limit', type: 'int', default: 60, help: '全局搜索抓取条数（过滤前，max 60）' },
         { name: 'page', type: 'int', default: 1, help: '页码' },
     ],
-    columns: ['rank', 'title', 'price', 'spec', 'shop', 'wholesale_id', 'provider_id', 'purchase_activity_id', 'manufacturer', 'unit', 'stock', 'url'],
+    columns: ['rank', 'title', 'price', 'spec', 'shop', 'wholesale_id', 'provider_id', 'manufacturer', 'unit', 'stock', 'url'],
     navigateBefore: false,
     func: async (page, kwargs) => {
         const query = String(kwargs.query || '').trim();
+        const providerId = String(kwargs.provider_id || '').trim();
         if (!query) {
-            throw new ArgumentError('药师帮搜索关键词不能为空');
+            throw new ArgumentError('药师帮供应商内搜索关键词不能为空');
         }
-        const limit = Math.min(Math.max(Number(kwargs.limit) || 10, 1), 60);
+        if (!providerId) {
+            throw new ArgumentError('provider_id 不能为空');
+        }
+        // pagesize 提升到 60（默认 search 的 3 倍），降低目标供应商被截断的概率。
+        const pageSize = Math.min(Math.max(Number(kwargs.limit) || 60, 1), 60);
         const pageNum = Math.max(Number(kwargs.page) || 1, 1);
 
-        const searchUrl = `https://dian.ysbang.cn/#/indexContent?searchkey=${encodeURIComponent(query)}&page=${pageNum}&pagesize=${limit}&firstSearch=true`;
+        const searchUrl = `https://dian.ysbang.cn/#/indexContent?searchkey=${encodeURIComponent(query)}&page=${pageNum}&pagesize=${pageSize}&firstSearch=true`;
         await page.goto(searchUrl);
         await page.wait(6);
 
@@ -112,6 +123,6 @@ cli({
             })()
         `);
 
-        return extractSearchResults(data, limit);
+        return extractSearchResults(data, pageSize, providerId);
     },
 });

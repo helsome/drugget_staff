@@ -23,6 +23,7 @@ from .catalog import normalize_spec
 CHALLENGE_MARKERS = ("验证码", "滑块", "安全验证", "京东验证", "captcha")
 RATE_LIMIT_MARKERS = ("频控页", "访问过于频繁", "pc-frequent-pro", "rate limit")
 LOGIN_MARKERS = ("未登录", "登录失效", "not logged", "login required")
+BLOCKED_MARKERS = ("阻断弹窗", "采购活动ID不能为空", "请选择要下单的连锁总部")
 HOMEPAGE_MARKERS = ("京东(jd.com)-", "轻松购物", "淘宝网 - 淘！我喜欢")
 
 
@@ -40,6 +41,8 @@ def detect_access_state(title: str | None, url: str | None, stderr: str | None) 
         return CollectionStatus.RATE_LIMITED
     if any(marker.lower() in text for marker in LOGIN_MARKERS):
         return CollectionStatus.LOGIN_REQUIRED
+    if any(marker.lower() in text for marker in BLOCKED_MARKERS):
+        return CollectionStatus.PAGE_CHANGED
     return None
 
 
@@ -77,7 +80,7 @@ class ComputerUseCollector(ABC):
     async def collect_fixed(self, task: CollectionTaskSpec, session: BrowserSession) -> CollectionResult: ...
 
     @abstractmethod
-    async def search(self, query: str, session: BrowserSession) -> list[SearchHit]: ...
+    async def search(self, query: str, session: BrowserSession, *, limit: int = 20) -> list[SearchHit]: ...
 
     async def search_store(self, task: CollectionTaskSpec, session: BrowserSession) -> list[SearchHit]:
         """Run a store-bound search; never silently downgrade it to global search."""
@@ -480,7 +483,7 @@ class OpenCLIComputerUseCollector(ComputerUseCollector):
     async def inspect_candidate(self, task: CollectionTaskSpec, session: BrowserSession) -> CollectionResult:
         return await self._detail(task, session)
 
-    async def search(self, query: str, session: BrowserSession) -> list[SearchHit]:
+    async def search(self, query: str, session: BrowserSession, *, limit: int = 20) -> list[SearchHit]:
         args = [
             session.platform,
             "search",
@@ -488,7 +491,7 @@ class OpenCLIComputerUseCollector(ComputerUseCollector):
             "-f",
             "json",
             "--limit",
-            "20",
+            str(limit),
         ]
         if session.platform == "taobao":
             args.extend(["--sort", "default"])
@@ -554,7 +557,7 @@ class OpenCLIComputerUseCollector(ComputerUseCollector):
             if status:
                 raise CollectorAccessError("药师帮供应商档案不可用", collection_status=status.value, details=profile)
             hits = [
-                hit for hit in await self.search(task.query or "", session)
+                hit for hit in await self.search(task.query or "", session, limit=int(task.metadata.get("search_limit", 20)))
                 if str(hit.raw.get("provider_id") or "") == provider_id
             ]
             evidence = self._search_evidence.get(session.alias, EvidenceBundle())

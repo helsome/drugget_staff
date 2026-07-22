@@ -13,15 +13,16 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from price_specialist.collector import OpenCLIComputerUseCollector
 from price_specialist.config import Settings
 from price_specialist.database import configured_database, init_database
-from price_specialist.enums import TaskType
+from price_specialist.enums import TaskStatus, TaskType
 from price_specialist.evidence import EvidenceStore
-from price_specialist.models import CollectionTask, DrugProduct, PriceObservation, SearchCandidate, StoreResponsibility
+from price_specialist.models import CollectionRun, CollectionTask, DrugProduct, PriceObservation, SearchCandidate, StoreResponsibility
 from price_specialist.orchestrator import BatchOrchestrator
+from price_specialist.run_logger import BatchLogger
 from price_specialist.schemas import CollectionTaskSpec
 from price_specialist.services import TaskQueueService
 from export_fixture_run_csv import export_run
@@ -214,6 +215,16 @@ def seed_smoke_tasks(queue: TaskQueueService, run_id: str, db, *, only_store_id:
             raise ValueError(f"测试数据集中没有店铺ID: {only_store_id}")
     else:
         rows = [*rows, *[existing_global[key] for key in sorted(existing_global)]]
+    # 历史手填的 yaoshibang provider_id（W00010=5201, W00019=21288, W06410=9023）
+    # 从未在任何真实搜索/观测中出现，是假值；清空后强制 collector 走 resolve-provider
+    # 发现真实 provider_id，并由 orchestrator 回填到 StoreResponsibility。
+    db.execute(
+        update(StoreResponsibility)
+        .where(StoreResponsibility.platform == "yaoshibang")
+        .where(StoreResponsibility.internal_store_id.in_(("W00010", "W00019", "W06410")))
+        .values(platform_store_key=None)
+    )
+    db.flush()
     for row in rows:
         drug = db.scalar(select(DrugProduct).where(DrugProduct.brand_name == row["brand"]))
         if drug is None:
@@ -248,19 +259,26 @@ def seed_smoke_tasks(queue: TaskQueueService, run_id: str, db, *, only_store_id:
             metadata={
                 "drug_id": drug.id, "target_brand": row["brand"], "target_spec": row["spec_normalized"] or None,
                 "route": "shop_home" if row["platform_code"] == "taobao" and store_route else "provider_profile" if store_route else "global",
-                "shop_home_url": VERIFIED_TAOBAO_HOMES.get(row["store_id"]) if row["platform_code"] == "taobao" and store_route else None,
+                "shop_home_url": (store.shop_home_url or VERIFIED_TAOBAO_HOMES.get(row["store_id"])) if row["platform_code"] == "taobao" and store_route else None,
                 "provider_id": stored_provider_id or None,
                 # Fixture intentionally has no provider_id. The collector now
                 # calls `resolve-provider` and proceeds only on a unique exact
                 # name match; ambiguity remains an auditable human action.
                 "fixture_seed_key": row["seed_key"],
+                "inspect_limit": 1,
             },
         ))
 
 
 async def main(*, only_store_id: str | None = None, seed_key: str | None = None,
                store_id: str | None = None, brand: str | None = None,
-               platform: str | None = None, max_candidates: int = 1, output_root: Path | None = None) -> None:
+               platform: str | None = None, max_candidates: int = 1,
+               output_root: Path | None = None, max_tasks: int | None = None,
+               resume_run_id: str | None = None) -> None:
+    settings = Settings.from_env(PROJECT_ROOT)
+    engine, factory = configured_database(settings)
+    init_database(engine)
+
     if seed_key or store_id or brand:
         if platform not in {None, "yaoshibang"}:
             raise ValueError("按种子闭环当前仅支持 --platform yaoshibang")
@@ -270,19 +288,55 @@ async def main(*, only_store_id: str | None = None, seed_key: str | None = None,
         )
         print(result)
         return
-    settings = Settings.from_env(PROJECT_ROOT)
-    engine, factory = configured_database(settings)
-    init_database(engine)
+
     with factory() as db:
-        queue = TaskQueueService(db)
-        run = queue.create_run()
-        seed_smoke_tasks(queue, run.id, db, only_store_id=only_store_id)
-        db.commit()
+        if resume_run_id:
+            run = db.get(CollectionRun, resume_run_id)
+            if run is None:
+                raise ValueError(f"要恢复的批次不存在: {resume_run_id}")
+            # Reset leased/running tasks back to pending for re-execution.
+            db.execute(
+                update(CollectionTask)
+                .where(CollectionTask.run_id == resume_run_id)
+                .where(CollectionTask.status.in_((TaskStatus.LEASED.value, TaskStatus.RUNNING.value)))
+                .values(status=TaskStatus.PENDING.value)
+            )
+            db.commit()
+            run_id = resume_run_id
+        else:
+            queue = TaskQueueService(db)
+            run = queue.create_run()
+            run_id = run.id
+            seed_smoke_tasks(queue, run.id, db, only_store_id=only_store_id)
+            db.commit()
+
+        output_dir = (output_root or PROJECT_ROOT / "artifacts/runs/current") / run_id
+        output_dir.mkdir(parents=True, exist_ok=True)
+        logger = BatchLogger(run_id, output_dir)
+
+        # Determine which platforms to run
+        sessions = {}
+        if platform and platform == "taobao":
+            sessions["taobao"] = "taobao-p0"
+        elif platform and platform == "yaoshibang":
+            sessions["yaoshibang"] = "yaoshibang-p0"
+        elif not platform:
+            sessions["taobao"] = "taobao-p0"
+            sessions["yaoshibang"] = "yaoshibang-p0"
+
         outcome = await BatchOrchestrator(
             session=db, collector=OpenCLIComputerUseCollector(settings),
-            evidence_store=EvidenceStore(settings.evidence_dir), run_id=run.id,
-        ).execute_all({"taobao": "taobao-p0", "yaoshibang": "yaoshibang-p0"})
-        print({"run_id": run.id, "outcome": outcome})
+            evidence_store=EvidenceStore(settings.evidence_dir), run_id=run_id,
+            logger=logger,
+        ).execute_all(sessions, max_tasks_per_platform=max_tasks)
+
+        logger.close()
+
+        # Auto-export CSV artifacts
+        export_run(run_id, output_dir)
+        print({"run_id": run_id, "outcome": outcome, "output": str(output_dir)})
+        print(f"CSV导出目录: {output_dir}")
+        print(f"JSONL日志: {logger.log_path}")
 
 
 if __name__ == "__main__":
@@ -291,10 +345,13 @@ if __name__ == "__main__":
     parser.add_argument("--seed-key", help="选择一条药师帮测试种子并运行受限闭环")
     parser.add_argument("--store-id", help="与 --brand 一起选择一条药师帮店铺种子")
     parser.add_argument("--brand", help="与 --store-id 一起选择药品品牌")
-    parser.add_argument("--platform", choices=("yaoshibang",), help="按种子闭环的平台")
+    parser.add_argument("--platform", choices=("taobao", "yaoshibang"), help="限制只运行指定平台的任务")
     parser.add_argument("--max-candidates", type=int, default=1, choices=range(1, 2), help="最多确认的候选数（当前固定为 1）")
+    parser.add_argument("--max-tasks", type=int, default=None, help="限制每个平台最多执行的任务数")
+    parser.add_argument("--resume-run-id", help="恢复已有批次，不创建新 run 和种子任务")
     parser.add_argument("--output-root", type=Path, help="本批次 CSV 输出根目录")
     args = parser.parse_args()
     asyncio.run(main(only_store_id=args.only_store_id, seed_key=args.seed_key,
                      store_id=args.store_id, brand=args.brand, platform=args.platform,
-                     max_candidates=args.max_candidates, output_root=args.output_root))
+                     max_candidates=args.max_candidates, output_root=args.output_root,
+                     max_tasks=args.max_tasks, resume_run_id=args.resume_run_id))

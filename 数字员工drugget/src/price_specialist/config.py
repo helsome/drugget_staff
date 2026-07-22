@@ -5,6 +5,18 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
+def _load_dotenv(env_path: Path) -> None:
+    """Load a .env file, ignoring missing files and comments."""
+    if not env_path.is_file():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip())
+
+
 @dataclass(frozen=True)
 class Settings:
     project_dir: Path
@@ -18,8 +30,18 @@ class Settings:
     network_retry_limit: int
 
     @classmethod
-    def from_env(cls, project_dir: Path | None = None) -> "Settings":
+    def from_env(cls, project_dir: Path | None = None, *, test_mode: bool = False) -> "Settings":
         root = (project_dir or Path.cwd()).resolve()
+
+        # Load environment files layered
+        env_file = root / ".env"
+        test_env = root / ".env.test"
+        prod_env = root / ".env.prod"
+        _load_dotenv(env_file)
+        if test_mode:
+            _load_dotenv(test_env)
+        else:
+            _load_dotenv(prod_env)
 
         def resolve_path(name: str, default: str) -> Path:
             value = Path(os.getenv(name, default))

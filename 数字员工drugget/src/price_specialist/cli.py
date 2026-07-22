@@ -216,10 +216,64 @@ def enqueue_p0() -> None:
     typer.echo(json.dumps({"run_id": run.id, "fixed_tasks": fixed_count, "search_tasks": search_count}, ensure_ascii=False))
 
 
+@app.command("enqueue-yaoshibang-global-batch")
+def enqueue_yaoshibang_global_batch(
+    limit: int = typer.Option(20, min=1, help="本批次药品数"),
+    offset: int = typer.Option(0, min=0, help="按药品名称排序后的起始偏移"),
+    inspect_limit: int = typer.Option(5, min=1, help="每个药品最多生成的详情候选数"),
+) -> None:
+    """仅为指定批次药品创建药师帮 GLOBAL_SEARCH 任务。
+
+    该入口不创建 STORE_SEARCH。默认每个药品只创建一条品牌+通用名搜索，
+    搜索成功后由批次运行器为每个药品最多生成 5 个详情候选，
+    用于测试药师帮大规模抓取能力。
+    """
+    cfg = settings()
+    engine, factory = configured_database(cfg)
+    init_database(engine)
+    with factory.begin() as session:
+        drugs = list(session.scalars(
+            select(DrugProduct).order_by(DrugProduct.brand_name).offset(offset).limit(limit)
+        ))
+        if not drugs:
+            raise typer.BadParameter("指定范围内没有药品")
+        run = TaskQueueService(session).create_run()
+        for index, drug in enumerate(drugs):
+            TaskQueueService(session).enqueue(CollectionTaskSpec(
+                task_id=str(uuid.uuid4()), run_id=run.id, platform="yaoshibang",
+                session_alias="yaoshibang-p0", task_type=TaskType.SEARCH,
+                priority=50 + index, drug_name=drug.brand_name,
+                generic_name=drug.generic_name,
+                query=f"{drug.brand_name} {drug.generic_name}",
+                metadata={
+                    "drug_id": drug.id,
+                    "target_brand": drug.brand_name,
+                    "target_spec": None,
+                    "route": "global",
+                    "batch_type": "yaoshibang_global_20",
+                    "inspect_limit": inspect_limit,
+                },
+            ))
+        run.summary = {
+            "batch_type": "yaoshibang_global_20",
+            "platform": "yaoshibang",
+            "drug_count": len(drugs),
+            "offset": offset,
+            "limit": limit,
+            "search_tasks": len(drugs),
+            "inspect_limit": inspect_limit,
+            "notifications": "dry_run",
+        }
+        payload = {"run_id": run.id, "drug_count": len(drugs), "search_tasks": len(drugs),
+                   "drugs": [drug.brand_name for drug in drugs]}
+    typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+
+
 @app.command("run-batch")
 def run_batch(
     run_id: str | None = typer.Option(None, help="只执行指定run；省略时使用最新pending run"),
     max_tasks_per_platform: int | None = typer.Option(None, min=1, help="每个平台最多执行多少条，用于有界烟测"),
+    parallel: bool = typer.Option(True, help="淘宝和药师帮使用独立会话并行抓取"),
 ) -> None:
     """Run one queued P0 run; Search and fixed tasks retain independent records."""
     cfg = settings()
@@ -240,11 +294,14 @@ def run_batch(
             collector=collector,
             evidence_store=EvidenceStore(cfg.evidence_dir),
             run_id=selected_run_id,
+            session_factory=factory,
+            collector_factory=lambda: OpenCLIComputerUseCollector(cfg),
         )
         outcome = asyncio.run(
             runner.execute_all(
                 {platform: f"{platform}-p0" for platform in cfg.allowed_platforms},
                 max_tasks_per_platform=max_tasks_per_platform,
+                parallel=parallel,
             )
         )
     typer.echo(json.dumps(outcome, ensure_ascii=False))

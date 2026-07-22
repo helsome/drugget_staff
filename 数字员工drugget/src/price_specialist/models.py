@@ -75,6 +75,13 @@ class StoreResponsibility(Base):
     contact: Mapped[str | None] = mapped_column(String(200))
     involved_products: Mapped[str | None] = mapped_column(Text)
     fixed_tier: Mapped[str] = mapped_column(String(40), nullable=False)
+    # Store identity lifecycle: legacy/discovered/verified/active/stale/retired.
+    # A store discovered by global search is not eligible for STORE_SEARCH yet.
+    identity_status: Mapped[str] = mapped_column(String(40), nullable=False, default="legacy")
+    first_discovered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    discovery_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    identity_evidence: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
 
 class MonitorTarget(Base):

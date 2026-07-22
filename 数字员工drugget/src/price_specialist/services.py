@@ -126,6 +126,70 @@ class TaskQueueService:
         return observation
 
 
+class StoreDiscoveryService:
+    """Persist store identities found by GLOBAL_SEARCH detail verification.
+
+    Discovery is deliberately separate from responsibility and monitoring
+    activation. A discovered store must be reviewed/verified before it can
+    receive STORE_SEARCH tasks.
+    """
+
+    ACTIVE_STATUSES = {"verified", "active"}
+
+    def __init__(self, session: Session):
+        self.session = session
+
+    def record_from_detail(self, *, task: CollectionTask, spec: CollectionTaskSpec,
+                           result: CollectionResult) -> StoreResponsibility | None:
+        if task.task_type != "inspect_candidate" or result.collection_status.value != "success":
+            return None
+        raw = result.evidence.raw_fields or {}
+        provider_id = str(spec.metadata.get("provider_id") or raw.get("provider_id") or "").strip()
+        home_url = str(spec.metadata.get("shop_home_url") or raw.get("shop_home_url") or "").strip() or None
+        shop_name = str(result.page_shop or raw.get("provider_name") or spec.shop_name or "").strip()
+        if not shop_name or (not provider_id and not home_url):
+            return None
+        query = select(StoreResponsibility).where(StoreResponsibility.platform == task.platform)
+        if provider_id:
+            query = query.where(StoreResponsibility.platform_store_key == provider_id)
+        else:
+            query = query.where(StoreResponsibility.shop_home_url == home_url)
+        store = self.session.scalar(query.limit(1))
+        now = datetime.now()
+        evidence = {
+            "source": "global_search_detail",
+            "run_id": task.run_id,
+            "task_id": task.id,
+            "drug": spec.drug_name,
+            "product_id": spec.metadata.get("candidate_product_id"),
+            "url": result.final_url,
+            "page_title": result.page_title,
+            "provider_id": provider_id or None,
+            "provider_name": shop_name,
+            "captured_at": now.isoformat(),
+        }
+        if store is None:
+            store = StoreResponsibility(
+                internal_store_id=f"discovered-{task.platform}-{provider_id or abs(hash(home_url))}",
+                platform=task.platform, platform_store_key=provider_id or None,
+                shop_home_url=home_url, shop_name=shop_name, shop_status="待核验",
+                fixed_tier="observation_only", identity_status="discovered",
+                first_discovered_at=now, last_seen_at=now, discovery_count=1,
+                identity_evidence=evidence,
+            )
+            self.session.add(store)
+        else:
+            if store.identity_status not in self.ACTIVE_STATUSES:
+                store.identity_status = "discovered"
+            store.platform_store_key = store.platform_store_key or provider_id or None
+            store.shop_home_url = store.shop_home_url or home_url
+            store.last_seen_at = now
+            store.discovery_count = (store.discovery_count or 0) + 1
+            store.identity_evidence = {**(store.identity_evidence or {}), "latest": evidence}
+        self.session.flush()
+        return store
+
+
 class SearchCandidateService:
     """Classify and persist Search hits without treating list prices as evidence."""
 
@@ -186,9 +250,12 @@ class SearchCandidateService:
         target_brand = str(spec.metadata.get("target_brand") or spec.drug_name or "")
         if not drug_id or not target_brand:
             return []
+        candidate_limit = int(spec.metadata.get("candidate_limit", 0) or 0)
         classifier = self._classifier()
         saved: list[ClassifiedCandidate] = []
         for hit in hits:
+            if candidate_limit > 0 and len(saved) >= candidate_limit:
+                break
             item = classifier.classify(
                 hit,
                 target_brand=target_brand,

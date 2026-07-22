@@ -62,8 +62,8 @@ def value(item: Any) -> str:
     return str(item)
 
 
-def write_rows(path: Path, rows: list[dict[str, Any]]) -> None:
-    keys = list(dict.fromkeys(key for row in rows for key in row))
+def write_rows(path: Path, rows: list[dict[str, Any]], *, fieldnames: list[str] | None = None) -> None:
+    keys = fieldnames or list(dict.fromkeys(key for row in rows for key in row))
     headings = [CHINESE_HEADERS.get(key, key) for key in keys]
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.writer(handle)
@@ -77,34 +77,45 @@ def fixture_table(table: str) -> list[dict[str, Any]]:
         return [dict(row) for row in source.execute(f'SELECT * FROM "{table}"')]
 
 
-def export_run(run_id: str, output_dir: Path) -> Path:
+def export_run(
+    run_id: str,
+    output_dir: Path,
+    *,
+    test_mode: bool = False,
+    include_fixture_inputs: bool = False,
+) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
-    for table in ("store_drug_targets", "task_seeds", "historical_product_clues"):
-        write_rows(output_dir / f"fixture_{table}.csv", fixture_table(table))
+    if include_fixture_inputs:
+        for table in ("store_drug_targets", "task_seeds", "historical_product_clues"):
+            write_rows(output_dir / f"fixture_{table}.csv", fixture_table(table))
 
-    engine, factory = configured_database(Settings.from_env(PROJECT_ROOT))
+    engine, factory = configured_database(Settings.from_env(PROJECT_ROOT, test_mode=test_mode))
     with factory() as db:
         run = db.get(CollectionRun, run_id)
         if run is None:
             raise ValueError(f"run不存在: {run_id}")
-        write_rows(output_dir / "collection_runs.csv", [{column.name: getattr(run, column.name) for column in run.__table__.columns}])
+        write_rows(
+            output_dir / "collection_runs.csv",
+            [{column.name: getattr(run, column.name) for column in run.__table__.columns}],
+            fieldnames=[column.name for column in CollectionRun.__table__.columns],
+        )
         write_rows(output_dir / "collection_tasks.csv", [
             {column.name: getattr(item, column.name) for column in item.__table__.columns}
             for item in db.scalars(select(CollectionTask).where(CollectionTask.run_id == run_id))
-        ])
+        ], fieldnames=[column.name for column in CollectionTask.__table__.columns])
         write_rows(output_dir / "price_observations.csv", [
             {column.name: getattr(item, column.name) for column in item.__table__.columns}
             for item in db.scalars(select(PriceObservation).where(PriceObservation.run_id == run_id))
-        ])
+        ], fieldnames=[column.name for column in PriceObservation.__table__.columns])
         write_rows(output_dir / "search_candidates.csv", [
             {column.name: getattr(item, column.name) for column in item.__table__.columns}
             for item in db.scalars(select(SearchCandidate).where(SearchCandidate.run_id == run_id))
-        ])
+        ], fieldnames=[column.name for column in SearchCandidate.__table__.columns])
         task_ids = select(CollectionTask.id).where(CollectionTask.run_id == run_id)
         write_rows(output_dir / "incidents.csv", [
             {column.name: getattr(item, column.name) for column in item.__table__.columns}
             for item in db.scalars(select(Incident).where(Incident.task_id.in_(task_ids)))
-        ])
+        ], fieldnames=[column.name for column in Incident.__table__.columns])
     return output_dir
 
 
@@ -112,6 +123,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("run_id")
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--include-fixture-inputs", action="store_true")
     args = parser.parse_args()
     destination = args.output or PROJECT_ROOT / "artifacts/runs/current" / args.run_id
-    print(export_run(args.run_id, destination.resolve()))
+    print(export_run(args.run_id, destination.resolve(), include_fixture_inputs=args.include_fixture_inputs))

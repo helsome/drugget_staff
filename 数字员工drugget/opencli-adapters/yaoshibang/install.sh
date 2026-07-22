@@ -28,6 +28,7 @@ cp "$ADAPTER_DIR/search.js" "$TARGET_DIR/"
 cp "$ADAPTER_DIR/detail.js" "$TARGET_DIR/"
 cp "$ADAPTER_DIR/shop.js" "$TARGET_DIR/"
 cp "$ADAPTER_DIR/resolve-provider.js" "$TARGET_DIR/"
+cp "$ADAPTER_DIR/provider-search.js" "$TARGET_DIR/"
 
 # 验证安装
 echo "    验证安装..."
@@ -40,6 +41,7 @@ if opencli list 2>/dev/null | grep -q yaoshibang; then
     echo "  opencli yaoshibang detail <商品ID> --provider_id <供应商ID>  - 查看商品详情"
     echo "  opencli yaoshibang shop <供应商ID>  - 查看店铺信息"
     echo "  opencli yaoshibang resolve-provider <店铺名>  - 解析供应商ID"
+    echo "  opencli yaoshibang provider-search <关键词> --provider_id <供应商ID>  - 供应商内搜索"
 else
     echo "==> 文件已复制，但 opencli 未识别到 yaoshibang。"
     echo "    请确认 opencli 是否正确读取 ~/.opencli/clis/ 目录。"
