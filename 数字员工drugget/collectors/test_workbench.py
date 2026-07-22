@@ -28,6 +28,7 @@ from price_specialist.run_logger import (
     write_task_status_csv,
 )
 from price_specialist.test_runner import TestRunConfig, TestWorker, _progress
+from price_specialist.services import DrugSelection
 
 
 # ── Colour scheme ──────────────────────────────────────────────────────────
@@ -566,7 +567,7 @@ class TestWorkbench(tk.Tk):
             return
 
         config = self.collector_config.get_config()
-        config.drugs = drugs
+        config.drugs = [DrugSelection.from_generic_name(d) for d in drugs]
         config.platforms = platforms
         config.search_modes = search_modes
         config.rate_policy_overrides = self.platform_config.get_rate_overrides()
