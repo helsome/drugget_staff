@@ -1,0 +1,41 @@
+{
+  "product": {
+    "product_id": "getai-prod-1",
+    "provider_id": "yaoshibang-getai",
+    "title": "葛泰 地奥司明片 0.45g*20片",
+    "manufacturer": "葛泰",
+    "generic_name": "地奥司明片",
+    "brand": "葛泰"
+  },
+  "sku_options": [
+    {
+      "sku_id": "getai-sku-045-20",
+      "raw_spec": "0.45g*20片",
+      "normalized_spec": "0.45g*20片",
+      "units_per_box": 20,
+      "min_unit": "片",
+      "selected": true
+    }
+  ],
+  "price_quotes": [
+    {
+      "quote_id": "getai-quote-1",
+      "price_type": "base_price",
+      "amount": "16.17",
+      "currency": "CNY",
+      "min_quantity": 1,
+      "sku_id": "getai-sku-045-20"
+    }
+  ],
+  "selected_sku": {},
+  "page_context": {
+    "final_url": "https://dian.yaoshi.com/drug/getai-diosmin-045-20",
+    "page_shop": "药实在",
+    "platform": "yaoshibang",
+    "captured_at": "2026-07-20T10:00:00Z"
+  },
+  "parser": {
+    "name": "yaoshibang_detail",
+    "version": "1.0"
+  }
+}
