@@ -24,24 +24,22 @@ def test_coverage_counts_against_real_csv() -> None:
     assert report["business_confirmed"] == 1
     assert report["pending"] == 31
     assert report["active"] == 32
-    assert report["comparable"] == 1
+    assert report["comparable"] == 32
     assert report["strength_only_specs"] == 6
     assert report["spec_less"] == 25
 
-    assert report["comparable_drugs"] == ["葛泰"]
+    assert len(report["comparable_drugs"]) == 30
+    assert "葛泰" in report["comparable_drugs"]
 
-    assert len(report["stale_conflicts"]) == 1
-    conflict = report["stale_conflicts"][0]
-    assert conflict["brand"] == "葛泰"
-    assert conflict["generic_name"] == "地奥司明片"
-    assert conflict["detail"]
+    assert report["stale_conflicts"] == []
 
 
-def test_strength_only_and_comparable_drugs_match_audit() -> None:
+def test_strength_only_and_guidance_eligible_drugs_match_audit() -> None:
     report = compute_coverage(CSV_PATH, today=TODAY)
 
-    # 葛泰 0.45g*20片 is the single confirmed, parseable, effective rule.
-    assert report["comparable_drugs"] == ["葛泰"]
+    # All 30 brands are covered by the designated source; packaging remains a
+    # page-evidence requirement rather than a guidance eligibility gate.
+    assert len(report["comparable_drugs"]) == 30
 
     # The 6 strength-only spec_keys called out in the prior audit.
     expected_strength_only_brands = {"希诺彤", "倍利舒", "托妥", "晴瑞欣", "品定"}
@@ -58,8 +56,7 @@ def test_pending_drugs_is_sorted_unique_brand_list() -> None:
     assert pending == sorted(pending)
     assert len(pending) == len(set(pending))
     assert len(pending) == 30
-    # 葛泰 retains a stale spec-less pending row alongside its confirmed full-spec row,
-    # so it still appears among pending drugs (and is flagged as a stale conflict).
+    # business confirmation is reported independently from source eligibility.
     assert "葛泰" in pending
 
 

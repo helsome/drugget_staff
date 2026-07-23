@@ -26,14 +26,15 @@ def detail(s, *, price="0.8085", shop="药实在"):
     return drug, observation
 
 
-def test_current_incomplete_getai_rule_is_not_comparable():
+def test_designated_general_getai_rule_is_comparable_without_fake_business_confirmation():
     s = session(); drug, observation = detail(s)
-    s.add(ControlPriceVersion(drug_id=drug.id, spec_key=None, price_per_min_unit=Decimal("1.15"), min_unit="片", effective_from=date(2026, 4, 1), source="价格标准表.md", source_line="地奥司明片葛泰1.15", active=True, business_confirmed=False))
+    s.add(ControlPriceVersion(drug_id=drug.id, spec_key=None, price_per_min_unit=Decimal("1.15"), min_unit="片", effective_from=date(2026, 4, 1), source="价格标准表.md", source_line="地奥司明片葛泰1.15", active=True, business_confirmed=False, authority_basis="designated_source", source_sha256="source-v1"))
     s.flush()
     comparison = PriceDecisionService(s).evaluate_observation(observation.id)
-    assert comparison.verdict == NOT_COMPARABLE
-    assert comparison.reason_code == "exact_confirmed_control_rule_missing"
-    assert AlertDryRunService().ensure_event(s, comparison=comparison) is None
+    assert comparison.verdict == BELOW_CONTROL
+    assert comparison.rule_snapshot["business_confirmed"] is False
+    assert comparison.rule_snapshot["authority_basis"] == "designated_source"
+    assert AlertDryRunService().ensure_event(s, comparison=comparison) is not None
 
 
 def test_below_case_and_preview_are_idempotent():

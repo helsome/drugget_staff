@@ -22,6 +22,7 @@ from .logging_config import configure_logging
 from .models import CollectionRun, CollectionTask, DrugProduct, MonitorTarget, PackageMaster, PriceComparison, StoreResponsibility
 from .offline_search import classify_existing_search
 from .orchestrator import BatchOrchestrator
+from .review_factory import build_review_orchestrator
 from .replay import audit_legacy_smoke, write_replay_report
 from .scheduler import scheduler_description
 from .schemas import BrowserSession, CollectionTaskSpec
@@ -300,13 +301,16 @@ def run_batch(
         )
         if not selected_run_id:
             raise typer.BadParameter("没有pending run，请先执行enqueue-p0")
+        review_orchestrator = build_review_orchestrator(
+            session=session, settings=cfg, run_id=selected_run_id,
+            event_sink=None, runtime_mode="production",
+        )
         runner = BatchOrchestrator(
             session=session,
             collector=collector,
             evidence_store=EvidenceStore(cfg.evidence_dir),
             run_id=selected_run_id,
-            session_factory=factory,
-            collector_factory=lambda: OpenCLIComputerUseCollector(cfg),
+            review_orchestrator=review_orchestrator,
         )
         outcome = asyncio.run(
             runner.execute_all(

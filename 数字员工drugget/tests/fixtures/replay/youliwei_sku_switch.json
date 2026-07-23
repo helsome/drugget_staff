@@ -1,0 +1,67 @@
+{
+  "scenario": "sku_switch_price_change",
+  "representative_drug": "优立维",
+  "product": {
+    "product_id": "ylw-prod-2",
+    "title": "优立维 硫酸氢氯吡格雷片",
+    "manufacturer": "",
+    "provider_id": "replay-provider-ylw"
+  },
+  "sku_options": [
+    {
+      "sku_id": "ylw-75-36",
+      "raw_spec": "75mg*36片",
+      "normalized_spec": "75mg*36片",
+      "selected": false,
+      "available": true
+    },
+    {
+      "sku_id": "ylw-75-48",
+      "raw_spec": "75mg*48片",
+      "normalized_spec": "75mg*48片",
+      "selected": true,
+      "available": true
+    }
+  ],
+  "price_quotes": [
+    {
+      "sku_id": "ylw-75-36",
+      "price_type": "base_price",
+      "amount": "45.80",
+      "min_quantity": 1,
+      "membership_required": false,
+      "promotion_required": false,
+      "raw_text": "切换前 75mg*36片 ¥45.80",
+      "evidence_pointer": "price_quotes[0].amount"
+    },
+    {
+      "sku_id": "ylw-75-48",
+      "price_type": "base_price",
+      "amount": "59.90",
+      "min_quantity": 1,
+      "membership_required": false,
+      "promotion_required": false,
+      "raw_text": "切换后 75mg*48片 ¥59.90",
+      "evidence_pointer": "price_quotes[1].amount"
+    }
+  ],
+  "selected_sku": {
+    "sku_id": "ylw-75-48",
+    "raw_spec": "75mg*48片",
+    "normalized_spec": "75mg*48片",
+    "selected": true,
+    "available": true,
+    "verified": true
+  },
+  "page_context": {
+    "final_url": "https://replay.invalid/ylw-prod-2",
+    "page_shop": "回放供应商",
+    "platform": "taobao",
+    "source": "replay",
+    "interaction": "select_sku"
+  },
+  "parser": {
+    "name": "replay_fixture",
+    "version": "2.0"
+  }
+}

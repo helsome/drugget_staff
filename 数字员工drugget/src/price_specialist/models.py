@@ -58,6 +58,8 @@ class ControlPriceVersion(Base):
     confirmed_by: Mapped[str | None] = mapped_column(String(100))
     confirmed_at: Mapped[date | None] = mapped_column(Date)
     approval_reference: Mapped[str | None] = mapped_column(String(300))
+    authority_basis: Mapped[str | None] = mapped_column(String(40))
+    source_sha256: Mapped[str | None] = mapped_column(String(64))
 
 
 class StoreResponsibility(Base):

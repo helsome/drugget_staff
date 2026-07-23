@@ -1,14 +1,15 @@
 import csv
+import hashlib
 from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
 from price_specialist.catalog import CONTROL_PRICE_RULE_FIELDNAMES, import_control_price_rules, parse_control_price_rules, parse_control_prices
 from price_specialist.decisions import BELOW_CONTROL, PriceDecisionService
-from price_specialist.models import Base, CollectionRun, CollectionTask, DrugProduct, PackageMaster, PriceObservation
+from price_specialist.models import Base, CollectionRun, CollectionTask, ControlPriceVersion, DrugProduct, PackageMaster, PriceObservation
 from price_specialist.bootstrap import sync_control_price_rules
 
 
@@ -87,3 +88,30 @@ def test_control_rule_sync_uses_validated_csv_not_manual_sqlite(tmp_path: Path):
     session.add(DrugProduct(brand_name="葛泰", generic_name="地奥司明片")); session.flush()
     assert sync_control_price_rules(session, control_path=source) == {"input": 1, "added": 1, "updated": 0}
     assert sync_control_price_rules(session, control_path=source) == {"input": 1, "added": 0, "updated": 1}
+
+
+def test_designated_source_hash_creates_a_new_version_and_retires_old_one(tmp_path: Path):
+    raw_dir = tmp_path / "data" / "raw"; raw_dir.mkdir(parents=True)
+    knowledge = tmp_path / "data" / "knowledge-base"; knowledge.mkdir(parents=True)
+    raw = raw_dir / "价格标准表.md"
+    raw.write_text("h1\nh2\nh3\n地奥司明片葛泰1.15\n", encoding="utf-8")
+    rule = {
+        "brand": "葛泰", "generic_name": "地奥司明片", "spec_key": "",
+        "control_price_value": "1.15", "control_price_basis": "per_min_unit",
+        "control_price_per_min_unit": "1.15", "min_unit": "片", "effective_from": "2026-04-01",
+        "effective_to": "", "active": "True", "source_file": "价格标准表.md",
+        "source_line": "地奥司明片葛泰1.15", "business_confirmed": "False",
+        "confirmed_by": "", "confirmed_at": "", "approval_reference": "",
+    }
+    source = knowledge / "control_price_rules.csv"; write_rules(source, [rule])
+    engine = create_engine("sqlite://"); Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)(); session.add(DrugProduct(brand_name="葛泰", generic_name="地奥司明片")); session.flush()
+    assert sync_control_price_rules(session, control_path=source) == {"input": 1, "added": 1, "updated": 0}
+    first = session.scalar(select(ControlPriceVersion))
+    assert first.authority_basis == "designated_source"
+    assert first.source_sha256 == hashlib.sha256(raw.read_bytes()).hexdigest()
+    raw.write_text("h1\nh2\nh3\n地奥司明片葛泰1.15\n# rev2\n", encoding="utf-8")
+    assert sync_control_price_rules(session, control_path=source) == {"input": 1, "added": 1, "updated": 0}
+    versions = list(session.scalars(select(ControlPriceVersion)))
+    assert len(versions) == 2
+    assert sum(version.active for version in versions) == 1

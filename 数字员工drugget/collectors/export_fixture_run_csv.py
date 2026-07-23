@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 
 from price_specialist.config import Settings
 from price_specialist.database import configured_database
+from price_specialist.formal_price_state import not_comparable_action
 from price_specialist.models import (
     CollectionRun,
     CollectionTask,
@@ -147,6 +148,14 @@ ACTION_QUEUE_FIELDS: list[str] = [
 
 RECOMMENDED_ACTIONS: dict[str, str] = {
     "guidance_missing": "补充确认控价规则后重跑",
+    "formal_detail_price_missing": "补采详情正式价格和最小单位后重跑",
+    "drug_identity_missing": "补全可审计药品身份后重跑",
+    "detail_spec_missing": "补全详情完整规格后重跑",
+    "package_unverified": "核验包装主数据后重跑",
+    "package_unit_mismatch": "核验页面和包装主数据的最小单位",
+    "control_rule_ambiguous": "提交人工澄清唯一控价规则",
+    "control_rule_unit_mismatch": "提交人工核验控价最小单位",
+    "not_comparable_blocked": "排查不可比较原因并人工处理",
     "agent_failed": "排查智能体复核失败并重试",
     "recapture_required": "重新采集页面价格",
     "human_review_required": "提交人工复核",
@@ -305,8 +314,12 @@ def _classify_follow_up(
     collection_status = obs.collection_status or ""
     error_code = obs.error_code or ""
 
-    if verdict == "not_comparable" and reason_code == "exact_confirmed_control_rule_missing":
-        return ("guidance_missing", reason_code, "缺少已确认的完整规格控价规则")
+    if verdict == "not_comparable":
+        action_type, detail = not_comparable_action(
+            reason_code,
+            comparison.reason_detail if comparison is not None else None,
+        )
+        return (action_type, reason_code or "not_comparable", detail)
 
     if (review_error_code is not None and review_error_code != "") or event_review_status == "agent_failed":
         return ("agent_failed", review_error_code or "agent_failed", "智能体复核失败")

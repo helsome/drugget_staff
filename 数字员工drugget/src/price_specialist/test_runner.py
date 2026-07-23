@@ -19,8 +19,9 @@ from .database import configured_database, init_database
 from .enums import StoreSelectionMode, TaskType
 from .evidence import EvidenceStore
 from .orchestrator import BatchOrchestrator, DEFAULT_RATE_POLICIES, RatePolicy
+from .review_factory import build_review_orchestrator
 from .schemas import CollectionTaskSpec
-from .run_logger import RunEvent
+from .run_logger import QueueEventSink, RunEvent
 from .services import DrugSelection, StoreTaskPlanner, TaskQueueService
 
 
@@ -232,11 +233,17 @@ class TestWorker:
                     interval_jitter_seconds=current.interval_jitter_seconds,
                     cooldown_jitter_seconds=current.cooldown_jitter_seconds,
                 )
+            review_orchestrator = build_review_orchestrator(
+                session=db, settings=settings, run_id=run_id,
+                event_sink=QueueEventSink(self.event_queue),
+                runtime_mode="test" if cfg.use_test_db else "production",
+            )
             orchestrator = BatchOrchestrator(
                 session=db, collector=collector,
                 evidence_store=evidence_store, run_id=run_id,
                 rate_policies=rate_policies,
                 cancellation_token=self.cancellation_token,
+                review_orchestrator=review_orchestrator,
             )
             outcomes = await orchestrator.execute_all(sessions)
 

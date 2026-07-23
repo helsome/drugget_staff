@@ -353,7 +353,6 @@ def evaluate_fixed_result(session: Session, spec: CollectionTaskSpec, result: Co
             select(ControlPriceVersion).where(
                 ControlPriceVersion.drug_id == target.drug_id,
                 ControlPriceVersion.active.is_(True),
-                ControlPriceVersion.business_confirmed.is_(True),
                 ControlPriceVersion.effective_from <= date.today(),
                 (ControlPriceVersion.effective_to.is_(None) | (ControlPriceVersion.effective_to >= date.today())),
             )
@@ -376,6 +375,8 @@ def evaluate_fixed_result(session: Session, spec: CollectionTaskSpec, result: Co
             confirmed_by=row.confirmed_by,
             confirmed_at=row.confirmed_at,
             approval_reference=row.approval_reference,
+            authority_basis=row.authority_basis,
+            source_sha256=row.source_sha256,
         )
         for row in rows
     ]

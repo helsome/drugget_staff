@@ -51,6 +51,8 @@ def init_database(engine: Engine) -> None:
             "confirmed_by": "VARCHAR(100)",
             "confirmed_at": "DATE",
             "approval_reference": "VARCHAR(300)",
+            "authority_basis": "VARCHAR(40)",
+            "source_sha256": "VARCHAR(64)",
         }
         with engine.begin() as connection:
             for name, ddl in additive_columns.items():

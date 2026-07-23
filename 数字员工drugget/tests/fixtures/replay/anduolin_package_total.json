@@ -1,0 +1,51 @@
+{
+  "scenario": "package_total_price",
+  "representative_drug": "安多林",
+  "product": {
+    "product_id": "adl-prod-1",
+    "title": "安多林 阿瑞匹坦胶囊 80mg*2粒+125mg*1粒 2盒装",
+    "manufacturer": "",
+    "provider_id": "replay-provider-adl"
+  },
+  "sku_options": [
+    {
+      "sku_id": "adl-combo-3",
+      "raw_spec": "80mg*2粒+125mg*1粒",
+      "normalized_spec": "80mg*2粒+125mg*1粒",
+      "selected": true,
+      "available": true
+    }
+  ],
+  "price_quotes": [
+    {
+      "sku_id": "adl-combo-3",
+      "price_type": "package_total_price",
+      "amount": "896.00",
+      "min_quantity": 2,
+      "membership_required": false,
+      "promotion_required": false,
+      "price_box_count": 2,
+      "units_per_box": 3,
+      "raw_text": "2盒装总价 ¥896.00，2盒起购",
+      "evidence_pointer": "price_quotes[0].amount"
+    }
+  ],
+  "selected_sku": {
+    "sku_id": "adl-combo-3",
+    "raw_spec": "80mg*2粒+125mg*1粒",
+    "normalized_spec": "80mg*2粒+125mg*1粒",
+    "selected": true,
+    "available": true,
+    "verified": true
+  },
+  "page_context": {
+    "final_url": "https://replay.invalid/adl-prod-1",
+    "page_shop": "回放供应商",
+    "platform": "jd",
+    "source": "replay"
+  },
+  "parser": {
+    "name": "replay_fixture",
+    "version": "2.0"
+  }
+}

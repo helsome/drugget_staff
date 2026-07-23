@@ -16,6 +16,7 @@ from .enums import CalculationStatus, CollectionStatus, PriceStatus
 from .errors import CollectorAccessError
 from .pricing import parse_price
 from .schemas import BrowserSession, CollectionResult, CollectionTaskSpec, EvidenceBundle, SearchHit
+from .sku_evidence import normalize_sku_evidence
 from .smoke_plan import normalize_shop_name
 from .catalog import normalize_spec
 
@@ -449,6 +450,23 @@ class OpenCLIComputerUseCollector(ComputerUseCollector):
         match = re.search(r"(\d+)\s*盒(?:装|起购|包邮)", str(title or ""))
         if box_count is None and match:
             box_count = Decimal(match.group(1))
+        raw_evidence = normalize_sku_evidence(
+            {**fields, **route_fields},
+            product_id=product_id,
+            title=title,
+            manufacturer=fields.get("生产厂家") or fields.get("manufacturer"),
+            provider_id=(task.metadata or {}).get("provider_id") or fields.get("provider_id"),
+            selected_spec=selected_spec,
+            selected_sku_id=fields.get("sku_id") or fields.get("selected_sku_id"),
+            page_price_raw=price_raw,
+            page_price_value=parse_price(price_raw),
+            min_purchase_quantity=box_count,
+            final_url=final_url,
+            page_shop=page_shop,
+            platform=session.platform,
+            parser_name=f"{session.platform}_detail",
+            parser_version="opencli-1.8.6",
+        )
         return CollectionResult(
             collection_status=status,
             calculation_status=CalculationStatus.NOT_APPLICABLE,
@@ -470,7 +488,7 @@ class OpenCLIComputerUseCollector(ComputerUseCollector):
             evidence=EvidenceBundle(
                 final_url=final_url,
                 page_title=title,
-                raw_fields={**fields, **route_fields},
+                raw_fields=raw_evidence,
                 screenshot_bytes_b64=screenshot_b64,
                 collector_version="opencli-1.8.6",
                 captured_at=datetime.now(),

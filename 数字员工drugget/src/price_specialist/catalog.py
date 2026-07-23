@@ -10,6 +10,9 @@ from decimal import Decimal
 from pathlib import Path
 
 
+DESIGNATED_CONTROL_SOURCE = "价格标准表.md"
+
+
 DRUG_MAP: dict[str, str] = {
     "马来酸阿伐曲泊帕片": "晴安欣",
     "甲磺酸仑伐替尼胶囊": "泽万欣",
@@ -171,6 +174,10 @@ class ControlPriceEntry:
     confirmed_by: str | None = None
     confirmed_at: date | None = None
     approval_reference: str | None = None
+    # A designated-source rule is operationally eligible without pretending it
+    # has been individually business-approved.  The two facts remain separate.
+    authority_basis: str | None = None
+    source_sha256: str | None = None
 
 
 CONTROL_PRICE_RULE_COLUMNS = {
@@ -221,10 +228,11 @@ def _parse_date(value: str, *, field: str, line_number: int, required: bool = Fa
 
 
 def parse_control_price_rules(path: Path) -> list[ControlPriceEntry]:
-    """Parse the curated control-price contract without inferring applicability.
+    """Parse the curated control-price contract.
 
-    Rows may remain pending business confirmation for traceability, but those
-    rows are intentionally ineligible for price comparison.
+    Rules sourced from the designated price table are eligible guidance even
+    while ``business_confirmed`` remains false.  That flag records an
+    independent human-approval workflow and must never be fabricated here.
     """
     with path.open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
@@ -298,6 +306,11 @@ def parse_control_price_rules(path: Path) -> list[ControlPriceEntry]:
                     confirmed_by=confirmed_by,
                     confirmed_at=confirmed_at,
                     approval_reference=approval_reference,
+                    authority_basis=(
+                        "designated_source"
+                        if Path(source_file).name == DESIGNATED_CONTROL_SOURCE
+                        else None
+                    ),
                 )
             )
     return entries

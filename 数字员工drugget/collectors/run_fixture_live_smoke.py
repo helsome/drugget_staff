@@ -22,6 +22,7 @@ from price_specialist.enums import TaskStatus, TaskType
 from price_specialist.evidence import EvidenceStore
 from price_specialist.models import CollectionRun, CollectionTask, DrugProduct, PriceObservation, SearchCandidate, StoreResponsibility
 from price_specialist.orchestrator import BatchOrchestrator
+from price_specialist.review_factory import build_review_orchestrator
 from price_specialist.run_logger import BatchLogger
 from price_specialist.schemas import CollectionTaskSpec
 from price_specialist.services import StoreTaskPlanner, TaskQueueService
@@ -116,8 +117,15 @@ async def run_yaoshibang_seed(*, seed: dict[str, str], max_candidates: int, outp
                       "inspect_limit": max_candidates},
         ))
         db.commit()
-        runner = BatchOrchestrator(session=db, collector=OpenCLIComputerUseCollector(settings),
-                                   evidence_store=EvidenceStore(settings.evidence_dir), run_id=run.id)
+        review_orchestrator = build_review_orchestrator(
+            session=db, settings=settings, run_id=run.id, event_sink=None,
+            runtime_mode="production",
+        )
+        runner = BatchOrchestrator(
+            session=db, collector=OpenCLIComputerUseCollector(settings),
+            evidence_store=EvidenceStore(settings.evidence_dir), run_id=run.id,
+            review_orchestrator=review_orchestrator,
+        )
         await runner.execute_platform("yaoshibang", "yaoshibang-p0", task_types={TaskType.SEARCH.value})
         detail_task = db.scalar(select(CollectionTask).where(
             CollectionTask.run_id == run.id, CollectionTask.task_type == TaskType.INSPECT_CANDIDATE.value,
@@ -130,12 +138,6 @@ async def run_yaoshibang_seed(*, seed: dict[str, str], max_candidates: int, outp
         provider_id = validate_yaoshibang_detail(
             detail=detail, detail_task=detail_task, expected_specs=expected_specs,
         )
-        candidate = db.scalar(select(SearchCandidate).where(
-            SearchCandidate.run_id == run.id, SearchCandidate.product_id == detail_spec.product_id,
-        ))
-        if candidate:
-            candidate.is_formal_price = True
-            candidate.sku_verification_status = "verified_detail"
         store = db.scalar(select(StoreResponsibility).where(
             StoreResponsibility.platform == "yaoshibang", StoreResponsibility.platform_store_key == provider_id,
         ))
@@ -162,7 +164,7 @@ async def run_yaoshibang_seed(*, seed: dict[str, str], max_candidates: int, outp
         run.status = "completed"
         run.finished_at = datetime.now()
         run.summary = {"fixture_seed_key": seed["seed_key"], "provider_id": provider_id,
-                       "product_id": detail_spec.product_id, "formal_price": str(detail.page_price_value),
+                       "product_id": detail_spec.product_id, "captured_page_price": str(detail.page_price_value),
                        "spec": detail.selected_spec, "sale_box_count": str(detail.sale_box_count)}
         db.commit()
         destination = (output_root or (PROJECT_ROOT / "artifacts/runs/current" / datetime.now().strftime("%Y-%m-%d"))) / run.id
@@ -322,10 +324,14 @@ async def main(*, only_store_id: str | None = None, seed_key: str | None = None,
             sessions["taobao"] = "taobao-p0"
             sessions["yaoshibang"] = "yaoshibang-p0"
 
+        review_orchestrator = build_review_orchestrator(
+            session=db, settings=settings, run_id=run_id, event_sink=None,
+            runtime_mode="production",
+        )
         outcome = await BatchOrchestrator(
             session=db, collector=OpenCLIComputerUseCollector(settings),
             evidence_store=EvidenceStore(settings.evidence_dir), run_id=run_id,
-            logger=logger,
+            logger=logger, review_orchestrator=review_orchestrator,
         ).execute_all(sessions, max_tasks_per_platform=max_tasks)
 
         logger.close()

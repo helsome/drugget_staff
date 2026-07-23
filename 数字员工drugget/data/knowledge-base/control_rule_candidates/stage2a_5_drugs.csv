@@ -1,0 +1,6 @@
+brand,generic_name,manufacturer,spec_key,control_price_value,control_price_basis,control_price_per_min_unit,min_unit,effective_from,effective_to,source_file,source_line,business_confirmed,confirmed_by,confirmed_at,approval_reference
+葛泰,地奥司明片,,0.45g*20片,1.15,per_min_unit,1.15,片,2026-04-01,,业务确认会话-2026-07-20,业务确认：地奥司明片葛泰 0.45g*20片 1.15元/片,True,业务确认（会话）,2026-07-20,用户会话确认-2026-07-20
+晴诺舒,米拉贝隆缓释片,,50mg*20片,1.74,per_min_unit,1.74,片,2026-04-01,,价格标准表.md,米拉贝隆缓释片晴诺舒1.74,False,,,
+优立维,硫酸氢氯吡格雷片,,75mg*36片,1.22,per_min_unit,1.22,片,2026-04-01,,价格标准表.md,硫酸氢氯吡格雷片优立维1.22,False,,,
+安多林,阿瑞匹坦胶囊,,80mg*2粒+125mg*1粒,147.33,per_min_unit,147.33,粒,2026-04-01,,价格标准表.md,阿瑞匹坦胶囊安多林147.33,False,,,
+畅凡,芦比前列酮软胶囊,,24μg*10粒,5.88,per_min_unit,5.88,粒,2026-04-01,,价格标准表.md,芦比前列酮软胶囊畅凡5.88,False,,,

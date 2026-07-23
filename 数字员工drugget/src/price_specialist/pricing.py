@@ -33,11 +33,13 @@ def resolve_control_price(
     spec: str | None,
     on_date: date | None = None,
 ) -> ControlPriceEntry | None:
-    """Resolve a control price without converting units or guessing a specification.
+    """Resolve authoritative guidance without using it to alter page facts.
 
-    A control price is eligible only when its full specification exactly matches
-    the verified page specification. General (spec-less) rules are retained as
-    reference data but must not produce a break-price conclusion.
+    Precedence is: human-confirmed complete package rule, designated/human
+    strength selector, then a designated/human product-general rule.  A
+    strength (``20mg``) is a selector, never a divisor.  Ties deliberately
+    fail closed because the calling decision service turns ambiguity into a
+    human-review state.
     """
     comparison_date = on_date or date.today()
     brand_entries = [
@@ -45,7 +47,7 @@ def resolve_control_price(
         for entry in entries
         if entry.brand == brand
         and entry.active
-        and entry.business_confirmed
+        and (entry.business_confirmed or entry.authority_basis == "designated_source")
         and entry.effective_from is not None
         and entry.effective_from <= comparison_date
         and (entry.effective_to is None or comparison_date <= entry.effective_to)
@@ -53,27 +55,41 @@ def resolve_control_price(
     if not brand_entries:
         return None
     normalized = (normalize_spec(spec) or "").replace(" ", "").lower()
+    # Page packaging is still required before a page price can be converted;
+    # this resolver merely permits a guidance rule to be package-agnostic.
     if parse_package_units(normalized)[0] is None:
         return None
-    specific = [
-        entry
-        for entry in brand_entries
-        if entry.spec_key and parse_package_units((normalize_spec(entry.spec_key) or "").replace(" ", ""))[0] is not None
+
+    def normalized_key(entry: ControlPriceEntry) -> str:
+        return (normalize_spec(entry.spec_key) or "").replace(" ", "").lower()
+
+    confirmed_full = [
+        entry for entry in brand_entries
+        if entry.business_confirmed
+        and entry.spec_key
+        and parse_package_units(normalized_key(entry))[0] is not None
+        and normalized_key(entry) == normalized
     ]
-    matches = [
-        entry
-        for entry in specific
-        if (normalize_spec(entry.spec_key) or "").replace(" ", "").lower() == normalized
+    strength = [
+        entry for entry in brand_entries
+        if entry.spec_key
+        and parse_package_units(normalized_key(entry))[0] is None
+        and normalized_key(entry) in normalized
     ]
-    if len(matches) == 1:
-        return matches[0]
-    if len(matches) > 1:
-        raise AmbiguousControlPrice(
-            f"{brand} {spec or '未提供规格'}命中多个控价",
-            details={"source_lines": [entry.source_line for entry in matches]},
-        )
-    if specific:
-        return None
+    general = [entry for entry in brand_entries if not entry.spec_key]
+
+    for candidates in (confirmed_full, strength, general):
+        if not candidates:
+            continue
+        # One possible selector may be repeated in a source export only when
+        # it is semantically identical.  Treat any duplicate as ambiguous so
+        # no price is silently chosen.
+        if len(candidates) != 1:
+            raise AmbiguousControlPrice(
+                f"{brand} {spec or '未提供规格'}命中多个同优先级控价",
+                details={"source_lines": [entry.source_line for entry in candidates]},
+            )
+        return candidates[0]
     return None
 
 

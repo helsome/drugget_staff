@@ -53,7 +53,7 @@ class AgentProposalValidator:
         comparison: Any,
         rule: Any = None,
     ) -> ValidationOutcome:
-        del comparison, rule  # Stage 1: reserved for Stage-2 rule checks.
+        del rule
         reasons: list[str] = []
         failing_decisions: list[str] = []
 
@@ -66,7 +66,7 @@ class AgentProposalValidator:
 
         # Rule 2: evidence pointers resolve against raw_evidence or known columns.
         raw_evidence = getattr(observation, "raw_evidence", None) or {}
-        if not all(self._pointer_resolves(p, raw_evidence) for p in proposal.evidence_pointers):
+        if not proposal.evidence_pointers or not all(self._pointer_resolves(p, raw_evidence) for p in proposal.evidence_pointers):
             reasons.append("evidence_pointer")
             failing_decisions.append("human_review")
 
@@ -79,6 +79,47 @@ class AgentProposalValidator:
         if proposal.unresolved_questions:
             reasons.append("unresolved_questions")
             failing_decisions.append("human_review")
+
+        if proposal.recommended_action != proposal.decision:
+            reasons.append("recommended_action")
+            failing_decisions.append("human_review")
+        if proposal.price_verified is not True:
+            reasons.append("price_verified")
+            failing_decisions.append("human_review")
+
+        # Stage-2 structured evidence activates the complete SKU/quote
+        # contract. Legacy Stage-1 rows have no SKU evidence and remain
+        # conservatively governed by their existing single-unit checks.
+        structured = any(key in raw_evidence for key in ("sku_options", "price_quotes", "selected_sku", "product"))
+        if structured:
+            selected = raw_evidence.get("selected_sku") or {}
+            selected_id = selected.get("sku_id") or selected.get("id")
+            sku_ids = {str(item.get("sku_id")) for item in raw_evidence.get("sku_options", []) if item.get("sku_id")}
+            if not proposal.target_sku_id or proposal.target_sku_id not in sku_ids or proposal.target_sku_id != selected_id:
+                reasons.append("target_sku_id")
+                failing_decisions.append("recapture")
+            quotes = [q for q in raw_evidence.get("price_quotes", []) if q.get("sku_id") == proposal.target_sku_id]
+            page_price = getattr(observation, "page_price_value", None)
+            quote = next((q for q in quotes if str(q.get("amount")) in {str(proposal.normalized_price), str(page_price)}), None)
+            if quote is None:
+                reasons.append("price_quote")
+                failing_decisions.append("human_review")
+            else:
+                if proposal.price_type != quote.get("price_type"):
+                    reasons.append("price_type")
+                    failing_decisions.append("human_review")
+                if proposal.min_purchase_quantity != quote.get("min_quantity"):
+                    reasons.append("min_purchase_quantity")
+                    failing_decisions.append("human_review")
+            if not any(p.startswith("product.") or p.startswith("manufacturer") for p in proposal.evidence_pointers):
+                reasons.append("product_manufacturer_evidence")
+                failing_decisions.append("reject")
+            if proposal.control_price_version_id != str(getattr(comparison, "control_price_version_id", None) or ""):
+                reasons.append("control_price_version_id")
+                failing_decisions.append("human_review")
+            if proposal.evidence_sha256 != str(getattr(observation, "evidence_sha256", None) or ""):
+                reasons.append("evidence_sha256")
+                failing_decisions.append("human_review")
 
         # Rule 5: SKU match -> recapture.
         if proposal.sku_match is False:
@@ -117,7 +158,21 @@ class AgentProposalValidator:
 
     @staticmethod
     def _pointer_resolves(pointer: str, raw_evidence: dict[str, Any]) -> bool:
-        return pointer in _KNOWN_COLUMN_POINTERS or pointer in raw_evidence
+        """Resolve ``a.b[0].c`` against captured evidence, never agent text."""
+        if pointer in _KNOWN_COLUMN_POINTERS:
+            return True
+        current: Any = raw_evidence
+        for segment in pointer.replace("]", "").split("."):
+            for part in segment.split("["):
+                if part == "":
+                    continue
+                if isinstance(current, dict) and part in current:
+                    current = current[part]
+                elif isinstance(current, list) and part.isdigit() and int(part) < len(current):
+                    current = current[int(part)]
+                else:
+                    return False
+        return current is not None
 
 
 def _parse_decimal(value: str | None) -> Decimal | None:

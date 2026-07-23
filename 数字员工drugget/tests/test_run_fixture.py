@@ -493,8 +493,8 @@ async def test_platform_filter_only_runs_requested_platform(memory_db, tmp_path)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_search_detail_pipeline_marks_formal_price(memory_db, tmp_path) -> None:
-    """A full search → detail pipeline should mark a candidate as formal price."""
+async def test_search_detail_pipeline_without_review_is_not_formal(memory_db, tmp_path) -> None:
+    """A direct runner without the mandatory gate is fail-closed."""
     engine, factory = memory_db
     with factory() as db:
         run = CollectionRun(id="test-formal")
@@ -533,14 +533,15 @@ async def test_search_detail_pipeline_marks_formal_price(memory_db, tmp_path) ->
         assert detail_obs.collection_status == CollectionStatus.SUCCESS.value
         assert detail_obs.page_price_value == 99.0
 
-        # Check that the search candidate is marked as formal price
+        # A caller that bypasses the composition root cannot release a formal
+        # price merely because detail collection succeeded.
         candidate = db.scalar(
             select(SearchCandidate).where(
                 SearchCandidate.run_id == run.id,
             )
         )
         assert candidate is not None, "应该有搜索候选记录"
-        assert candidate.is_formal_price is True, "详情成功的候选应标记为正式价格"
+        assert candidate.is_formal_price is False, "未配置审核器不得标记正式价格"
 
 
 # ---------------------------------------------------------------------------
@@ -932,7 +933,7 @@ async def test_inspect_candidate_rank2_fallback_on_parse_error(memory_db, tmp_pa
             )
         )
         assert formal is not None
-        assert formal.is_formal_price is True, "rank=2 成功应标记为正式价格"
+        assert formal.is_formal_price is False, "未配置审核器不得标记正式价格"
         assert outcomes[0]["completed"] >= 2
 
 

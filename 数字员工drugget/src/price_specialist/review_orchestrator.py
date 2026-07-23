@@ -16,6 +16,7 @@ collection batch.
 from __future__ import annotations
 
 import logging
+import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,7 +24,9 @@ from typing import Any, Callable
 
 from .agent_validator import AgentProposalValidator, ValidationOutcome
 from .alerts import AlertDryRunService
-from .decisions import PriceDecisionService
+from .decisions import NOT_BELOW_CONTROL, NOT_COMPARABLE, PriceDecisionService
+from .formal_price_state import formal_price_state
+from .models import PriceBreakEvent
 from .review_policy import ReviewPolicy, ReviewTrigger
 from .run_logger import RunEvent
 
@@ -96,25 +99,85 @@ class ReviewOrchestrator:
         # 2. Policy: is mandatory agent review required?
         trigger: ReviewTrigger | None = self.review_policy.requires_review(comparison, observation)
 
-        # 3. No review required -> formal price is allowed immediately.
-        if trigger is None:
-            comparison.review_required = False
-            comparison.formal_price_status = "confirmed"
+        # 3. The deterministic decision table is fail-closed.  A
+        # non-comparable result never calls an agent: page anomalies cannot
+        # turn missing guidance/package evidence into a reviewable formal
+        # price.  Only an exact not_below_control result *without* a policy
+        # trigger may be confirmed without an agent.
+        state = formal_price_state(comparison.verdict, comparison.reason_code)
+        if comparison.verdict == NOT_COMPARABLE or (
+            (comparison.verdict != NOT_BELOW_CONTROL or trigger is None)
+            and not state.dispatch_agent
+        ):
+            comparison.review_required = state.review_required
+            comparison.review_status = state.review_status
+            comparison.formal_price_status = state.formal_price_status
             self.session.flush()
             return ReviewOutcome(
-                formal_price_status="confirmed",
+                formal_price_status=state.formal_price_status,
+                comparison=comparison,
+                event=None,
+                skipped=True,
+            )
+
+        # Stage-2 evidence triggers apply to comparable, non-below-control
+        # prices too.  They use the same pending -> agent -> validator gate as
+        # a below-control comparison and cannot retain direct confirmation.
+        if comparison.verdict == NOT_BELOW_CONTROL and trigger is not None:
+            state = type(state)(True, "pending_agent", "pending", True)
+
+        # A below-control result must be reviewed.  If an implementation
+        # regresses ReviewPolicy, preserve safety by blocking instead of
+        # falling through to a formal confirmation.
+        if trigger is None:
+            comparison.review_required = True
+            comparison.review_status = "blocked"
+            comparison.formal_price_status = "blocked"
+            self.session.flush()
+            self._emit_review_event(
+                "review_policy_violation",
+                status="failed",
+                observation=observation,
+                comparison=comparison,
+                event=None,
+                message="低于控价但未获得审核触发，已阻断正式价格",
+                details={"reason_code": comparison.reason_code},
+            )
+            return ReviewOutcome(
+                formal_price_status="blocked",
                 comparison=comparison,
                 event=None,
                 skipped=True,
             )
 
         # 4. Review required -> create the PriceBreakEvent, dispatch the agent, validate.
-        comparison.review_required = True
+        comparison.review_required = state.review_required
         comparison.review_reason = trigger.reason
-        comparison.review_status = "pending_agent"
+        comparison.review_status = state.review_status
+        comparison.formal_price_status = state.formal_price_status
         self.session.flush()
 
         event = self.alert_service.ensure_event(self.session, comparison=comparison)
+        if event is None:
+            # Non-low comparable prices can still need an evidence review (for
+            # example ambiguous SKU selection).  They are review-only events:
+            # no price-break routing or notification is created, but the
+            # durable event id is required to store auditable agent I/O.
+            event = PriceBreakEvent(
+                observation_id=observation.id,
+                comparison_id=comparison.id,
+                routing_status="review_only",
+                event_status="review_only",
+                payload={
+                    "send": False,
+                    "review_only": True,
+                    "comparison_id": comparison.id,
+                    "observation_id": observation.id,
+                    "review_reason": trigger.reason,
+                },
+            )
+            self.session.add(event)
+            self.session.flush()
         if event is not None:
             event.review_status = "pending_agent"
             self.session.flush()
@@ -150,9 +213,15 @@ class ReviewOrchestrator:
                 observation=observation,
             )
             outcome: ValidationOutcome = self.validator.validate(proposal, observation, comparison)
-            review_status, formal_price_status = _REVIEW_STATUS.get(
-                outcome.decision, ("human_review_required", "pending"),
-            )
+            if hasattr(self.review_service, "write_validation"):
+                self.review_service.write_validation(event=event, outcome=outcome)
+            shadow_mode = getattr(self, "review_mode", None) == "codex_shadow"
+            review_status, formal_price_status = _REVIEW_STATUS.get(outcome.decision, ("human_review_required", "pending"))
+            if shadow_mode:
+                # Shadow results are auditable advisory data only. They never
+                # settle the formal status, even if a proposal validates.
+                review_status = "shadow_completed" if outcome.passed else "shadow_validation_failed"
+                formal_price_status = "pending"
             comparison.review_status = review_status
             comparison.formal_price_status = formal_price_status
             if event is not None:
@@ -160,7 +229,14 @@ class ReviewOrchestrator:
                 event.review_decision = _event_decision(outcome.decision)
                 event.reviewed_at = datetime.now(timezone.utc)
                 event.review_evidence_path = str(self.evidence_root / str(event.id) / "agent-review")
-                event.review_summary = ", ".join(outcome.reasons) if outcome.reasons else outcome.decision
+                if shadow_mode:
+                    event.review_summary = json.dumps({
+                        "shadow_review_status": review_status,
+                        "shadow_review_decision": outcome.decision,
+                        "shadow_validation_result": {"passed": outcome.passed, "reasons": outcome.reasons},
+                    }, ensure_ascii=False)
+                else:
+                    event.review_summary = ", ".join(outcome.reasons) if outcome.reasons else outcome.decision
             self.session.flush()
 
             accepted = outcome.decision == "accepted"

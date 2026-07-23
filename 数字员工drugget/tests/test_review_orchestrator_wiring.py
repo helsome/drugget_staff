@@ -20,6 +20,7 @@ from price_specialist.agent_review import AgentProposal, AgentReviewService, Fak
 from price_specialist.agent_validator import AgentProposalValidator
 from price_specialist.alerts import AlertDryRunService
 from price_specialist.collector import ComputerUseCollector
+from price_specialist.config import Settings
 from price_specialist.database import create_db_engine, init_database, make_session_factory
 from price_specialist.decisions import PriceDecisionService
 from price_specialist.enums import CollectionStatus, TaskType
@@ -37,6 +38,7 @@ from price_specialist.models import (
 )
 from price_specialist.orchestrator import BatchOrchestrator, RatePolicy
 from price_specialist.review_orchestrator import ReviewOrchestrator
+from price_specialist.review_factory import build_review_orchestrator
 from price_specialist.review_policy import ReviewPolicy
 from price_specialist.schemas import (
     CollectionResult,
@@ -170,6 +172,32 @@ async def test_above_guidance_skips_review_and_confirms(tmp_path: Path) -> None:
         assert db.scalar(select(PriceBreakEvent)) is None
 
 
+@pytest.mark.asyncio
+async def test_above_guidance_with_sku_ambiguity_dispatches_and_cannot_direct_confirm(tmp_path: Path) -> None:
+    """A comparable non-low price with explicit evidence risk enters review."""
+    engine = create_db_engine("sqlite:///:memory:")
+    init_database(engine)
+    factory = make_session_factory(engine)
+    with factory() as db:
+        observation = _seed_getai_rule(db, unit_price=Decimal("1.50"))
+        observation.raw_evidence = {"sku_ambiguous": True}
+        review_orchestrator = _build_review_orchestrator(
+            db, tmp_path, reviewer=_RaisingReviewer(), run_id=observation.run_id,
+        )
+
+        outcome = await review_orchestrator.review_observation(observation)
+
+        assert outcome.skipped is False
+        assert outcome.comparison.verdict == "not_below_control"
+        assert outcome.comparison.review_required is True
+        assert outcome.comparison.review_reason == "sku_ambiguous"
+        assert outcome.comparison.review_status == "agent_failed"
+        assert outcome.comparison.formal_price_status == "pending"
+        event = db.scalar(select(PriceBreakEvent).where(PriceBreakEvent.observation_id == observation.id))
+        assert event is not None
+        assert (tmp_path / event.id / "agent-review" / "request.json").is_file()
+
+
 # ---------------------------------------------------------------------------
 # L1: agent failure -> contained, formal price pending, no exception escapes
 # ---------------------------------------------------------------------------
@@ -179,6 +207,44 @@ class _RaisingReviewer:
 
     async def review(self, request: dict) -> AgentProposal:
         raise RuntimeError("agent is down")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("with_control_rule", "make_detail_price_missing", "expected_status"),
+    [
+        (False, False, "captured_uncompared"),
+        (True, True, "blocked"),
+    ],
+)
+async def test_not_comparable_ignores_auxiliary_evidence_triggers(
+    tmp_path: Path,
+    with_control_rule: bool,
+    make_detail_price_missing: bool,
+    expected_status: str,
+) -> None:
+    """Auxiliary page evidence never dispatches an otherwise non-comparable row."""
+    engine = create_db_engine("sqlite:///:memory:")
+    init_database(engine)
+    factory = make_session_factory(engine)
+    with factory() as db:
+        observation = _seed_getai_rule(db, unit_price=Decimal("0.8085"))
+        if not with_control_rule:
+            rule = db.scalar(select(ControlPriceVersion))
+            assert rule is not None
+            db.delete(rule)
+            db.flush()
+        observation.raw_evidence = {"sku_ambiguous": True, "page_changed": True}
+        if make_detail_price_missing:
+            observation.single_unit_price = None
+        review_orchestrator = _build_review_orchestrator(db, tmp_path, run_id=observation.run_id)
+
+        outcome = await review_orchestrator.review_observation(observation)
+
+        assert outcome.comparison.verdict == "not_comparable"
+        assert outcome.skipped is True
+        assert outcome.comparison.formal_price_status == expected_status
+        assert db.scalar(select(PriceBreakEvent).where(PriceBreakEvent.observation_id == observation.id)) is None
 
 
 @pytest.mark.asyncio
@@ -279,16 +345,17 @@ async def test_batch_orchestrator_gates_formal_price_on_review(tmp_path: Path) -
         ))
         db.commit()
 
-        review_orchestrator = ReviewOrchestrator(
-            session=db,
-            decision_service=PriceDecisionService(db),
-            review_policy=ReviewPolicy(),
-            review_service=AgentReviewService(FakeAgentReviewer(), evidence_root=tmp_path),
-            validator=AgentProposalValidator(),
-            alert_service=AlertDryRunService(),
-            evidence_root=tmp_path,
-            emit=lambda _event: None,
-            run_id=run.id,
+        settings = Settings.load(
+            tmp_path,
+            overrides={
+                "PRICE_SPECIALIST_DATABASE_URL": "sqlite:///:memory:",
+                "PRICE_SPECIALIST_EVIDENCE_DIR": "evidence",
+                "PRICE_SPECIALIST_OUTPUT_DIR": "outputs",
+            },
+        )
+        review_orchestrator = build_review_orchestrator(
+            session=db, settings=settings, run_id=run.id, event_sink=None,
+            runtime_mode="test",
         )
         runner = BatchOrchestrator(
             session=db, collector=_GetaiDetailCollector(),
@@ -314,14 +381,13 @@ async def test_batch_orchestrator_gates_formal_price_on_review(tmp_path: Path) -
         assert event is not None
         assert event.review_decision == "accept"
 
-        # is_formal_price is True only because the review accepted; the
-        # back-compat path (no review_orchestrator) would have set it
-        # unconditionally, but here it is gated on formal_price_status.
+        # The composition root supplies the test-only fake reviewer, so the
+        # candidate is released only after the review outcome is confirmed.
         candidate = db.scalar(select(SearchCandidate).where(SearchCandidate.run_id == run.id))
         assert candidate is not None
         assert candidate.is_formal_price is True
 
         # Agent I/O persisted under evidence_root/<event>/agent-review/.
-        agent_dir = tmp_path / event.id / "agent-review"
+        agent_dir = tmp_path / "evidence" / event.id / "agent-review"
         assert (agent_dir / "request.json").is_file()
         assert (agent_dir / "final.json").is_file()

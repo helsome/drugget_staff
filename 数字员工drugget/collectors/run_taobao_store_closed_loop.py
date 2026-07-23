@@ -15,6 +15,7 @@ from price_specialist.enums import CollectionStatus, TaskType
 from price_specialist.evidence import EvidenceStore
 from price_specialist.models import DrugProduct, StoreResponsibility
 from price_specialist.orchestrator import BatchOrchestrator
+from price_specialist.review_factory import build_review_orchestrator
 from price_specialist.schemas import BrowserSession, CollectionResult, CollectionTaskSpec, EvidenceBundle
 from price_specialist.services import TaskQueueService
 from export_fixture_run_csv import export_run
@@ -86,7 +87,14 @@ async def main() -> None:
             print({"run_id": run.id, "status": "not_found", "attempts": attempts})
             return
         db.commit()
-        outcome = await BatchOrchestrator(session=db, collector=collector, evidence_store=EvidenceStore(settings.evidence_dir), run_id=run.id).execute_all({"taobao": "taobao-p0"})
+        review_orchestrator = build_review_orchestrator(
+            session=db, settings=settings, run_id=run.id, event_sink=None,
+            runtime_mode="production",
+        )
+        outcome = await BatchOrchestrator(
+            session=db, collector=collector, evidence_store=EvidenceStore(settings.evidence_dir),
+            run_id=run.id, review_orchestrator=review_orchestrator,
+        ).execute_all({"taobao": "taobao-p0"})
         output = ROOT / "artifacts/runs/current" / run.id
         export_run(run.id, output)
         print({"run_id": run.id, "store": chosen.shop_name, "outcome": outcome, "attempts": attempts, "csv_output": str(output)})

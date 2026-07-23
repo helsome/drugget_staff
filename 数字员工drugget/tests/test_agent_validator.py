@@ -113,6 +113,24 @@ def test_invalid_evidence_pointer_routes_to_human_review() -> None:
     assert "evidence_pointer" in outcome.reasons
 
 
+def test_nested_evidence_pointer_resolves_against_captured_quote() -> None:
+    validator = AgentProposalValidator()
+    observation = _observation(raw_evidence={
+        "product": {"title": "药品", "manufacturer": "厂家"},
+        "sku_options": [{"sku_id": "SKU-001"}],
+        "selected_sku": {"sku_id": "SKU-001"},
+        "price_quotes": [{"sku_id": "SKU-001", "amount": "0.8085", "price_type": "base_price", "min_quantity": 10}],
+    })
+    proposal = _proposal(evidence_pointers=["price_quotes[0].amount", "product.title", "product.manufacturer"], control_price_version_id="", evidence_sha256="")
+    assert validator.validate(proposal, observation, _comparison()).passed is True
+
+
+def test_empty_evidence_pointer_list_is_fail_closed() -> None:
+    outcome = AgentProposalValidator().validate(_proposal(evidence_pointers=[]), _observation(), _comparison())
+    assert outcome.passed is False
+    assert "evidence_pointer" in outcome.reasons
+
+
 def test_sku_match_false_routes_to_recapture() -> None:
     """(f) sku_match False -> recapture."""
     validator = AgentProposalValidator()

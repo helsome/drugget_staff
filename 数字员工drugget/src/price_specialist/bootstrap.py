@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from .catalog import BRAND_TO_GENERIC, parse_control_price_rules, parse_package_units
+from .catalog import DESIGNATED_CONTROL_SOURCE, BRAND_TO_GENERIC, parse_control_price_rules, parse_control_prices, parse_package_units
 from .data_quality import ANTUO_FILE, QUWEI_FILE, STORE_FILE, STORE_SNAPSHOT_FILE, load_store_records, valid_value
 from .models import (
     ControlPriceVersion,
@@ -26,6 +28,10 @@ if TYPE_CHECKING:
 def sync_control_price_rules(session: Session, *, control_path: Path) -> dict[str, int]:
     """Synchronize the validated CSV through the application layer only."""
     control_entries = parse_control_price_rules(control_path)
+    raw_source = control_path.parent.parent / "raw" / DESIGNATED_CONTROL_SOURCE
+    raw_entries = parse_control_prices(raw_source) if raw_source.is_file() else []
+    raw_lines = {entry.source_line for entry in raw_entries}
+    raw_sha256 = hashlib.sha256(raw_source.read_bytes()).hexdigest() if raw_source.is_file() else None
     drugs = {drug.brand_name: drug for drug in session.scalars(select(DrugProduct))}
     added = 0
     updated = 0
@@ -33,13 +39,33 @@ def sync_control_price_rules(session: Session, *, control_path: Path) -> dict[st
         drug = drugs.get(entry.brand)
         if drug is None:
             raise ValueError(f"控价规则药品未导入数据库：{entry.brand}")
-        existing = session.scalar(
-            select(ControlPriceVersion).where(
-                ControlPriceVersion.drug_id == drug.id,
-                ControlPriceVersion.spec_key == entry.spec_key,
-                ControlPriceVersion.source_line == entry.source_line,
-            )
+        is_designated = entry.authority_basis == "designated_source"
+        if is_designated and raw_source.is_file() and entry.source_line not in raw_lines:
+            raise ValueError(f"指定指导价来源未包含规则：{entry.source_line}")
+        existing_query = select(ControlPriceVersion).where(
+            ControlPriceVersion.drug_id == drug.id,
+            ControlPriceVersion.spec_key == entry.spec_key,
+            ControlPriceVersion.source_line == entry.source_line,
         )
+        if is_designated:
+            existing_query = existing_query.where(ControlPriceVersion.source_sha256 == raw_sha256)
+            # A changed designated source is a new control-price version.  The
+            # old version remains auditable but cannot be chosen for a new run.
+            for prior in session.scalars(
+                select(ControlPriceVersion).where(
+                    ControlPriceVersion.drug_id == drug.id,
+                    ControlPriceVersion.spec_key == entry.spec_key,
+                    ControlPriceVersion.source_line == entry.source_line,
+                    ControlPriceVersion.authority_basis == "designated_source",
+                    or_(
+                        ControlPriceVersion.source_sha256 != raw_sha256,
+                        ControlPriceVersion.source_sha256.is_(None),
+                    ),
+                    ControlPriceVersion.active.is_(True),
+                )
+            ):
+                prior.active = False
+        existing = session.scalar(existing_query)
         values = {
             "price_per_min_unit": entry.price, "min_unit": entry.min_unit,
             "effective_from": entry.effective_from, "effective_to": entry.effective_to,
@@ -47,6 +73,8 @@ def sync_control_price_rules(session: Session, *, control_path: Path) -> dict[st
             "active": entry.active, "business_confirmed": entry.business_confirmed,
             "confirmed_by": entry.confirmed_by, "confirmed_at": entry.confirmed_at,
             "approval_reference": entry.approval_reference,
+            "authority_basis": entry.authority_basis,
+            "source_sha256": raw_sha256 if is_designated else None,
         }
         if existing is None:
             session.add(ControlPriceVersion(drug_id=drug.id, spec_key=entry.spec_key, source_line=entry.source_line, **values))

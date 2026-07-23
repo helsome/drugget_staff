@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -51,6 +51,73 @@ class EvidenceBundle(BaseModel):
     login_status: str | None = None
     parser_version: str | None = None
     captured_at: datetime = Field(default_factory=datetime.now)
+
+
+PriceType = Literal[
+    "base_price",
+    "promotion_price",
+    "member_price",
+    "coupon_price",
+    "tier_price",
+    "range_price",
+    "package_total_price",
+    "unknown",
+]
+
+
+class ProductEvidence(BaseModel):
+    """Product identity as observed on the page; empty means not observed."""
+
+    model_config = ConfigDict(extra="allow")
+    product_id: str = ""
+    title: str = ""
+    manufacturer: str = ""
+    provider_id: str = ""
+
+
+class SKUOptionEvidence(BaseModel):
+    """One page-declared SKU option without inventing absent identifiers."""
+
+    model_config = ConfigDict(extra="allow")
+    sku_id: str = ""
+    raw_spec: str = ""
+    normalized_spec: str = ""
+    selected: bool = False
+    available: bool | None = None
+
+
+class PriceQuoteEvidence(BaseModel):
+    """A quote tied to one SKU and one visible pricing condition."""
+
+    model_config = ConfigDict(extra="allow")
+    sku_id: str = ""
+    price_type: PriceType = "unknown"
+    amount: str = ""
+    min_quantity: int | None = None
+    membership_required: bool | None = None
+    promotion_required: bool | None = None
+    # The page-declared package scope for ``amount``.  These are deliberately
+    # optional: a collector must not infer them from a title when absent.
+    price_box_count: int | None = None
+    units_per_box: int | None = None
+    raw_text: str = ""
+    evidence_pointer: str = ""
+
+
+class SKUEvidence(BaseModel):
+    """Canonical detail evidence stored inside ``PriceObservation.raw_evidence``.
+
+    Extra top-level keys are allowed so older adapter fields remain available
+    for audit and replay.
+    """
+
+    model_config = ConfigDict(extra="allow")
+    product: ProductEvidence = Field(default_factory=ProductEvidence)
+    sku_options: list[SKUOptionEvidence] = Field(default_factory=list)
+    price_quotes: list[PriceQuoteEvidence] = Field(default_factory=list)
+    selected_sku: dict[str, Any] = Field(default_factory=dict)
+    page_context: dict[str, Any] = Field(default_factory=dict)
+    parser: dict[str, str] = Field(default_factory=dict)
 
 
 class CollectionResult(BaseModel):

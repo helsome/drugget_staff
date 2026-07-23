@@ -1,0 +1,49 @@
+{
+  "scenario": "single_sku_base_price",
+  "representative_drug": "晴诺舒",
+  "product": {
+    "product_id": "qns-prod-1",
+    "title": "晴诺舒 米拉贝隆缓释片 50mg*20片",
+    "manufacturer": "",
+    "provider_id": "replay-provider-qns"
+  },
+  "sku_options": [
+    {
+      "sku_id": "qns-50-20",
+      "raw_spec": "50mg*20片",
+      "normalized_spec": "50mg*20片",
+      "selected": true,
+      "available": true
+    }
+  ],
+  "price_quotes": [
+    {
+      "sku_id": "qns-50-20",
+      "price_type": "base_price",
+      "amount": "38.00",
+      "min_quantity": 1,
+      "membership_required": false,
+      "promotion_required": false,
+      "raw_text": "价格 ¥38.00",
+      "evidence_pointer": "price_quotes[0].amount"
+    }
+  ],
+  "selected_sku": {
+    "sku_id": "qns-50-20",
+    "raw_spec": "50mg*20片",
+    "normalized_spec": "50mg*20片",
+    "selected": true,
+    "available": true,
+    "verified": true
+  },
+  "page_context": {
+    "final_url": "https://replay.invalid/qns-prod-1",
+    "page_shop": "回放供应商",
+    "platform": "taobao",
+    "source": "replay"
+  },
+  "parser": {
+    "name": "replay_fixture",
+    "version": "2.0"
+  }
+}

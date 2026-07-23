@@ -244,10 +244,9 @@ class BatchOrchestrator:
         self.logger = logger
         self.event_sink = event_sink
         self.cancellation_token = cancellation_token
-        # When None, the review gate is disabled and behavior is unchanged:
-        # is_formal_price is set unconditionally on inspect success and the
-        # dormant alert path runs. When wired, is_formal_price is gated on the
-        # review outcome and the PriceBreakEvent is created by the gate.
+        # A missing gate is intentionally fail-closed.  Legacy callers may
+        # still construct BatchOrchestrator directly, but they cannot turn an
+        # inspected candidate into a formal price without a confirmed review.
         self.review_orchestrator = review_orchestrator
 
     def _is_cancelled(self) -> bool:
@@ -606,9 +605,8 @@ class BatchOrchestrator:
             # Run the review gate for detail/fixed successes. The gate persists
             # a strict PriceComparison, creates a PriceBreakEvent for below-control
             # prices, dispatches the agent, and returns the formal-price status
-            # that gates ``is_formal_price``. When no review_orchestrator is
-            # wired (back-compat), behavior is unchanged: formal price is set
-            # unconditionally and the dormant alert path runs.
+            # that gates ``is_formal_price``.  An absent gate is fail-closed:
+            # collection evidence is retained, but no candidate is released.
             review_outcome = None
             if (
                 self.review_orchestrator is not None
@@ -629,10 +627,15 @@ class BatchOrchestrator:
                         SearchCandidate.product_id == str(spec.metadata.get("candidate_product_id") or spec.product_id or ""),
                     )
                 )
-                formal_confirmed = (
-                    review_outcome.formal_price_status == "confirmed"
+                formal_price_status = (
+                    review_outcome.formal_price_status
                     if review_outcome is not None
-                    else True
+                    else "blocked"
+                )
+                formal_confirmed = (
+                    formal_price_status == "confirmed"
+                    and self.review_orchestrator is not None
+                    and bool(getattr(self.review_orchestrator, "formal_release_enabled", True))
                 )
                 if candidate is not None and formal_confirmed:
                     candidate.is_formal_price = True
@@ -654,18 +657,13 @@ class BatchOrchestrator:
                         brand_name=spec.drug_name, generic_name=spec.generic_name,
                         shop_name=spec.shop_name, product_id=spec.product_id or candidate.product_id,
                         message=f"正式价格未确认（待复核）: {spec.drug_name or ''} {spec.shop_name or ''}",
-                        details={"formal_price_status": review_outcome.formal_price_status},
+                        details={"formal_price_status": formal_price_status},
                     ))
             elif (
                 spec.task_type == TaskType.INSPECT_CANDIDATE
                 and result.collection_status == CollectionStatus.PARSE_ERROR
             ):
                 self._enqueue_detail_fallback(spec)
-            # The review gate already created the PriceBreakEvent via
-            # ensure_event when active; only run the dormant wrapper on the
-            # back-compat path (review_orchestrator is None).
-            if self.review_orchestrator is None:
-                self.alerts.record_event(self.session, observation=observation)
             if result.collection_status in {CollectionStatus.PAGE_CHANGED, CollectionStatus.STORE_UNVERIFIED}:
                 task.status = TaskStatus.HUMAN_REQUIRED.value
             self.session.commit()

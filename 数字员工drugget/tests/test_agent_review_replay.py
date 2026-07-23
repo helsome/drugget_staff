@@ -372,13 +372,8 @@ async def test_l2_agent_timeout_is_contained_and_marks_pending(tmp_path: Path) -
 
 
 @pytest.mark.asyncio
-async def test_l2_guidance_missing_skips_review_and_confirms_formal_price(tmp_path: Path) -> None:
-    """No confirmed control rule -> not_comparable, no review, formal price confirmed.
-
-    Guidance-missing does NOT block the formal price: ReviewPolicy only triggers
-    on below_control, so a not_comparable observation is skipped and its
-    formal_price_status stays "confirmed".
-    """
+async def test_l2_guidance_missing_is_captured_uncompared_not_confirmed(tmp_path: Path) -> None:
+    """No confirmed control rule is auditable evidence, not a formal price."""
     engine = create_db_engine("sqlite:///:memory:")
     init_database(engine)
     factory = make_session_factory(engine)
@@ -395,12 +390,14 @@ async def test_l2_guidance_missing_skips_review_and_confirms_formal_price(tmp_pa
         assert comparison.verdict == "not_comparable"
         assert comparison.reason_code == "exact_confirmed_control_rule_missing"
 
-        # ReviewPolicy only triggers on below_control; not_comparable -> None.
+        # No agent is needed to identify a missing control rule, but that must
+        # not become an implicit confirmation.
         assert ReviewPolicy().requires_review(comparison, observation) is None
 
         assert outcome.skipped is True
         assert comparison.review_required is False
-        assert comparison.formal_price_status == "confirmed"
-        assert outcome.formal_price_status == "confirmed"
+        assert comparison.review_status == "guidance_missing"
+        assert comparison.formal_price_status == "captured_uncompared"
+        assert outcome.formal_price_status == "captured_uncompared"
         assert outcome.event is None
         assert db.scalar(select(PriceBreakEvent)) is None

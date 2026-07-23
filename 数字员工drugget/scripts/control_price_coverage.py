@@ -1,11 +1,8 @@
 """Control-price coverage report generator (read-only).
 
-Computes a coverage summary of the curated control-price rules CSV:
-how many rules are business-confirmed, pending, active, comparable
-(active + confirmed + effective + parseable package spec), and how many
-spec_keys are strength-only (non-empty but unparseable) or spec-less.
-It also flags stale conflicts where a (brand, generic_name) has both a
-spec-less pending row and a confirmed full-spec row.
+Computes a coverage summary of the curated control-price rules CSV.  The
+designated price table is operational guidance; individual business approval
+is reported separately.  Package evidence remains a page-side prerequisite.
 
 This module never mutates the CSV or any ``business_confirmed`` flag.
 """
@@ -43,12 +40,11 @@ def _is_effective(entry: ControlPriceEntry, today: date) -> bool:
 
 
 def _is_comparable(entry: ControlPriceEntry, today: date) -> bool:
-    """Mirror the comparability gate in pricing.resolve_control_price."""
+    """Whether the rule can guide a page with verified package evidence."""
     return (
         entry.active
-        and entry.business_confirmed
+        and (entry.business_confirmed or entry.authority_basis == "designated_source")
         and _is_effective(entry, today)
-        and _spec_is_parseable(entry.spec_key)
     )
 
 
@@ -90,15 +86,15 @@ def compute_coverage(csv_path: Path, *, today: date | None = None) -> dict:
             comparable_count += 1
             comparable_drugs.add(entry.brand)
 
-    # Stale conflict: same (brand, generic_name) has both a spec-less pending
-    # row and a confirmed full-spec row -> the spec-less row is dead data.
+    # A full-spec approved rule intentionally overrides a source general rule;
+    # this is no longer a data conflict.
     groups: dict[tuple[str, str], list[ControlPriceEntry]] = defaultdict(list)
     for entry in entries:
         groups[(entry.brand, entry.generic_name)].append(entry)
 
     stale_conflicts: list[dict[str, str]] = []
     for (brand, generic_name), group in groups.items():
-        stale_rows = [entry for entry in group if not entry.spec_key and not entry.business_confirmed]
+        stale_rows = [entry for entry in group if not entry.spec_key and not entry.business_confirmed and entry.authority_basis != "designated_source"]
         confirmed_rows = [
             entry for entry in group if entry.business_confirmed and _spec_is_parseable(entry.spec_key)
         ]
@@ -109,7 +105,7 @@ def compute_coverage(csv_path: Path, *, today: date | None = None) -> dict:
                     "brand": brand,
                     "generic_name": generic_name,
                     "detail": (
-                        f"同时存在规格缺失的未确认行与已确认完整规格行"
+                        f"同时存在规格缺失的非指定来源未确认行与已确认完整规格行"
                         f"({superseded.spec_key})，规格缺失行属失效数据"
                     ),
                 }

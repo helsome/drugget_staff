@@ -18,7 +18,7 @@ import pytest
 _collectors_dir = Path(__file__).resolve().parent.parent / "collectors"
 sys.path.insert(0, str(_collectors_dir))
 
-from export_fixture_run_csv import export_run_outputs  # noqa: E402
+from export_fixture_run_csv import _classify_follow_up, export_run_outputs  # noqa: E402
 from price_specialist.database import create_db_engine, init_database, make_session_factory  # noqa: E402
 from price_specialist.models import (  # noqa: E402
     CollectionRun,
@@ -241,3 +241,32 @@ def test_technical_csvs_emitted_with_debug(seeded_session, tmp_path):
     assert (output / "price_results.csv").exists()
     assert (output / "action_queue.csv").exists()
     assert (output / "manifest.json").exists()
+
+
+@pytest.mark.parametrize(
+    ("reason_code", "action_type"),
+    [
+        ("exact_confirmed_control_rule_missing", "guidance_missing"),
+        ("formal_detail_price_missing", "formal_detail_price_missing"),
+        ("drug_identity_missing", "drug_identity_missing"),
+        ("detail_spec_missing", "detail_spec_missing"),
+        ("package_unverified", "package_unverified"),
+        ("package_unit_mismatch", "package_unit_mismatch"),
+        ("control_rule_ambiguous", "control_rule_ambiguous"),
+        ("control_rule_unit_mismatch", "control_rule_unit_mismatch"),
+        ("unrecognized_non_comparable_reason", "not_comparable_blocked"),
+    ],
+)
+def test_action_queue_covers_every_not_comparable_reason(reason_code, action_type):
+    """No non-comparable outcome may be silently omitted from action_queue."""
+    from types import SimpleNamespace
+
+    observation = SimpleNamespace(collection_status="success", error_code=None)
+    comparison = SimpleNamespace(
+        verdict="not_comparable", reason_code=reason_code,
+        reason_detail=None, formal_price_status="blocked",
+    )
+    result = _classify_follow_up(observation, comparison, None)
+    assert result is not None
+    assert result[0] == action_type
+    assert result[1] == reason_code
