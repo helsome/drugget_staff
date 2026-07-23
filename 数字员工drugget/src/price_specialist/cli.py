@@ -68,6 +68,17 @@ def control_rules_sync(
     typer.echo(json.dumps(result, ensure_ascii=False))
 
 
+@app.command("control-rules-coverage")
+def control_rules_coverage(
+    source_path: Path = typer.Option(PROJECT_DIR / "data/knowledge-base/control_price_rules.csv", "--source", exists=True, dir_okay=False),
+) -> None:
+    """Print a read-only coverage report for the curated control-price rules CSV."""
+    from scripts.control_price_coverage import compute_coverage
+
+    report = compute_coverage(source_path)
+    typer.echo(json.dumps(report, ensure_ascii=False, indent=2))
+
+
 @app.command("price-judge")
 def price_judge(observation_id: str = typer.Option(..., "--observation-id")) -> None:
     """Persist a strict price decision; this command never sends notifications."""
