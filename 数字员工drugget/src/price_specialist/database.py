@@ -56,6 +56,33 @@ def init_database(engine: Engine) -> None:
             for name, ddl in additive_columns.items():
                 if name not in columns:
                     connection.execute(text(f"ALTER TABLE control_price_versions ADD COLUMN {name} {ddl}"))
+    if engine.dialect.name == "sqlite" and "price_comparisons" in inspect(engine).get_table_names():
+        columns = {item["name"] for item in inspect(engine).get_columns("price_comparisons")}
+        additive_columns = {
+            "review_required": "BOOLEAN NOT NULL DEFAULT 0",
+            "review_reason": "VARCHAR(100)",
+            "review_status": "VARCHAR(40)",
+            "formal_price_status": "VARCHAR(40) NOT NULL DEFAULT 'pending'",
+        }
+        with engine.begin() as connection:
+            for name, ddl in additive_columns.items():
+                if name not in columns:
+                    connection.execute(text(f"ALTER TABLE price_comparisons ADD COLUMN {name} {ddl}"))
+    if engine.dialect.name == "sqlite" and "price_break_events" in inspect(engine).get_table_names():
+        columns = {item["name"] for item in inspect(engine).get_columns("price_break_events")}
+        additive_columns = {
+            "review_status": "VARCHAR(40)",
+            "review_decision": "VARCHAR(40)",
+            "review_attempts": "INTEGER NOT NULL DEFAULT 0",
+            "reviewed_at": "DATETIME",
+            "review_evidence_path": "TEXT",
+            "review_error_code": "VARCHAR(100)",
+            "review_summary": "TEXT",
+        }
+        with engine.begin() as connection:
+            for name, ddl in additive_columns.items():
+                if name not in columns:
+                    connection.execute(text(f"ALTER TABLE price_break_events ADD COLUMN {name} {ddl}"))
 
 
 @contextmanager

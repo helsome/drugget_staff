@@ -216,6 +216,15 @@ class PriceBreakEvent(Base):
     routing_status: Mapped[str] = mapped_column(String(40), nullable=False)
     event_status: Mapped[str] = mapped_column(String(40), nullable=False, default="dry_run")
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    # Agent-review lifecycle (Stage 1+). The DB holds status + path + hash only;
+    # full agent I/O lives on disk under artifacts/evidence/<event>/agent-review/.
+    review_status: Mapped[str | None] = mapped_column(String(40))
+    review_decision: Mapped[str | None] = mapped_column(String(40))
+    review_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    review_evidence_path: Mapped[str | None] = mapped_column(Text)
+    review_error_code: Mapped[str | None] = mapped_column(String(100))
+    review_summary: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
 
 
@@ -236,6 +245,12 @@ class PriceComparison(Base):
     difference: Mapped[Decimal | None] = mapped_column(Numeric(12, 4))
     rule_snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     detail_evidence_snapshot: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    # Agent-review gate (Stage 1+). review_required/review_reason mirror the
+    # PriceBreakEvent case; formal_price_status gates below_guidance_confirmed.
+    review_required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    review_reason: Mapped[str | None] = mapped_column(String(100))
+    review_status: Mapped[str | None] = mapped_column(String(40))
+    formal_price_status: Mapped[str] = mapped_column(String(40), nullable=False, default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now, onupdate=datetime.now)
 
