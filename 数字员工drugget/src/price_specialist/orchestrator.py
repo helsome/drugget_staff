@@ -23,6 +23,7 @@ from .errors import CollectorAccessError
 from .incidents import IncidentService
 from .models import CollectionRun, CollectionTask, Incident, SearchCandidate, StoreResponsibility
 from .pricing import evaluate_price
+from .review_orchestrator import ReviewOrchestrator
 from .run_logger import RunEvent, RunEventSink
 from .schemas import BrowserSession, ClassifiedCandidate, CollectionResult, CollectionTaskSpec, SearchHit
 from .search import SearchClassifier, deduplicate_hits
@@ -228,6 +229,7 @@ class BatchOrchestrator:
         logger: Any | None = None,
         event_sink: Any | None = None,
         cancellation_token: CancellationToken | None = None,
+        review_orchestrator: ReviewOrchestrator | None = None,
     ):
         self.session = session
         self.collector = collector
@@ -242,6 +244,11 @@ class BatchOrchestrator:
         self.logger = logger
         self.event_sink = event_sink
         self.cancellation_token = cancellation_token
+        # When None, the review gate is disabled and behavior is unchanged:
+        # is_formal_price is set unconditionally on inspect success and the
+        # dormant alert path runs. When wired, is_formal_price is gated on the
+        # review outcome and the PriceBreakEvent is created by the gate.
+        self.review_orchestrator = review_orchestrator
 
     def _is_cancelled(self) -> bool:
         return self.cancellation_token is not None and self.cancellation_token.is_cancelled
@@ -596,6 +603,23 @@ class BatchOrchestrator:
                         message=f"固定任务失败: {result.collection_status.value}",
                     ))
 
+            # Run the review gate for detail/fixed successes. The gate persists
+            # a strict PriceComparison, creates a PriceBreakEvent for below-control
+            # prices, dispatches the agent, and returns the formal-price status
+            # that gates ``is_formal_price``. When no review_orchestrator is
+            # wired (back-compat), behavior is unchanged: formal price is set
+            # unconditionally and the dormant alert path runs.
+            review_outcome = None
+            if (
+                self.review_orchestrator is not None
+                and result.collection_status == CollectionStatus.SUCCESS
+                and spec.task_type
+                in {TaskType.INSPECT_CANDIDATE, TaskType.FIXED_CORE, TaskType.FIXED_OBSERVATION}
+            ):
+                review_outcome = await self.review_orchestrator.review_observation(
+                    observation, task_type=spec.task_type,
+                )
+
             if spec.task_type == TaskType.INSPECT_CANDIDATE and result.collection_status == CollectionStatus.SUCCESS:
                 candidate = self.session.scalar(
                     select(SearchCandidate).where(
@@ -605,7 +629,12 @@ class BatchOrchestrator:
                         SearchCandidate.product_id == str(spec.metadata.get("candidate_product_id") or spec.product_id or ""),
                     )
                 )
-                if candidate:
+                formal_confirmed = (
+                    review_outcome.formal_price_status == "confirmed"
+                    if review_outcome is not None
+                    else True
+                )
+                if candidate is not None and formal_confirmed:
                     candidate.is_formal_price = True
                     candidate.sku_verification_status = "verified_detail"
                     self._emit(RunEvent(
@@ -617,12 +646,26 @@ class BatchOrchestrator:
                         formal_price_count=1,
                         message=f"正式价格确认: {spec.drug_name or ''} {spec.shop_name or ''}",
                     ))
+                elif candidate is not None and not formal_confirmed:
+                    self._emit(RunEvent(
+                        run_id=self.run_id or "", event_type="formal_price_blocked",
+                        phase="inspect", status="partial", platform=platform,
+                        task_id=spec.task_id, task_type=spec.task_type.value if spec.task_type else None,
+                        brand_name=spec.drug_name, generic_name=spec.generic_name,
+                        shop_name=spec.shop_name, product_id=spec.product_id or candidate.product_id,
+                        message=f"正式价格未确认（待复核）: {spec.drug_name or ''} {spec.shop_name or ''}",
+                        details={"formal_price_status": review_outcome.formal_price_status},
+                    ))
             elif (
                 spec.task_type == TaskType.INSPECT_CANDIDATE
                 and result.collection_status == CollectionStatus.PARSE_ERROR
             ):
                 self._enqueue_detail_fallback(spec)
-            self.alerts.record_event(self.session, observation=observation)
+            # The review gate already created the PriceBreakEvent via
+            # ensure_event when active; only run the dormant wrapper on the
+            # back-compat path (review_orchestrator is None).
+            if self.review_orchestrator is None:
+                self.alerts.record_event(self.session, observation=observation)
             if result.collection_status in {CollectionStatus.PAGE_CHANGED, CollectionStatus.STORE_UNVERIFIED}:
                 task.status = TaskStatus.HUMAN_REQUIRED.value
             self.session.commit()

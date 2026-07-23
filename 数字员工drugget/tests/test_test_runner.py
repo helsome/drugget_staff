@@ -126,7 +126,7 @@ def test_export_contains_only_run_outputs_and_keeps_empty_headers(tmp_path, monk
         db.add(CollectionRun(id="export-run"))
         db.commit()
         output = tmp_path / "csv"
-        export_run_outputs("export-run", db, output)
+        export_run_outputs("export-run", db, output, debug_export=True)
         export_run_manifest("export-run", db, output, runtime_mode="test")
 
     assert not list(output.glob("fixture_*.csv"))

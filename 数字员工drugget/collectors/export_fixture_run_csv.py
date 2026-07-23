@@ -24,7 +24,15 @@ from sqlalchemy.orm import Session
 
 from price_specialist.config import Settings
 from price_specialist.database import configured_database
-from price_specialist.models import CollectionRun, CollectionTask, Incident, PriceObservation, SearchCandidate
+from price_specialist.models import (
+    CollectionRun,
+    CollectionTask,
+    Incident,
+    PriceBreakEvent,
+    PriceComparison,
+    PriceObservation,
+    SearchCandidate,
+)
 
 
 COLLECTOR_DIR = Path(__file__).resolve().parent
@@ -75,9 +83,9 @@ def value(item: Any) -> str:
     return str(item)
 
 
-def write_rows(path: Path, rows: list[dict[str, Any]], *, fieldnames: list[str] | None = None) -> None:
+def write_rows(path: Path, rows: list[dict[str, Any]], *, fieldnames: list[str] | None = None, translate_headers: bool = True) -> None:
     keys = fieldnames or list(dict.fromkeys(key for row in rows for key in row))
-    headings = [CHINESE_HEADERS.get(key, key) for key in keys]
+    headings = [CHINESE_HEADERS.get(key, key) if translate_headers else key for key in keys]
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(headings)
@@ -119,17 +127,224 @@ def _collect_files(output_dir: Path) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Business-facing CSVs (spec §6)
+# ---------------------------------------------------------------------------
+
+# price_results.csv: one row per observation, joining task/comparison/event.
+PRICE_RESULTS_FIELDS: list[str] = [
+    "run_id", "drug", "generic_name", "platform", "shop", "product_id", "sku_id",
+    "selected_spec", "price_type", "page_price", "comparison_price", "guidance_price",
+    "difference", "comparison_status", "review_status", "review_decision",
+    "formal_price_status", "error_code", "evidence_path",
+]
+
+# action_queue.csv: one row per observation whose outcome needs follow-up.
+ACTION_QUEUE_FIELDS: list[str] = [
+    "run_id", "drug", "platform", "shop", "action_type", "reason_code",
+    "reason_detail", "review_status", "evidence_path", "recommended_action",
+]
+
+RECOMMENDED_ACTIONS: dict[str, str] = {
+    "guidance_missing": "补充确认控价规则后重跑",
+    "agent_failed": "排查智能体复核失败并重试",
+    "recapture_required": "重新采集页面价格",
+    "human_review_required": "提交人工复核",
+    "page_changed": "更新采集器选择器后重新采集",
+    "login_required": "完成平台登录后重跑",
+    "challenge_detected": "处理风控/验证码后重跑",
+}
+
+
+def _payload_get(payload: Any, key: str) -> str:
+    """Read a scalar string from a JSON payload, "" if missing or not a dict."""
+    if isinstance(payload, dict):
+        return value(payload.get(key))
+    return ""
+
+
+def _build_business_rows(
+    run_id: str, session: Session
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Join observations -> tasks -> comparisons -> break events into business rows.
+
+    Returns (price_results_rows, action_queue_rows).  Never raises on partial
+    data; missing values become empty strings.
+    """
+    observations = list(
+        session.scalars(select(PriceObservation).where(PriceObservation.run_id == run_id))
+    )
+    if not observations:
+        return [], []
+
+    task_ids = {obs.task_id for obs in observations if obs.task_id}
+    tasks_by_id: dict[str, CollectionTask] = (
+        {t.id: t for t in session.scalars(select(CollectionTask).where(CollectionTask.id.in_(task_ids)))}
+        if task_ids
+        else {}
+    )
+
+    obs_ids = [obs.id for obs in observations]
+    comparisons_by_obs: dict[str, PriceComparison] = {
+        c.observation_id: c
+        for c in session.scalars(select(PriceComparison).where(PriceComparison.observation_id.in_(obs_ids)))
+    }
+    events_by_obs: dict[str, PriceBreakEvent] = {
+        e.observation_id: e
+        for e in session.scalars(select(PriceBreakEvent).where(PriceBreakEvent.observation_id.in_(obs_ids)))
+    }
+
+    price_rows: list[dict[str, Any]] = []
+    action_rows: list[dict[str, Any]] = []
+    for obs in observations:
+        task = tasks_by_id.get(obs.task_id)
+        comparison = comparisons_by_obs.get(obs.id)
+        event = events_by_obs.get(obs.id)
+
+        payload = task.payload if task is not None and isinstance(task.payload, dict) else {}
+        detail_snapshot = (
+            comparison.detail_evidence_snapshot
+            if comparison is not None and isinstance(comparison.detail_evidence_snapshot, dict)
+            else {}
+        )
+        raw = obs.raw_evidence if isinstance(obs.raw_evidence, dict) else {}
+
+        drug = _payload_get(payload, "drug_name") or _payload_get(detail_snapshot, "drug_name")
+        generic_name = _payload_get(payload, "generic_name") or _payload_get(detail_snapshot, "generic_name")
+        platform = value(task.platform) if task is not None else ""
+        shop = value(obs.page_shop)
+        product_id = _payload_get(payload, "product_id")
+        sku_id = _payload_get(raw, "selected_sku_id")
+        price_type = _payload_get(raw, "price_type")
+
+        page_price = obs.page_price_value
+        comparison_price = obs.comparison_price
+        if comparison_price is None and comparison is not None:
+            comparison_price = comparison.comparison_unit_price
+        guidance_price = comparison.control_price if comparison is not None else None
+        difference = comparison.difference if comparison is not None else None
+        comparison_status = value(comparison.verdict) if comparison is not None else ""
+        review_status = (
+            value(comparison.review_status)
+            if comparison is not None and comparison.review_status
+            else ""
+        ) or (
+            value(event.review_status)
+            if event is not None and event.review_status
+            else ""
+        )
+        review_decision = (
+            value(event.review_decision) if event is not None and event.review_decision else ""
+        )
+        formal_price_status = (
+            value(comparison.formal_price_status)
+            if comparison is not None and comparison.formal_price_status
+            else ""
+        )
+        error_code = value(obs.error_code)
+        evidence_path = value(obs.evidence_path)
+
+        price_rows.append({
+            "run_id": run_id,
+            "drug": drug,
+            "generic_name": generic_name,
+            "platform": platform,
+            "shop": shop,
+            "product_id": product_id,
+            "sku_id": sku_id,
+            "selected_spec": value(obs.selected_spec),
+            "price_type": price_type,
+            "page_price": page_price,
+            "comparison_price": comparison_price,
+            "guidance_price": guidance_price,
+            "difference": difference,
+            "comparison_status": comparison_status,
+            "review_status": review_status,
+            "review_decision": review_decision,
+            "formal_price_status": formal_price_status,
+            "error_code": error_code,
+            "evidence_path": evidence_path,
+        })
+
+        follow_up = _classify_follow_up(obs, comparison, event)
+        if follow_up is not None:
+            action_type, reason_code, reason_detail = follow_up
+            action_rows.append({
+                "run_id": run_id,
+                "drug": drug,
+                "platform": platform,
+                "shop": shop,
+                "action_type": action_type,
+                "reason_code": reason_code,
+                "reason_detail": reason_detail,
+                "review_status": review_status,
+                "evidence_path": evidence_path,
+                "recommended_action": RECOMMENDED_ACTIONS.get(action_type, ""),
+            })
+
+    return price_rows, action_rows
+
+
+def _classify_follow_up(
+    obs: PriceObservation,
+    comparison: PriceComparison | None,
+    event: PriceBreakEvent | None,
+) -> tuple[str, str, str] | None:
+    """Return (action_type, reason_code, reason_detail) if the observation needs follow-up.
+
+    First match wins in spec §6.2 priority order.  Returns None for clean
+    accepted results.
+    """
+    verdict = comparison.verdict if comparison is not None else None
+    reason_code = comparison.reason_code if comparison is not None else None
+    formal_price_status = comparison.formal_price_status if comparison is not None else None
+    review_decision = event.review_decision if event is not None else None
+    review_error_code = event.review_error_code if event is not None else None
+    event_review_status = event.review_status if event is not None else None
+
+    collection_status = obs.collection_status or ""
+    error_code = obs.error_code or ""
+
+    if verdict == "not_comparable" and reason_code == "exact_confirmed_control_rule_missing":
+        return ("guidance_missing", reason_code, "缺少已确认的完整规格控价规则")
+
+    if (review_error_code is not None and review_error_code != "") or event_review_status == "agent_failed":
+        return ("agent_failed", review_error_code or "agent_failed", "智能体复核失败")
+
+    if review_decision == "recapture":
+        return ("recapture_required", "recapture", "需重新采集页面价格")
+
+    if review_decision == "human_review" or (
+        verdict == "below_control" and formal_price_status != "confirmed"
+    ):
+        return ("human_review_required", reason_code or "human_review", "需人工复核")
+
+    if error_code == "page_changed" or collection_status == "page_changed":
+        return ("page_changed", error_code or "page_changed", "页面结构变化，需更新采集器")
+
+    if collection_status == "login_required" or error_code == "login_required":
+        return ("login_required", "login_required", "平台需要登录")
+
+    if collection_status == "challenge_detected" or error_code == "challenge_detected":
+        return ("challenge_detected", "challenge_detected", "触发风控/验证码")
+
+    return None
+
+
 def export_run_outputs(
     run_id: str,
     session: Session,
     output_dir: Path,
     *,
     include_incidents: bool = True,
+    debug_export: bool = False,
 ) -> Path:
-    """Export only the run results (tasks, observations, candidates, incidents).
+    """Export run results.
 
-    This is the primary export function called by the GUI and test runner.
-    It does NOT export fixture input data or touch fixture databases.
+    Business CSVs (price_results.csv, action_queue.csv) and manifest.json are
+    always written.  The five technical audit CSVs (collection_runs,
+    collection_tasks, price_observations, search_candidates, incidents) are
+    written only when debug_export=True.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -138,30 +353,50 @@ def export_run_outputs(
     if run is None:
         raise ValueError(f"run不存在: {run_id}")
 
+    # Business deliverables - always written (spec §6).
+    price_rows, action_rows = _build_business_rows(run_id, session)
     write_rows(
-        output_dir / "collection_runs.csv",
-        [_row_dict(run)],
-        fieldnames=_table_fieldnames(CollectionRun),
+        output_dir / "price_results.csv",
+        price_rows,
+        fieldnames=PRICE_RESULTS_FIELDS,
+        translate_headers=False,
     )
-    write_rows(output_dir / "collection_tasks.csv", [
-        _row_dict(item)
-        for item in session.scalars(select(CollectionTask).where(CollectionTask.run_id == run_id))
-    ], fieldnames=_table_fieldnames(CollectionTask))
-    write_rows(output_dir / "price_observations.csv", [
-        _row_dict(item)
-        for item in session.scalars(select(PriceObservation).where(PriceObservation.run_id == run_id))
-    ], fieldnames=_table_fieldnames(PriceObservation))
-    write_rows(output_dir / "search_candidates.csv", [
-        _row_dict(item)
-        for item in session.scalars(select(SearchCandidate).where(SearchCandidate.run_id == run_id))
-    ], fieldnames=_table_fieldnames(SearchCandidate))
+    write_rows(
+        output_dir / "action_queue.csv",
+        action_rows,
+        fieldnames=ACTION_QUEUE_FIELDS,
+        translate_headers=False,
+    )
 
-    if include_incidents:
-        task_ids = select(CollectionTask.id).where(CollectionTask.run_id == run_id)
-        write_rows(output_dir / "incidents.csv", [
+    # Technical audit CSVs - only when explicitly requested.
+    if debug_export:
+        write_rows(
+            output_dir / "collection_runs.csv",
+            [_row_dict(run)],
+            fieldnames=_table_fieldnames(CollectionRun),
+        )
+        write_rows(output_dir / "collection_tasks.csv", [
             _row_dict(item)
-            for item in session.scalars(select(Incident).where(Incident.task_id.in_(task_ids)))
-        ], fieldnames=_table_fieldnames(Incident))
+            for item in session.scalars(select(CollectionTask).where(CollectionTask.run_id == run_id))
+        ], fieldnames=_table_fieldnames(CollectionTask))
+        write_rows(output_dir / "price_observations.csv", [
+            _row_dict(item)
+            for item in session.scalars(select(PriceObservation).where(PriceObservation.run_id == run_id))
+        ], fieldnames=_table_fieldnames(PriceObservation))
+        write_rows(output_dir / "search_candidates.csv", [
+            _row_dict(item)
+            for item in session.scalars(select(SearchCandidate).where(SearchCandidate.run_id == run_id))
+        ], fieldnames=_table_fieldnames(SearchCandidate))
+
+        if include_incidents:
+            task_ids = select(CollectionTask.id).where(CollectionTask.run_id == run_id)
+            write_rows(output_dir / "incidents.csv", [
+                _row_dict(item)
+                for item in session.scalars(select(Incident).where(Incident.task_id.in_(task_ids)))
+            ], fieldnames=_table_fieldnames(Incident))
+
+    # Manifest is always part of the deliverable.
+    export_run_manifest(run_id, session, output_dir, run=run)
 
     return output_dir
 

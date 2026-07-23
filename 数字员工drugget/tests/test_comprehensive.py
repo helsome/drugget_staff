@@ -1090,7 +1090,7 @@ class TestExport:
             db.commit()
             output = tmp_path / "new" / "nested" / "dir"
             assert not output.exists()
-            export_run_outputs("create-dir-test", db, output)
+            export_run_outputs("create-dir-test", db, output, debug_export=True)
             assert output.is_dir()
             assert (output / "collection_runs.csv").is_file()
 
@@ -1102,7 +1102,7 @@ class TestExport:
             db.add(run)
             db.commit()
             output = tmp_path / "chinese"
-            export_run_outputs("chinese-headers", db, output)
+            export_run_outputs("chinese-headers", db, output, debug_export=True)
             csv_path = output / "collection_runs.csv"
             with csv_path.open(encoding="utf-8-sig", newline="") as f:
                 reader = csv.reader(f)
@@ -1310,7 +1310,7 @@ class TestFakeCollectorEndToEnd:
             db.add(task)
             db.commit()
 
-            export_run_outputs("e2e-export-final", db, output_dir)
+            export_run_outputs("e2e-export-final", db, output_dir, debug_export=True)
             export_run_manifest("e2e-export-final", db, output_dir, run=run,
                                 source_type="test_workbench", runtime_mode="test")
 
